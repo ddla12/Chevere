@@ -7,48 +7,9 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>True or false</h1>
-    <div data-attached="{ check: false }">
-        <button data-click="check = true">
-            True
-        </button>
-        <button data-click="check = false">
-            false
-        </button>
-        <span data-text="check"></span>
-    </div>
-
-    <h1>Toggle</h1>
-    <div data-attached="{ check: false }">
-        <button data-click="!check">
-            Toggle
-        </button>
-        <span data-text="check"></span>
-    </div>
-
-    <h1>Increment</h1>
-    <div data-attached="{ counter: 0 }">
+    <div data-attached="{ counter: 0, bool: false }">
         <button data-click="counter++">
             Increment
-        </button>
-        <span data-text="counter"></span>
-    </div>
-
-    <h1>Decrement</h1>
-    <div data-attached="{ counter: 0 }">
-        <button data-click="counter--">
-            Increment
-        </button>
-        <span data-text="counter"></span>
-    </div>
-
-    <h1>Both inc and dec</h1>
-    <div data-attached="{ counter: 0 }">
-        <button data-click="counter++">
-            Inc
-        </button>
-        <button data-click="counter--">
-            Dec
         </button>
         <span data-text="counter"></span>
     </div>

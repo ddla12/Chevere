@@ -15,7 +15,7 @@ export class CheverexNode implements CheverexElement {
         this.element.id = this.id;
 
         this.data = Parsers.parserData(data);
-        this.actions = this.checkDataTypes(this.element);
+        this.actions = this.checkActions(this.element);
     }
 
     setId(length: number): string {
@@ -35,20 +35,18 @@ export class CheverexNode implements CheverexElement {
         return final;
     }
 
-    checkDataTypes(el: Element): Action[] {
+    checkActions(el: Element): Action[] {
         const selectors: NodeListOf<Element>[] = [
             el.querySelectorAll(`#${this.id} > *[data-click]`),
         ];
 
         let clickedData: Action[] = [];
 
-        if(selectors[0]) {
-            selectors[0].forEach((click) => {
-                clickedData.push(
-                    Parsers.parseClick(click, this.data, this.id)
-                );
-            });
-        }
+        selectors[0].forEach((click) => {
+            clickedData.push(
+                Parsers.parseClick(click, this.data, this.id)
+            );
+        });
 
         return clickedData;
     }
