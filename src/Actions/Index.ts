@@ -1,156 +1,109 @@
-import { ChevereNode } from "../Chevere";
-import { Click, Action, TextRelation, ChevereEvent, InputModel, DataType, MethodType, ChildMethodType, RelatedElements, Selectors } from "../interfaces";
+import { ChevereNode, Helper } from "../Chevere";
+import { Click, TextRelation, InputModel } from "../interfaces";
 
-abstract class Actions {
-    abstract getActions(): Action;
-}
-
-export class TextAction implements TextRelation, Actions {
+export class TextAction implements TextRelation {
     element: Element;
-    data: ChildMethodType;
-    _variable?: any;
     parent: ChevereNode;
+    _variable?: any;
 
     constructor(data: TextRelation) {
         this.element = data.element;
-        this.data = data.data;
+        this.element.setAttribute("data-id", Helper.setId(10));
+
+        this.parent = data.parent;
         
         this.variable = this.element.getAttribute("data-text")!;
 
-        this.parent = data.parent;
+        this.setSelfText();
+    }
 
-        this.parent.setDefaultText(this._variable, this.element);
+    setSelfText() {
+        this.element.textContent = this._variable.value.toString();
     }
 
     set variable(attr: string) {
-        const pattern: RegExp = /^[0-9]|\s/g;
+        Helper.checkForError(attr);
+        
+        let parentVar = Object.keys(this.parent.data).find((d) => d == attr);
 
-        if(pattern.test(attr)) 
-            throw new SyntaxError("Variable name cannot start with a number or have spaces");
-
-        this._variable = attr;        
-    }
-
-    getActions(): Action {
-        return {
-            elem: this.element,
-            type: "text",
-            action: this._variable,
-        }
+        if(!parentVar) 
+            throw new ReferenceError(`The variable or method named '${parentVar}' wasn't found on the data-attached scope`);
+        
+        this._variable = this.parent.data[parentVar];
     }
 }
 
-export class ClickAction implements Click, Actions {
-    data: ChildMethodType;
-    element: Element;
-    _action: Function;
-    _arguments?: any[];
-    parent: ChevereNode;
+export class ClickAction implements Click {
+    element : Element;
+    parent  : ChevereNode;
+    method? : Function;
 
     constructor(click: Click) {
-        this.data = click.data!;
-        this.element = click.element;
+        this.element = click.element as HTMLButtonElement;
+        this.element.setAttribute("data-id", Helper.setId(10));
+        
+        this.parent  = click.parent;
 
-        this.parent = click.parent;
+        this.method = this.searchMethod();
 
-        this._action = this.action();
-
-        this.element.addEventListener("click", () => {
-            this._action();
-            this.parent.resetText()
-        });
+        this.parent?.setEvent({
+            elem: this.element,
+            action: this.method!,
+            type: "click"
+        });      
     }
 
-    action(): Function {
+    searchMethod(): Function {
         const attr = this.element.getAttribute("data-click")!;
 
         let sanitized: string = attr.replace("()", "");
 
-        let method: Function = this.data!.methods[sanitized];
+        let method: Function = this.parent.methods![sanitized];
 
         if(!method) 
             throw new ReferenceError(`There's no method ${attr} in the data-attached scope`);
 
-        let strFun: string = this.data!.methods[sanitized].toString()
-            .replace(/^\w.*\(.*\)\{{0}/g, "")
-            .replaceAll("this.", "this.data.data.")
-            .replace(/^.*|[\}]$/g, "");
-
-        let func: Function = new Function(strFun);
-
-        return func;
-    }
-
-    getActions(): Action {
-        return {
-            elem: this.element,
-            type: "click",
-            action: this._action.toString(),
-        }
+        return method;
     }
 }
 
-/*
 export class InputAction implements InputModel {
-    _variable?: any;
-    data: ChildMethodType;
-    parent: ChevereNode;
-    element: Element;
-    attached?: NodeListOf<Element>;
-    name: string;
+    element : Element;
+    parent  : ChevereNode;
+    variable: string;
 
     constructor(input: InputModel) {
-        this.data = input.data as DataType;
         this.parent = input.parent;
-        this.element = input.element;
+        this.element = input.element as HTMLInputElement;
 
-        this.variable = this.element.getAttribute("data-model");
+        this.variable = this.getVariable();
 
-        this.setValue();
-        this.getAttachedEls();
-    }
+        //Set the default value
+        this.element.value = this.parent.data[this.variable].value.toString();
 
-    getAttachedEls(): void {
-        let selector: NodeListOf<Element> = document.querySelectorAll(`#${this.parent.id} > *[data-text=${this.name}]`);
-
-
-        if(selector) this.attached = selector;
- 
-        setListener({
-            type: "input",
-            el: this.element,
-            actions: [
-                this.setTextForAttached(this.attached!).toString(),
-            ],
+        //Add the listener
+        this.element.addEventListener("input", () => {
+            this.setText();
         });
     }
 
-    setValue(): void {
-        this.element.value = this._variable;
+    setText() {
+        this.parent.data[this.variable].value = this.element.value.toString();
+    };
+
+    getVariable(): string {
+        let attr = this.element.getAttribute("data-model")!;
+
+        Helper.checkForError(attr);
+        
+        let variable = Object.keys(this.parent.data).find((data) => data == attr);
+
+        console.log(variable);
+
+        if(!variable)
+            throw new ReferenceError(`There's no a '${attr}' variable in the data-attached scope`);
+            
+        return variable;
     }
 
-    setTextForAttached(elems: NodeListOf<Element>): void {
-        elems.forEach((text) => {
-            text.textContent = this.element.value;
-        });
-    }
-
-    set variable(attr: string|null) {
-        if(attr === null)
-            throw new TypeError(`The data-model attribute is null, on your ${this.parent.data.name} component`);
-
-        this.name = Object.keys(this.data!).filter((dat) => {
-            return dat == attr;
-        })[0];
-
-        this._variable = this.data![this.name];
-    }
-
-    getActions(): Action {
-        return {
-            elem: this.element,
-            type: "model",
-            action: this._variable,
-        }
-    }
-}*/
+}

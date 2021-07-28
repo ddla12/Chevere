@@ -11,7 +11,7 @@ export type DataType = { [prop: string]: any, };
 
 export type MethodType = { [method: string]: Function, };
 
-export type ChildMethodType = MethodType|DataType|undefined;
+export type Child = { [type: string]: any[] };
 //#endregion
 
 //#region Enums
@@ -26,7 +26,7 @@ export enum ChevereTypes {
 export interface Action {
     elem: Element,
     type?: string,
-    action?: string,
+    instance: Actions,
 };
 
 export interface Relation {
@@ -63,24 +63,26 @@ export interface ParsedData {
     type?: Types,
 };
 
-export interface ChevereObject {
-    name: string,
-    value: string|number|boolean,
-    type: string|number|boolean
-};
-
-export interface ChevereElement {
-    id: string,
-    element: Element,
-    data: ChevereComponent,
-    _actions?: Action[],
-    childs?: ChevereChilds[],
-};
-
 export interface Data {
     [type: string]: string[]
 };
 
+export interface InputModel extends CheverexChild {
+    variable?: string,
+};
+
+export interface Click extends CheverexChild {
+    _action?: Function,
+};
+
+export interface TextRelation extends CheverexChild {};
+
+export interface Selectors {
+    [group: string]:NodeListOf<Element>
+}
+//#endregion
+
+//#region Cheverex
 export interface ChevereChilds {
     id: string,
     type: string,
@@ -90,46 +92,42 @@ export interface ChevereChilds {
     relations: string[]
 };
 
-export interface ChevereComponent {
-    name: string,
-    data: DataType,
-    methods?: MethodType,
-};
-
-export interface ChevereEvent {
-    type: string, 
-    el: Element, 
-    actions: any[],
-};
-
 export interface CheverexChild {
     element: Element,
     parent: ChevereNode,
-    data: ChildMethodType,
+    method?: Function,
 }
-
-export interface Variable {
-    _variable?: any,
-}
-
-export interface InputModel extends CheverexChild, Variable {
-    attached?: NodeListOf<Element>,
-    name?: string
-};
-
-export interface Click extends CheverexChild {
-    _action?: Function,
-    _arguments?: any[],
-};
-
-export interface TextRelation extends CheverexChild, Variable {};
 
 export interface ChevereWindow {
     findItsData(attr :string, data: ChevereData[]): ChevereData, 
     start(...data: ChevereData[]): void 
 }
 
-export interface Selectors {
-    [group: string]:NodeListOf<Element>
-}
-//#endregion
+export interface ChevereNodeData {
+    name: string,
+    data: DataType,
+    methods?: MethodType,
+};
+
+export interface ChevereElement extends ChevereNodeData {
+    element: Element,
+    _actions?: Action[],
+    childs?: Child,
+};
+
+export interface MainData {
+    [name: string]: ParsedData
+};
+
+export interface ParsedData {
+    nombre: string,
+    _value: any,
+    value: any
+};
+
+export interface ChevereEvent {
+    elem: HTMLElement|Element, 
+    type: string, 
+    action: Function
+};
+//#endregion////

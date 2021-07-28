@@ -1,17 +1,19 @@
 import { Chevere, ChevereData } from "./Chevere";
 
-const toggle: ChevereData = new ChevereData({
-    name: 'toggle',
+const bind: ChevereData = new ChevereData({
+    name: 'bind',
     data: {
-        counter: 0
+        toggle: false
+        text: "test"
     },
     methods: {
         toggle() {
-            this.counter++;
+            $data.toggle = !$data.toggle;
+            alert($data.toggle);
         }
     }
 });
 
 window.addEventListener("load", () => {
-    Chevere.start(toggle);
+    Chevere.start(bind);
 });

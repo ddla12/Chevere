@@ -1,95 +1,13 @@
-import { Action, ChevereComponent, ChevereWindow, DataType, MethodType, Selectors } from "./interfaces";
+import { Action, ChevereEvent, ChevereNodeData, ChevereWindow, Child, DataType, MainData, MethodType, ParsedData, Selectors } from "./interfaces";
 import { ChevereElement } from "./interfaces";
-import { ClickAction, InputAction, TextAction } from "./Actions/Index";
+import { ClickAction, TextAction, InputAction } from "./Actions/Index";
 
-export class ChevereData implements ChevereComponent {
-    name: string;
-    data: DataType;
-    methods?: MethodType;
-
-    constructor(data: ChevereData) {
-        this.name       = data.name;
-        this.data       = data.data;
-        this.methods    = data.methods;
-    }
-}
-
-export class ChevereNode implements ChevereElement {
-    data: ChevereComponent;
-    id: string;
-    _actions?: Action[] = [];
-    element: Element;
-
-    constructor(data: ChevereComponent, el: Element) {
-        this.id = this.setId(10);
-
-        this.element = el;
-        this.element.id = this.id;
-
-        this.data = data;
-
-        this._actions = this.checkForActions();
-    }
-
-    checkForActions(): Action[]|undefined {
-        let action: Action[] = [];
-
-        const selectors: Selectors = {
-            buttons: this.element.querySelectorAll(`#${this.id} > button[data-click]`),
-            text: this.element.querySelectorAll(`#${this.id} > *[data-text]`),
-            //inputs: this.element.querySelectorAll(`#${this.id} > input[data-model]`)
-        };
-
-        if(selectors.buttons.length) {
-            selectors.buttons.forEach((button) => {
-
-                const click = new ClickAction({ 
-                    element: button, 
-                    data: this.data, 
-                    parent: this});
-
-                action.push(click.getActions()); 
-            });
-        }
-
-        if(selectors.text.length) {
-            selectors.text.forEach((text) => {
-
-                const txt = new TextAction({ 
-                    element: text, 
-                    data: this.data, 
-                    parent: this 
-                });
-
-                action.push(txt.getActions()); 
-            });
-        }
-
-        /*if(selectors.inputs.length) {
-            selectors.inputs.forEach((input) => {
-                const inp = new InputAction({ element: input, data: this.data.data, parent: this});
-                action.push(inp.getActions()); 
-            });
-        }*/
-
-        return action;
-
-    }
-
-    resetText() {
-        const textChilds: Action[] = this._actions!.filter((action) => {
-            return action.type == "text"
-        });
-
-        textChilds.forEach((text) => {
-            this.setDefaultText(text.action as string, text.elem);
-        });
-    }
-
-    setDefaultText(variable: string, element: Element) {
-        element.textContent = this.data.data[variable].toString();
-    }
-
+/**
+ * Helper class for the CheverexNodes and Cheverex childs
+ * @class
+ * @constructor
+ */
+export const Helper = {
     setId(length: number): string {
         let final: string = "";
 
@@ -105,7 +23,175 @@ export class ChevereNode implements ChevereElement {
         }
 
         return final;
+    },
+    checkForError(str: string) {
+        const pattern: RegExp = /^[0-9]|\s/g;
+
+        if(pattern.test(str)) 
+            throw new SyntaxError("Variable name cannot start with a number or have spaces");
     }
+}
+
+/**
+ *  The class that users create their components
+ *  @class
+ */
+export class ChevereData implements ChevereNodeData {
+    name: string;
+    data: DataType;
+    methods?: MethodType;
+
+    constructor(data: ChevereData) {
+        this.name       = data.name;
+        this.data       = data.data;
+        this.methods    = data.methods;
+    }
+}
+
+export class ChevereNode implements ChevereElement {
+    name    : string    ;
+    data    : DataType  ;
+    id      : string;
+    methods?: MethodType;
+    element : Element   ;
+    actions?: Action[] = [];
+    childs? : Child = {
+        "data-click": [],
+        "data-text" : [],
+        "data-model": [],
+    };
+
+    constructor(data: ChevereData, el: Element) {;
+
+        this.name = data.name;
+        this.parseData(data.data);
+        
+        /**
+         *  Parse all $this, $self, $data...
+         */
+        this.methods    = this.parseMethods(data.methods);
+
+        /**
+         * Get the parent `div` and give it an id
+         */
+        this.element = el;
+        this.id = Helper.setId(10);
+        this.element.setAttribute("data-id", this.id);
+
+        /**
+         *  Get the events and actions of the component
+         */
+        this.checkForActionsAndChilds();
+
+    }
+
+    parseData(data: DataType) {
+        let obj: [string, ParsedData][] = [];
+
+        Object.keys(data).forEach((d) => {
+            obj.push([
+                d,
+                this.parsedObj(d, data[d])
+            ]);
+        });
+
+        this.data = Object.fromEntries(obj);
+    }
+
+    /**
+     * Parsed the methods described in the method property of the data
+     * @param {MethodType} methods 
+     * @returns The methods parsed
+     */
+    parseMethods(methods?: MethodType): MethodType|undefined {
+        if(methods == undefined) return;
+
+        Object.keys(methods).forEach((method) => {
+            let parsed: string = methods[method].toString().replace(/^.*|[\}]$/g, "");
+
+            let newFunc: Function = new Function("{$this = undefined, $data = undefined}", parsed);
+
+            methods[method] = newFunc;
+        });
+
+        return methods;
+    }
+
+
+    checkForActionsAndChilds() {
+        const parentSelector: string = `div[data-id=${this.id}] > `;
+
+        const selectors: Selectors = {
+            buttons: this.element.querySelectorAll(parentSelector + 'button[data-click]'),
+            text: this.element.querySelectorAll(parentSelector + '*[data-text]'),
+            inputs: this.element.querySelectorAll(parentSelector + 'input[data-model]')
+        };
+
+        if(selectors.buttons.length) {
+            selectors.buttons.forEach((button) => {
+
+                const click = new ClickAction({ 
+                    element: button, 
+                    parent: this
+                });
+
+                this.childs!["data-click"].push(click);
+            });
+        }
+
+
+        if(selectors.text.length) {
+            selectors.text.forEach((text) => {
+
+                const txt = new TextAction({ 
+                    element: text, 
+                    parent: this, 
+                });
+
+                this.childs!["data-text"].push(txt);
+            });
+        }
+
+        if(selectors.inputs.length) {
+            selectors.inputs.forEach((input) => {
+                
+                const inp = new InputAction({ 
+                    element: input,  
+                    parent: this
+                });
+
+                this.childs!["data-model"].push(inp);
+            });
+        }
+    }
+
+    parsedObj(name: string, value: any): ParsedData {
+        const self = this;
+        return {
+            nombre: name,
+            _value: value,
+            set value(value: any) {
+                self.childs!["data-text"].forEach(text => {
+                    text.setSelfText()
+                });
+                this._value = value;
+            },
+            get value() {
+                return this._value;
+            }
+        }
+
+    }
+
+    setEvent(event: ChevereEvent) {
+        event.elem.addEventListener(event.type, () => {
+            event.action({
+                $this: this,
+                $data: this.data
+            });
+        });
+    };
+
 }
 
 /**
@@ -116,8 +202,10 @@ export const Chevere: ChevereWindow = {
     findItsData(attr :string, data: ChevereData[]): ChevereData {
         let search: ChevereData|undefined = data.find(d => d.name == attr);
 
-        if(search == undefined) throw new ReferenceError(`'${attr}' couldn't be found in any of your declared components`);
-        else return search;
+        if(search == undefined) 
+            throw new ReferenceError(`'${attr}' couldn't be found in any of your declared components`);
+        else 
+            return search;
     },
     start(...data: ChevereData[]): void {
         let [ ...props ] = data;
