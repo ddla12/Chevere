@@ -1,14 +1,11 @@
-import { Action, ChevereComponent, ChevereWindow, DataType, Selectors } from "./interfaces";
+import { Action, ChevereComponent, ChevereWindow, DataType, MethodType, Selectors } from "./interfaces";
 import { ChevereElement } from "./interfaces";
 import { ClickAction, InputAction, TextAction } from "./Actions/Index";
 
-/**
- * @class ChevereData
- */
 export class ChevereData implements ChevereComponent {
     name: string;
-    data: object;
-    methods?: { [method: string]: Function };
+    data: DataType;
+    methods?: MethodType;
 
     constructor(data: ChevereData) {
         this.name       = data.name;
@@ -20,7 +17,7 @@ export class ChevereData implements ChevereComponent {
 export class ChevereNode implements ChevereElement {
     data: ChevereComponent;
     id: string;
-    actions?: Action[] = [];
+    _actions?: Action[] = [];
     element: Element;
 
     constructor(data: ChevereComponent, el: Element) {
@@ -30,12 +27,13 @@ export class ChevereNode implements ChevereElement {
         this.element.id = this.id;
 
         this.data = data;
-        this.checkForActions();
 
-        console.log(this)
+        this._actions = this.checkForActions();
     }
 
-    checkForActions() {
+    checkForActions(): Action[]|undefined {
+        let action: Action[] = [];
+
         const selectors: Selectors = {
             buttons: this.element.querySelectorAll(`#${this.id} > button[data-click]`),
             text: this.element.querySelectorAll(`#${this.id} > *[data-text]`),
@@ -44,15 +42,26 @@ export class ChevereNode implements ChevereElement {
 
         if(selectors.buttons.length) {
             selectors.buttons.forEach((button) => {
-                const click = new ClickAction({ element: button, data: this.data.methods, parent: this});
-                this.actions.push(click.getActions()); 
+
+                const click = new ClickAction({ 
+                    element: button, 
+                    data: this.data, 
+                    parent: this});
+
+                action.push(click.getActions()); 
             });
         }
 
         if(selectors.text.length) {
             selectors.text.forEach((text) => {
-                const txt = new TextAction({ element: text, data: this.data.data, parent: this });
-                this.actions.push(txt.getActions()); 
+
+                const txt = new TextAction({ 
+                    element: text, 
+                    data: this.data, 
+                    parent: this 
+                });
+
+                action.push(txt.getActions()); 
             });
         }
 
@@ -62,14 +71,17 @@ export class ChevereNode implements ChevereElement {
                 action.push(inp.getActions()); 
             });
         }*/
+
+        return action;
+
     }
 
     resetText() {
-        const textChilds: Action[]|undefined = this.actions?.filter((action) => {
+        const textChilds: Action[] = this._actions!.filter((action) => {
             return action.type == "text"
         });
 
-        textChilds!.forEach((text) => {
+        textChilds.forEach((text) => {
             this.setDefaultText(text.action as string, text.elem);
         });
     }

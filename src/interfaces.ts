@@ -73,7 +73,7 @@ export interface ChevereElement {
     id: string,
     element: Element,
     data: ChevereComponent,
-    actions?: Action[],
+    _actions?: Action[],
     childs?: ChevereChilds[],
 };
 

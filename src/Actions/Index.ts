@@ -1,8 +1,8 @@
 import { ChevereNode } from "../Chevere";
-import { ChevereComponent, Click, Action, TextRelation, ChevereEvent, InputModel, DataType, MethodType, ChildMethodType, RelatedElements, Selectors } from "../interfaces";
+import { Click, Action, TextRelation, ChevereEvent, InputModel, DataType, MethodType, ChildMethodType, RelatedElements, Selectors } from "../interfaces";
 
 abstract class Actions {
-    abstract getActions(action: Action): Action;
+    abstract getActions(): Action;
 }
 
 export class TextAction implements TextRelation, Actions {
@@ -13,7 +13,7 @@ export class TextAction implements TextRelation, Actions {
 
     constructor(data: TextRelation) {
         this.element = data.element;
-        this.data = data.data as DataType;
+        this.data = data.data;
         
         this.variable = this.element.getAttribute("data-text")!;
 
@@ -40,7 +40,7 @@ export class TextAction implements TextRelation, Actions {
     }
 }
 
-export class ClickAction implements Click {
+export class ClickAction implements Click, Actions {
     data: ChildMethodType;
     element: Element;
     _action: Function;
@@ -48,22 +48,16 @@ export class ClickAction implements Click {
     parent: ChevereNode;
 
     constructor(click: Click) {
-        this.data = click.data as MethodType;
+        this.data = click.data!;
         this.element = click.element;
 
         this.parent = click.parent;
 
         this._action = this.action();
-    }
 
-    registerListener(): void {
-        setListener({
-            type: "click",
-            el: this.element,
-            actions: [
-                this._action(),
-                this.parent.resetText(),
-            ],
+        this.element.addEventListener("click", () => {
+            this._action();
+            this.parent.resetText()
         });
     }
 
@@ -72,14 +66,14 @@ export class ClickAction implements Click {
 
         let sanitized: string = attr.replace("()", "");
 
-        let method: Function = this.data[sanitized];
+        let method: Function = this.data!.methods[sanitized];
 
         if(!method) 
             throw new ReferenceError(`There's no method ${attr} in the data-attached scope`);
 
-        let strFun: string = this.data[sanitized].toString()
+        let strFun: string = this.data!.methods[sanitized].toString()
             .replace(/^\w.*\(.*\)\{{0}/g, "")
-            .replaceAll("this.", "this.data.")
+            .replaceAll("this.", "this.data.data.")
             .replace(/^.*|[\}]$/g, "");
 
         let func: Function = new Function(strFun);
@@ -88,7 +82,6 @@ export class ClickAction implements Click {
     }
 
     getActions(): Action {
-        this.registerListener();
         return {
             elem: this.element,
             type: "click",
@@ -97,6 +90,7 @@ export class ClickAction implements Click {
     }
 }
 
+/*
 export class InputAction implements InputModel {
     _variable?: any;
     data: ChildMethodType;
@@ -159,11 +153,4 @@ export class InputAction implements InputModel {
             action: this._variable,
         }
     }
-}
-
-function setListener(event: ChevereEvent): void {
-    console.log(event.actions)
-    event.el.addEventListener(event.type, () =>{
-        event.actions.forEach((action) => action.call());
-    });
-}
+}*/

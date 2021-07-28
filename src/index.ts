@@ -3,11 +3,11 @@ import { Chevere, ChevereData } from "./Chevere";
 const toggle: ChevereData = new ChevereData({
     name: 'toggle',
     data: {
-        toggle: false
+        counter: 0
     },
     methods: {
         toggle() {
-            this.toggle = !this.toggle;
+            this.counter++;
         }
     }
 });
