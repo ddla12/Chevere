@@ -7,12 +7,14 @@
     <title>Document</title>
 </head>
 <body>
-    <div data-attached="{ counter: 0, bool: false }">
-        <button data-click="counter++">
-            Increment
+
+    <div data-attached="toggle">
+        <button data-click="toggle()">
+            Toggle
         </button>
-        <span data-text="counter"></span>
+        <span data-text="toggle"></span>
     </div>
+
       <script src="bundle.js"></script>
 </body>
 </html>

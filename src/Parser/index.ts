@@ -1,6 +1,4 @@
-import { setClick } from "../Actions/Index";
-import { CheverexObject, CheverexTypes, Pattern, TryParse, Action, Data, ParsedData, Patterns, ListOfRelation, Relation } from "../interfaces";
-import { setTextElements } from "../utils";
+import * as Interfaces from "../interfaces";
 
 //#region parserData 
 /**
@@ -8,7 +6,7 @@ import { setTextElements } from "../utils";
  * @param {string} str - The text content of the data-attached attribute
  * @return An array of parsed objects, with the data
  */
-export function parserData(str: string): CheverexObject[] {
+export function parserData(str: string): ChevereObject[] {
 
     /**
      * Main pattern of the parser
@@ -46,13 +44,13 @@ export function parserData(str: string): CheverexObject[] {
     };
 
     /**
-     * The array with all the data of an CheverexElement
-     * @type {CheverexObject[]}
+     * The array with all the data of an ChevereElement
+     * @type {ChevereObject[]}
      */
-    const final: CheverexObject[] = data.variables.map((variable) => {
+    const final: ChevereObject[] = data.variables.map((variable) => {
 
         //Check if the variable is of any of the allowed types
-        if(!(typeof sanitized[variable] in CheverexTypes)) {
+        if(!(typeof sanitized[variable] in ChevereTypes)) {
             throw new TypeError("Type not allowed, only values of type number, string or boolean");
         }
 
@@ -71,11 +69,11 @@ export function parserData(str: string): CheverexObject[] {
 /**
  * Parse the expression that is in the data-click attribute
  * @param {Element} el The button itself
- * @param {CheverexObject[]} data The data that are in the data-attached attribute
+ * @param {ChevereObject[]} data The data that are in the data-attached attribute
  * @param {string} id The id of the parent element, the one have the data-attached attribute
  * @returns An Action
  */
-export function parseClick(el: Element, data: CheverexObject[], id: string): Action {
+export function parseClick(el: Element, data: Interfaces.ChevereObject[], id: string): Interfaces.Action {
 
     /**
      * The regex patterns for the parser
@@ -138,7 +136,7 @@ export function parseClick(el: Element, data: CheverexObject[], id: string): Act
     ({ action: action.action, name: action.variable } = parsed);
 
     //Check if the variable is at the data-attached attribute of the scope, and its of the same type...
-    let check: CheverexObject|undefined = data.find((d) => {
+    let check: ChevereObject|undefined = data.find((d) => {
         return ((d.name == action.variable) && (typeof d.value == parsed.type));
     });
 
