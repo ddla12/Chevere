@@ -1,4 +1,4 @@
-import { Action, ChevereEvent, ChevereNodeData, ChevereWindow, Child, DataType, MainData, MethodType, ParsedData, Selectors } from "./interfaces";
+import { ChevereEvent, ChevereNodeData, ChevereWindow, Child, DataType, MethodType, ParsedData, Selectors } from "./interfaces";
 import { ChevereElement } from "./interfaces";
 import { ClickAction, TextAction, InputAction } from "./Actions/Index";
 
@@ -54,7 +54,6 @@ export class ChevereNode implements ChevereElement {
     id      : string;
     methods?: MethodType;
     element : Element   ;
-    actions?: Action[] = [];
     childs? : Child = {
         "data-click": [],
         "data-text" : [],
@@ -64,7 +63,7 @@ export class ChevereNode implements ChevereElement {
     constructor(data: ChevereData, el: Element) {;
 
         this.name = data.name;
-        this.parseData(data.data);
+        this.data = this.parseData(data.data);
         
         /**
          *  Parse all $this, $self, $data...
@@ -85,6 +84,10 @@ export class ChevereNode implements ChevereElement {
 
     }
 
+    /**
+     * Parse all the data, they need getter and a setter
+     * @param data The primitive data
+     */
     parseData(data: DataType) {
         let obj: [string, ParsedData][] = [];
 
@@ -95,7 +98,7 @@ export class ChevereNode implements ChevereElement {
             ]);
         });
 
-        this.data = Object.fromEntries(obj);
+        return Object.fromEntries(obj);
     }
 
     /**
@@ -109,6 +112,10 @@ export class ChevereNode implements ChevereElement {
         Object.keys(methods).forEach((method) => {
             let parsed: string = methods[method].toString().replace(/^.*|[\}]$/g, "");
 
+            Object.keys(this.data).forEach((variable) => {
+                parsed = parsed.replaceAll(`$data.${variable}`, `$data.${variable}.value`)
+            });
+
             let newFunc: Function = new Function("{$this = undefined, $data = undefined}", parsed);
 
             methods[method] = newFunc;
@@ -118,15 +125,23 @@ export class ChevereNode implements ChevereElement {
     }
 
 
+    /**
+     * Find all the childrens that have an action and data
+     */
     checkForActionsAndChilds() {
         const parentSelector: string = `div[data-id=${this.id}] > `;
 
+        /**
+         * All the elements supported with Cheverex
+         * @const
+         */
         const selectors: Selectors = {
             buttons: this.element.querySelectorAll(parentSelector + 'button[data-click]'),
             text: this.element.querySelectorAll(parentSelector + '*[data-text]'),
-            inputs: this.element.querySelectorAll(parentSelector + 'input[data-model]')
+            inputs: this.element.querySelectorAll(parentSelector + 'input[data-model],' + parentSelector + 'textarea[data-model]')
         };
 
+        //Buttons
         if(selectors.buttons.length) {
             selectors.buttons.forEach((button) => {
 
@@ -139,7 +154,7 @@ export class ChevereNode implements ChevereElement {
             });
         }
 
-
+        //Data-text
         if(selectors.text.length) {
             selectors.text.forEach((text) => {
 
@@ -152,6 +167,7 @@ export class ChevereNode implements ChevereElement {
             });
         }
 
+        //Text Inputs with model
         if(selectors.inputs.length) {
             selectors.inputs.forEach((input) => {
                 
@@ -165,15 +181,35 @@ export class ChevereNode implements ChevereElement {
         }
     }
 
+    /**
+     * The parsed data, with the getter and setter
+     * @param {string} name The name of the property of the unparsed data object 
+     * @param {any} value the value of that property
+     * @returns The parsed data
+     */
     parsedObj(name: string, value: any): ParsedData {
         const self = this;
         return {
             nombre: name,
             _value: value,
             set value(value: any) {
-                self.childs!["data-text"].forEach(text => {
-                    text.setSelfText()
-                });
+
+                //There's a weird delay when you try to sync all inputs, I don't know why
+                window.setTimeout(() => {
+                    self.childs!["data-text"]
+                        .filter((text) => text._variable.nombre == this.nombre)
+                        .forEach((text) => {
+                            text.setText(this.value);
+                        });
+                }, 100);
+
+                //Sync text with all inputs that have this variable as model in their 'data-model' attribute
+                self.childs!["data-model"]
+                    .filter((input) => input.variable == this.nombre)
+                    .forEach((input) => {
+                        input.assignText(value);
+                    });
+
                 this._value = value;
             },
             get value() {
@@ -183,6 +219,10 @@ export class ChevereNode implements ChevereElement {
 
     }
 
+    /**
+     * Set a custom event in the scope of the data-attached
+     * @param event The event type, the element, and the function without executing
+     */
     setEvent(event: ChevereEvent) {
         event.elem.addEventListener(event.type, () => {
             event.action({
@@ -199,6 +239,12 @@ export class ChevereNode implements ChevereElement {
  *  @const
  */
 export const Chevere: ChevereWindow = {
+    /**
+     * Find a ChevereData by the value of the 'data-attached' attribute 
+     * @param {string} attr 
+     * @param {ChevereData[]} data  
+     * @returns The data ready for instance a CheverexNode
+     */
     findItsData(attr :string, data: ChevereData[]): ChevereData {
         let search: ChevereData|undefined = data.find(d => d.name == attr);
 
@@ -207,10 +253,15 @@ export const Chevere: ChevereWindow = {
         else 
             return search;
     },
+    /**
+     * Search for Chevere Nodes at the site
+     * @param data All the Chevere components
+     */
     start(...data: ChevereData[]): void {
         let [ ...props ] = data;
         const elements: NodeListOf<Element> = document.querySelectorAll("div[data-attached]");
 
+        //Create a ChevereNode for each data-attached
         elements.forEach(el => {
             const dataAttr: string = el.getAttribute("data-attached")!;
 

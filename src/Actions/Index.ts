@@ -14,11 +14,11 @@ export class TextAction implements TextRelation {
         
         this.variable = this.element.getAttribute("data-text")!;
 
-        this.setSelfText();
+        this.element.textContent = this._variable.value.toString();
     }
 
-    setSelfText() {
-        this.element.textContent = this._variable.value.toString();
+    setText(value: any) {
+        this.element.textContent = value.toString();
     }
 
     set variable(attr: string) {
@@ -67,8 +67,12 @@ export class ClickAction implements Click {
     }
 }
 
+/**
+ * The class for those inputs elements that have the `data-model` attribute
+ *  @class
+ */
 export class InputAction implements InputModel {
-    element : Element;
+    element : HTMLTextAreaElement|HTMLInputElement;
     parent  : ChevereNode;
     variable: string;
 
@@ -76,6 +80,7 @@ export class InputAction implements InputModel {
         this.parent = input.parent;
         this.element = input.element as HTMLInputElement;
 
+        //Search if the indicated variable of the data-model attribute exists in the scope
         this.variable = this.getVariable();
 
         //Set the default value
@@ -83,11 +88,15 @@ export class InputAction implements InputModel {
 
         //Add the listener
         this.element.addEventListener("input", () => {
-            this.setText();
+            this.syncText();
         });
     }
 
-    setText() {
+    assignText(value: any) { 
+        this.element.value = value.toString()
+    }
+
+    syncText() {
         this.parent.data[this.variable].value = this.element.value.toString();
     };
 
@@ -97,8 +106,6 @@ export class InputAction implements InputModel {
         Helper.checkForError(attr);
         
         let variable = Object.keys(this.parent.data).find((data) => data == attr);
-
-        console.log(variable);
 
         if(!variable)
             throw new ReferenceError(`There's no a '${attr}' variable in the data-attached scope`);

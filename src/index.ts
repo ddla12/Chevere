@@ -9,7 +9,6 @@ const bind: ChevereData = new ChevereData({
     methods: {
         toggle() {
             $data.toggle = !$data.toggle;
-            alert($data.toggle);
         }
     }
 });
