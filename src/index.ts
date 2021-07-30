@@ -4,12 +4,9 @@ const bind: ChevereData = new ChevereData({
     name: 'bind',
     data: {
         toggle: false
-        text: "test"
     },
-    methods: {
-        toggle() {
-            $data.toggle = !$data.toggle;
-        }
+    init() {
+        $data.toggle = !$data.toggle
     }
 });
 

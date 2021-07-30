@@ -14,7 +14,7 @@ export class TextAction implements TextRelation {
         
         this.variable = this.element.getAttribute("data-text")!;
 
-        this.element.textContent = this._variable.value.toString();
+        this.element.textContent = this._variable;
     }
 
     setText(value: any) {
@@ -24,12 +24,40 @@ export class TextAction implements TextRelation {
     set variable(attr: string) {
         Helper.checkForError(attr);
         
-        let parentVar = Object.keys(this.parent.data).find((d) => d == attr);
+        const arrAttr: string = attr.split(".").splice(1).join(".");
+
+        const customObjAttr = attr.replace(/\..*/, ``);
+
+        let parentVar = Object.keys(this.parent.data).find((d) => (d == customObjAttr));
 
         if(!parentVar) 
             throw new ReferenceError(`The variable or method named '${parentVar}' wasn't found on the data-attached scope`);
         
-        this._variable = this.parent.data[parentVar];
+        if(arrAttr === "") this._variable = this.parent.data[parentVar].value;
+        else {
+            
+            let arr: string[] = arrAttr.split(".");
+            let last: string = arr[arr.length-1];
+            let length: number = arr.length-1;
+
+            //Find the nested property by recursivity
+            function findProperty(obj: any, key: any, pos: number, nested: number): any {
+                if(nested == length) {
+                    if(obj.hasOwnProperty(key)) return obj[key];
+                    else throw new ReferenceError(`There's no a '${key}' property in the '${obj}' property,  the ${parentVar}`);
+                } else {
+                    return findProperty(obj[arr[pos]], last, pos+1, nested + 1)
+                }
+            };
+
+            let exists = findProperty(this.parent.data[parentVar].value, last, 0, 0);
+
+            console.log(exists);
+            if(!exists)
+                throw new ReferenceError(`The property named '${arrAttr}' wasn't found on the '${parentVar}' data`);
+
+            this._variable = exists;
+        }
     }
 }
 

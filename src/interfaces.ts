@@ -9,12 +9,6 @@ export type Child = { [type: string]: any[] };
 //#endregion
 
 //#region Interfaces
-export interface ParsedData {
-    action?: string,
-    name?: string,
-    type?: Types,
-};
-
 export interface InputModel extends CheverexChild {
     variable?: string,
 };
@@ -47,6 +41,7 @@ export interface CheverexChild {
 }
 
 export interface ChevereWindow {
+    nodes: ChevereNode[],
     findItsData(attr :string, data: ChevereData[]): ChevereData, 
     start(...data: ChevereData[]): void 
 }
@@ -54,12 +49,18 @@ export interface ChevereWindow {
 export interface ChevereNodeData {
     name: string,
     data: DataType,
+    init?: Function,
     methods?: MethodType,
 };
 
 export interface ChevereElement extends ChevereNodeData {
     element: Element,
     childs?: Child,
+};
+
+export interface Init {
+    init: Function, 
+    args?: object
 };
 
 export interface MainData {
