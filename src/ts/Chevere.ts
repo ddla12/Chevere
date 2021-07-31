@@ -1,4 +1,14 @@
-import { ChevereEvent, ChevereNodeData, ChevereWindow, Child, DataType, Init, MethodType, ParsedData, Selectors } from "./interfaces";
+import {
+    ChevereEvent,
+    ChevereNodeData,
+    ChevereWindow,
+    Child,
+    DataType,
+    Init,
+    MethodType,
+    ParsedData,
+    Selectors,
+} from "./interfaces";
 import { ChevereElement } from "./interfaces";
 import { ClickAction, TextAction, InputAction } from "./Actions/Index";
 
@@ -11,15 +21,16 @@ export const Helper = {
     setId(length: number): string {
         let final: string = "";
 
-        const chars: { [type: string]: string  } = {
-            "letters": "abcdefghijklmnopqrstuvwxyz",
-            "mayus": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            "numbers": "0123456789"
+        const chars: { [type: string]: string } = {
+            letters: "abcdefghijklmnopqrstuvwxyz",
+            mayus: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            numbers: "0123456789",
         };
 
-        for(let i = 0; i <= length; i++) {
-            let rkey: string = Object.keys(chars)[Math.floor(Math.random() * 2)];
-            final += chars[rkey][Math.floor(Math.random() * length)]
+        for (let i = 0; i <= length; i++) {
+            let rkey: string =
+                Object.keys(chars)[Math.floor(Math.random() * 2)];
+            final += chars[rkey][Math.floor(Math.random() * length)];
         }
 
         return final;
@@ -27,10 +38,12 @@ export const Helper = {
     checkForError(str: string) {
         const pattern: RegExp = /^[0-9]|\s/g;
 
-        if(pattern.test(str)) 
-            throw new SyntaxError("Variable name cannot start with a number or have spaces");
-    }
-}
+        if (pattern.test(str))
+            throw new SyntaxError(
+                "Variable name cannot start with a number or have spaces",
+            );
+    },
+};
 
 /**
  *  The class that users create their components
@@ -43,10 +56,10 @@ export class ChevereData implements ChevereNodeData {
     methods?: MethodType;
 
     constructor(data: ChevereNodeData) {
-        this.name       = data.name;
-        this.data       = data.data;
-        this.init       = data.init;
-        this.methods    = data.methods;
+        this.name = data.name;
+        this.data = data.data;
+        this.init = data.init;
+        this.methods = data.methods;
     }
 
     /**
@@ -54,55 +67,71 @@ export class ChevereData implements ChevereNodeData {
      * @param {string} args The arguments of de data-attached attribute
      */
     parseArguments(args: string): void {
-
-        if((this.init == undefined)) return;
-
-        //Those custom arguments to array
+        //The arguments described in the HTML tag
         let htmlArgs = args
             .trim()
             .replace(/^\w*\(/, "")
             .replace(/\)$/, "")
             .split(",");
 
-        if(htmlArgs[0] == "") {
-            this.parseInit({
-                init: this.init
-            })
+        if (this.init == undefined && htmlArgs[0] != "")
+            throw new Error(
+                `There's not a init() method defined in your ${this.name} component`,
+            );
 
-            return;
-        };
+        if (this.init == undefined) return;
 
         //The arguments of the init function defined in your data
-        let parsedArgs = this.init?.toString()
+        let parsedArgs = this.init
+            ?.toString()
             .replace(/\{.*/gs, "")
             .replace("init(", "")
             .replace(")", "")
             .replaceAll(" ", "")
             .split(",")!;
 
-        if(parsedArgs[0] == "") {
-            this.parseInit({
-                init: this.init
-            });
+        if (parsedArgs[0] == "" && htmlArgs[0] != "") {
+            throw new Error(
+                `The init() function of the ${this.name}() component doesn't receive any parameter`,
+            );
+        }
 
+        if (parsedArgs.length != htmlArgs.length) {
+            throw new Error(`The init() function of the ${this.name}() component needs to receive 
+            ${parsedArgs.length} parameters, ${htmlArgs.length} passed`);
+        }
+
+        if (parsedArgs[0] != "" && htmlArgs[0] == "") {
+            throw new Error(`The init() function of the ${
+                this.name
+            }() component needs to receive 
+            ${parsedArgs.length} parameters, ${htmlArgs.length - 1} passed`);
+        }
+
+        if (parsedArgs[0] == "") {
+            this.parseInit({
+                init: this.init,
+            });
             return;
-        };
+        }
 
         //Get a valid value for the argument, for example, check for strings with unclosed quotes
-        let final = htmlArgs.map(arg => {
+        let final = htmlArgs.map((arg) => {
             const n = this.name;
             let name: string = parsedArgs[htmlArgs.indexOf(arg)];
 
+            //Try get a valid value
             function func(): Function {
-                //Try get a valid value
-                try {
-                    return new Function(`return ${arg}`);
-                } catch (error) {
-                    throw new Error(`${error} at the value ${arg}, check the arguments at your '${n}' components`);
-                }
+                return new Function(`return ${arg}`);
             }
-            
-            func();
+
+            try {
+                func()();
+            } catch (error) {
+                throw new Error(
+                    `${error}, check the arguments of one of your '${n}' components`,
+                );
+            }
 
             //Return the value
             return [name, func()()];
@@ -114,7 +143,7 @@ export class ChevereData implements ChevereNodeData {
         //...and pass it to the unparsed init function
         this.parseInit({
             init: this.init!,
-            args: data
+            args: data,
         });
     }
 
@@ -125,55 +154,54 @@ export class ChevereData implements ChevereNodeData {
      * @returns the init function
      */
     parseInit(init: Init): Function {
-        //Quit curly braces 
-        let func: string = init.init.toString()
+        //Quit curly braces
+        let func: string = init.init
+            .toString()
             .replace(/\w.*\{/, "")
             .replace(/\}$/, "");
 
         //Finds the real arguments and no expressions with the same name
-        if(init.args) {
+        if (init.args) {
             Object.keys(init.args).forEach((arg) => {
                 let str: string = `(?<=(=\\s)|(\\()|(=))(${arg})`;
-                func = func.replace(new RegExp(str, 'g'), `$args.${arg}`)
+                func = func.replace(new RegExp(str, "g"), `$args.${arg}`);
             });
         }
 
         //Create the new parsed init function
         let newFunc: Function = new Function(
-            "{$this = undefined, $data = undefined, $args = undefined}",
-            func
+            "{$this = undefined, $args = undefined}",
+            func,
         );
 
         //Return the new init function and executes it
         return newFunc({
             $this: this,
-            $data: this.data,
-            $args: init.args
+            $args: init.args,
         });
     }
 }
 
 export class ChevereNode implements ChevereElement {
-    name    : string    ;
-    data    : DataType  ;
-    id      : string;
+    name: string;
+    data: DataType;
+    id: string;
     methods?: MethodType;
-    element : Element   ;
-    childs? : Child = {
+    element: Element;
+    childs?: Child = {
         "data-click": [],
-        "data-text" : [],
+        "data-text": [],
         "data-model": [],
     };
 
-    constructor(data: ChevereData, el: Element) {;
-
+    constructor(data: ChevereData, el: Element) {
         this.name = data.name;
         this.data = this.parseData(data.data);
-        
+
         /**
          *  Parse all $this, $self, $data...
          */
-        this.methods    = this.parseMethods(data.methods);
+        this.methods = this.parseMethods(data.methods);
 
         /**
          * Get the parent `div` and give it an id
@@ -186,7 +214,6 @@ export class ChevereNode implements ChevereElement {
          *  Get the events and actions of the component
          */
         this.checkForActionsAndChilds();
-
     }
 
     /**
@@ -197,10 +224,7 @@ export class ChevereNode implements ChevereElement {
         let obj: [string, ParsedData][] = [];
 
         Object.keys(data).forEach((d) => {
-            obj.push([
-                d,
-                this.parsedObj(d, data[d])
-            ]);
+            obj.push([d, this.parsedObj(d, data[d])]);
         });
 
         return Object.fromEntries(obj);
@@ -208,23 +232,33 @@ export class ChevereNode implements ChevereElement {
 
     /**
      * Parsed the methods described in the method property of the data
-     * @param {MethodType} methods 
+     * @param {MethodType} methods
      * @returns The methods parsed
      */
-    parseMethods(methods?: MethodType): MethodType|undefined {
-        if(methods == undefined) return;
+    parseMethods(methods?: MethodType): MethodType | undefined {
+        if (methods == undefined) return;
 
         Object.keys(methods).forEach((method) => {
-            let wasParsed: number = methods[method].toString().search("anonymous");
-            
-            if(wasParsed == -1) {
-                let parsed: string = methods[method].toString().replace(/^.*|[\}]$/g, "");
+            let wasParsed: number = methods[method]
+                .toString()
+                .search("anonymous");
+
+            if (wasParsed == -1) {
+                let parsed: string = methods[method]
+                    .toString()
+                    .replace(/^.*|[\}]$/g, "");
 
                 Object.keys(this.data).forEach((variable) => {
-                    parsed = parsed.replaceAll(`$data.${variable}`, `$data.${variable}.value`)
+                    parsed = parsed.replaceAll(
+                        `$this.data.${variable}`,
+                        `$this.data.${variable}.value`,
+                    );
                 });
 
-                let newFunc: Function = new Function("{$this = undefined, $data = undefined}", parsed);
+                let newFunc: Function = new Function(
+                    "{$this = undefined, $data = undefined}",
+                    parsed,
+                );
 
                 methods[method] = newFunc;
             }
@@ -232,7 +266,6 @@ export class ChevereNode implements ChevereElement {
 
         return methods;
     }
-
 
     /**
      * Find all the childrens that have an action and data
@@ -245,20 +278,26 @@ export class ChevereNode implements ChevereElement {
          * @const
          */
         const selectors: Selectors = {
-            buttons : this.element.querySelectorAll(parentSelector + 'button[data-click]'),
-            text    : this.element.querySelectorAll(parentSelector + '*[data-text]'),
-            inputs  : this.element.querySelectorAll(
-                parentSelector + 'input[data-model][type=text],' + parentSelector + 'textarea[data-model]'
-                )
+            buttons: this.element.querySelectorAll(
+                parentSelector + "button[data-click]",
+            ),
+            text: this.element.querySelectorAll(
+                parentSelector + "*[data-text]",
+            ),
+            inputs: this.element.querySelectorAll(
+                parentSelector +
+                    "input[data-model][type=text]," +
+                    parentSelector +
+                    "textarea[data-model]",
+            ),
         };
 
         //Buttons
-        if(selectors.buttons.length) {
+        if (selectors.buttons.length) {
             selectors.buttons.forEach((button) => {
-
-                const click = new ClickAction({ 
-                    element: button, 
-                    parent: this
+                const click = new ClickAction({
+                    element: button,
+                    parent: this,
                 });
 
                 this.childs!["data-click"].push(click);
@@ -266,12 +305,11 @@ export class ChevereNode implements ChevereElement {
         }
 
         //Data-text
-        if(selectors.text.length) {
+        if (selectors.text.length) {
             selectors.text.forEach((text) => {
-
-                const txt = new TextAction({ 
-                    element: text, 
-                    parent: this, 
+                const txt = new TextAction({
+                    element: text,
+                    parent: this,
                 });
 
                 this.childs!["data-text"].push(txt);
@@ -279,12 +317,11 @@ export class ChevereNode implements ChevereElement {
         }
 
         //Text Inputs with model
-        if(selectors.inputs.length) {
+        if (selectors.inputs.length) {
             selectors.inputs.forEach((input) => {
-                
-                const inp = new InputAction({ 
-                    element: input,  
-                    parent: this
+                const inp = new InputAction({
+                    element: input,
+                    parent: this,
                 });
 
                 this.childs!["data-model"].push(inp);
@@ -294,7 +331,7 @@ export class ChevereNode implements ChevereElement {
 
     /**
      * The parsed data, with the getter and setter
-     * @param {string} name The name of the property of the unparsed data object 
+     * @param {string} name The name of the property of the unparsed data object
      * @param {any} value the value of that property
      * @returns The parsed data
      */
@@ -305,30 +342,28 @@ export class ChevereNode implements ChevereElement {
             nombre: name,
             _value: value,
             set value(value: any) {
-
                 //There's a weird delay when you try to sync all inputs, I don't know why
                 window.setTimeout(() => {
-                    self.childs!["data-text"]
-                        .filter((text) => text._variable.nombre == this.nombre)
-                        .forEach((text) => {
-                            text.setText(this.value);
-                        });
+                    self.childs!["data-text"].filter(
+                        (text) => text._variable.nombre == this.nombre,
+                    ).forEach((text) => {
+                        text.setText(this.value);
+                    });
                 }, 100);
 
                 //Sync text with all inputs that have this variable as model in their 'data-model' attribute
-                self.childs!["data-model"]
-                    .filter((input) => input.variable == this.nombre)
-                    .forEach((input) => {
-                        input.assignText(value);
-                    });
+                self.childs!["data-model"].filter(
+                    (input) => input.variable == this.nombre,
+                ).forEach((input) => {
+                    input.assignText(value);
+                });
 
                 this._value = value;
             },
             get value() {
                 return this._value;
-            }
-        }
-
+            },
+        };
     }
 
     /**
@@ -339,43 +374,45 @@ export class ChevereNode implements ChevereElement {
         event.elem.addEventListener(event.type, () => {
             event.action({
                 $this: this,
-                $data: this.data
             });
         });
-    };
-
+    }
 }
 
 /**
- *  The main Chevere object, it initializes the Chevere framework 
+ *  The main Chevere object, it initializes the Chevere framework
  *  @const
  */
 export const Chevere: ChevereWindow = {
     nodes: [],
     /**
-     * Find a ChevereData by the value of the 'data-attached' attribute 
-     * @param {string} attr 
-     * @param {ChevereData[]} data  
+     * Find a ChevereData by the value of the 'data-attached' attribute
+     * @param {string} attr
+     * @param {ChevereData[]} data
      * @returns The data ready for instance a CheverexNode
      */
-    findItsData(attr :string, data: ChevereData[]): ChevereData {
-        let search: ChevereData|undefined = data.find(d => d.name == attr.replace(/\(.*\)/, ""));
+    findItsData(attr: string, data: ChevereData[]): ChevereData {
+        let search: ChevereData | undefined = data.find(
+            (d) => d.name == attr.replace(/\(.*\)/, ""),
+        );
 
-        if(search == undefined) 
-            throw new ReferenceError(`'${attr}' couldn't be found in any of your declared components`);
-        else 
-            return search;
+        if (search == undefined)
+            throw new ReferenceError(
+                `'${attr}' couldn't be found in any of your declared components`,
+            );
+        else return search;
     },
     /**
      * Search for Chevere Nodes at the site
      * @param data All the Chevere components
      */
     start(...data: ChevereData[]): void {
-        let [ ...props ] = data;
-        const elements: NodeListOf<Element> = document.querySelectorAll("div[data-attached]");
+        let [...props] = data;
+        const elements: NodeListOf<Element> =
+            document.querySelectorAll("div[data-attached]");
 
         //Create a ChevereNode for each data-attached
-        elements.forEach(el => {
+        elements.forEach((el) => {
             const dataAttr: string = el.getAttribute("data-attached")!;
 
             let getData = this.findItsData(dataAttr, props);
@@ -383,8 +420,11 @@ export const Chevere: ChevereWindow = {
             getData.parseArguments(dataAttr);
 
             let node = new ChevereNode(getData, el);
-            
+
             this.nodes.push(node);
         });
-    }
+    },
+    data(data: ChevereNodeData): ChevereData {
+        return new ChevereData(data);
+    },
 };

@@ -8,12 +8,33 @@
 </head>
 <body>
 
-    
     <div data-attached="bind()">
+        <button data-click="toggle()">Toggle</button>
         <span data-text="toggle"></span>
     </div>
 
-    <p id="oijo"></p>
+    <div data-attached="bind()">
+        <button data-click="toggle()">Toggle</button>
+        <span data-text="toggle"></span>
+    </div>
+
       <script src="bundle.js"></script>
+      <script>
+            const bind = Chevere.data({
+                name: "bind",
+                data: {
+                    toggle: false
+                },
+                methods: {
+                    toggle() {
+                        $this.data.toggle = !$this.data.toggle;
+                    }
+                }
+            });
+
+            window.addEventListener("load", () => {
+                Chevere.start(bind);
+            });
+      </script>
 </body>
 </html>
