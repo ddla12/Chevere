@@ -8,13 +8,7 @@
 </head>
 <body>
 
-    <div data-attached="bind()">
-        <button data-click="toggle()">Toggle</button>
-        <span data-text="toggle"></span>
-    </div>
-
-    <div data-attached="bind()">
-        <button data-click="toggle()">Toggle</button>
+    <div data-attached="bind(true, 'uhu')">
         <span data-text="toggle"></span>
     </div>
 
@@ -25,10 +19,9 @@
                 data: {
                     toggle: false
                 },
-                methods: {
-                    toggle() {
-                        $this.data.toggle = !$this.data.toggle;
-                    }
+                init(value, value2) {
+                    $this.data.toggle = value;
+                    alert(value2)
                 }
             });
 

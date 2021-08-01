@@ -1,4 +1,5 @@
-import { ChevereData, ChevereNode } from "./Chevere";
+import ChevereNode from "./chevere/ChevereNode";
+import ChevereData from "./chevere/ChevereData";
 
 //#region Types
 export type DataType = { [prop: string]: any };
@@ -6,6 +7,8 @@ export type DataType = { [prop: string]: any };
 export type MethodType = { [method: string]: Function };
 
 export type Child = { [type: string]: any[] };
+
+export type ParsedArgs = undefined|string[];
 //#endregion
 
 //#region Interfaces
@@ -61,7 +64,7 @@ export interface ChevereElement extends ChevereNodeData {
 
 export interface Init {
     init: Function;
-    args?: object;
+    args?: ArgumentsObject;
 }
 
 export interface MainData {
@@ -73,6 +76,23 @@ export interface ParsedData {
     _value: any;
     value: any;
 }
+
+export interface ArgumentsObject {
+    [arg: string]: any,
+};
+
+export interface CompareArguments {
+    htmlArgs: ParsedArgs, 
+    methodArgs: ParsedArgs,
+    method: string,
+    component: string,
+};
+
+export interface ArgsErrors {
+    args: string[], 
+    name: string, 
+    method: string
+};
 
 export interface ChevereEvent {
     elem: HTMLElement | Element;

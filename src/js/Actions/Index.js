@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InputAction = exports.ClickAction = exports.TextAction = void 0;
-const Chevere_1 = require("../Chevere");
+const Helper_1 = require("../utils/Helper");
 class TextAction {
     constructor(data) {
         this.element = data.element;
-        this.element.setAttribute("data-id", Chevere_1.Helper.setId(10));
+        this.element.setAttribute("data-id", Helper_1.Helper.setDataId(10));
         this.parent = data.parent;
         this.variable = this.element.getAttribute("data-text");
         this.element.textContent = this._variable.value;
@@ -14,10 +14,10 @@ class TextAction {
         this.element.textContent = value.toString();
     }
     set variable(attr) {
-        Chevere_1.Helper.checkForError(attr);
+        Helper_1.Helper.checkForErrorInVariable(attr);
         const arrAttr = attr.split(".").splice(1).join(".");
         const customObjAttr = attr.replace(/\..*/, ``);
-        let parentVar = Object.keys(this.parent.data).find((d) => (d == customObjAttr));
+        let parentVar = Object.keys(this.parent.data).find((d) => d == customObjAttr);
         if (!parentVar)
             throw new ReferenceError(`The variable or method named '${parentVar}' wasn't found on the data-attached scope`);
         if (arrAttr === "")
@@ -38,7 +38,6 @@ class TextAction {
                     return findProperty(obj[arr[pos]], last, pos + 1, nested + 1);
                 }
             }
-            ;
             let exists = findProperty(this.parent.data[parentVar].value, last, 0, 0);
             console.log(exists);
             if (!exists)
@@ -51,13 +50,13 @@ exports.TextAction = TextAction;
 class ClickAction {
     constructor(click) {
         this.element = click.element;
-        this.element.setAttribute("data-id", Chevere_1.Helper.setId(10));
+        this.element.setAttribute("data-id", Helper_1.Helper.setDataId(10));
         this.parent = click.parent;
         this.method = this.searchMethod();
         this.parent?.setEvent({
             elem: this.element,
             action: this.method,
-            type: "click"
+            type: "click",
         });
     }
     searchMethod() {
@@ -93,10 +92,9 @@ class InputAction {
     syncText() {
         this.parent.data[this.variable].value = this.element.value.toString();
     }
-    ;
     getVariable() {
         let attr = this.element.getAttribute("data-model");
-        Chevere_1.Helper.checkForError(attr);
+        Helper_1.Helper.checkForErrorInVariable(attr);
         let variable = Object.keys(this.parent.data).find((data) => data == attr);
         if (!variable)
             throw new ReferenceError(`There's no a '${attr}' variable in the data-attached scope`);

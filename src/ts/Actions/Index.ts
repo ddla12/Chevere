@@ -1,5 +1,6 @@
-import { ChevereNode, Helper } from "../Chevere";
+import ChevereNode from "../chevere/ChevereNode";
 import { Click, TextRelation, InputModel } from "../interfaces";
+import { Helper } from "../utils/Helper";
 
 export class TextAction implements TextRelation {
     element: Element;
@@ -8,7 +9,7 @@ export class TextAction implements TextRelation {
 
     constructor(data: TextRelation) {
         this.element = data.element;
-        this.element.setAttribute("data-id", Helper.setId(10));
+        this.element.setAttribute("data-id", Helper.setDataId(10));
 
         this.parent = data.parent;
 
@@ -22,7 +23,7 @@ export class TextAction implements TextRelation {
     }
 
     set variable(attr: string) {
-        Helper.checkForError(attr);
+        Helper.checkForErrorInVariable(attr);
 
         const arrAttr: string = attr.split(".").splice(1).join(".");
 
@@ -91,7 +92,7 @@ export class ClickAction implements Click {
 
     constructor(click: Click) {
         this.element = click.element as HTMLButtonElement;
-        this.element.setAttribute("data-id", Helper.setId(10));
+        this.element.setAttribute("data-id", Helper.setDataId(10));
 
         this.parent = click.parent;
 
@@ -156,7 +157,7 @@ export class InputAction implements InputModel {
     getVariable(): string {
         let attr = this.element.getAttribute("data-model")!;
 
-        Helper.checkForError(attr);
+        Helper.checkForErrorInVariable(attr);
 
         let variable = Object.keys(this.parent.data).find(
             (data) => data == attr,
