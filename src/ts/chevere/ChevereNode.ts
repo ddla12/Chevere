@@ -1,7 +1,10 @@
-import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, Selectors } from "../interfaces";
-import { ClickAction, TextAction, InputAction } from "../Actions/Index";
+import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, Selectors, EventElements, ParsedArgs } from "../interfaces";
+import { TextAction, InputAction } from "../Actions/Index";
 import ChevereData from "./ChevereData";
+import EventNode from "../Actions/EventNode";
 import { Helper } from "../utils/Helper";
+import ChildsHelper from "../utils/ChildsHelper";
+import LoopNode from "../Actions/LoopNode";
 
 export default class ChevereNode implements ChevereElement {
     name: string;
@@ -9,10 +12,12 @@ export default class ChevereNode implements ChevereElement {
     id: string;
     methods?: MethodType;
     element: Element;
+    args: { [method: string]: ParsedArgs } = {};
     childs?: Child = {
-        "data-click": [],
+        "event": [],
         "data-text": [],
         "data-model": [],
+        "data-for": []
     };
 
     constructor(data: ChevereData, el: Element) {
@@ -66,6 +71,10 @@ export default class ChevereNode implements ChevereElement {
                 .search("anonymous");
 
             if (wasParsed == -1) {
+                let args: ParsedArgs = Helper.methodArguments(methods[method]);
+            
+                if(args) this.args[method] = args;
+
                 let parsed: string = methods[method]
                     .toString()
                     .replace(/^.*|[\}]$/g, "");
@@ -77,8 +86,15 @@ export default class ChevereNode implements ChevereElement {
                     );
                 });
 
+                if(this.args[method] != undefined) {
+                    this.args[method].forEach((arg) => {
+                        let str: string = `(?<=(=\\s)|(\\()|(=))(${arg})`;
+                        parsed = parsed.replace(new RegExp(str, "g"), `$args.${arg}`);
+                    });
+                };
+                
                 let newFunc: Function = new Function(
-                    "{$this = undefined}",
+                    "{$this = undefined, $event = undefined, $args = undefined}",
                     parsed,
                 );
 
@@ -93,62 +109,57 @@ export default class ChevereNode implements ChevereElement {
      * Find all the childrens that have an action and data
      */
     checkForActionsAndChilds() {
-        const parentSelector: string = `div[data-id=${this.id}] > `;
-
         /**
          * All the elements supported with Cheverex
          * @const
          */
-        const selectors: Selectors = {
-            buttons: this.element.querySelectorAll(
-                parentSelector + "button[data-click]",
-            ),
-            text: this.element.querySelectorAll(
-                parentSelector + "*[data-text]",
-            ),
-            inputs: this.element.querySelectorAll(
-                parentSelector +
-                    "input[data-model][type=text]," +
-                    parentSelector +
-                    "textarea[data-model]",
-            ),
+        const
+            eventNodes: EventElements           = ChildsHelper.getElementsByDataOnAttr(this.element), 
+            textNodes   : NodeListOf<Element>   = ChildsHelper.getElementsByDataTextAttr(this.element),
+            modelNodes  : NodeListOf<Element>   = ChildsHelper.getElementsByDataModelAttr(this.element),
+            loopNodes   : NodeListOf<HTMLTemplateElement> = ChildsHelper.getElementsByDataFor(this.element);
+
+        //EventNodes
+        if (eventNodes) {
+            eventNodes.forEach((node) => {
+                this.childs!["event"].push(new EventNode({
+                    element: node[0],
+                    parent: this,
+                    event: node[1],
+                    attrVal: node[2],
+                }));
+            });
         };
 
-        //Buttons
-        if (selectors.buttons.length) {
-            selectors.buttons.forEach((button) => {
-                const click = new ClickAction({
-                    element: button,
-                    parent: this,
-                });
-
-                this.childs!["data-click"].push(click);
-            });
-        }
-
         //Data-text
-        if (selectors.text.length) {
-            selectors.text.forEach((text) => {
-                const txt = new TextAction({
+        if (textNodes) {
+            textNodes.forEach((text) => {
+                this.childs!["data-text"].push(new TextAction({
                     element: text,
                     parent: this,
-                });
-
-                this.childs!["data-text"].push(txt);
+                }));
             });
-        }
+        };
 
         //Text Inputs with model
-        if (selectors.inputs.length) {
-            selectors.inputs.forEach((input) => {
-                const inp = new InputAction({
+        if (modelNodes) {
+            modelNodes.forEach((input) => {
+                this.childs!["data-model"].push(new InputAction({
                     element: input,
                     parent: this,
-                });
-
-                this.childs!["data-model"].push(inp);
+                }));
             });
-        }
+        };
+
+        //For nodes
+        if (loopNodes) {
+            loopNodes.forEach((loop) => {
+                this.childs!["data-for"].push(new LoopNode({
+                    element: loop,
+                    parent: this
+                }));
+            });
+        };
     }
 
     /**
@@ -196,6 +207,7 @@ export default class ChevereNode implements ChevereElement {
         event.elem.addEventListener(event.type, () => {
             event.action({
                 $this: this,
+                $args: event.args
             });
         });
     }

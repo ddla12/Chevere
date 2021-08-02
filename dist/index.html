@@ -8,25 +8,28 @@
 </head>
 <body>
 
-    <div data-attached="bind(true, 'uhu')">
-        <span data-text="toggle"></span>
+    <div data-attached="forin()">
+        <span>Test</span>
+        <template data-for="l in list">
+            <div>
+                <span data-text>8y78</span>
+            </div>
+        </template>
+        <span>Test 2</span>
     </div>
 
       <script src="bundle.js"></script>
       <script>
-            const bind = Chevere.data({
-                name: "bind",
+
+            const forin = Chevere.data({
+                name: "forin",
                 data: {
-                    toggle: false
+                    list: ["Esto", "es", "una", "prueba"]
                 },
-                init(value, value2) {
-                    $this.data.toggle = value;
-                    alert(value2)
-                }
             });
 
             window.addEventListener("load", () => {
-                Chevere.start(bind);
+                Chevere.start(forin);
             });
       </script>
 </body>

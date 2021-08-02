@@ -1,5 +1,5 @@
 import ChevereNode from "../chevere/ChevereNode";
-import { Click, TextRelation, InputModel } from "../interfaces";
+import { TextRelation, InputModel } from "../interfaces";
 import { Helper } from "../utils/Helper";
 
 export class TextAction implements TextRelation {
@@ -82,42 +82,6 @@ export class TextAction implements TextRelation {
 
             this._variable = exists;
         }
-    }
-}
-
-export class ClickAction implements Click {
-    element: Element;
-    parent: ChevereNode;
-    method?: Function;
-
-    constructor(click: Click) {
-        this.element = click.element as HTMLButtonElement;
-        this.element.setAttribute("data-id", Helper.setDataId(10));
-
-        this.parent = click.parent;
-
-        this.method = this.searchMethod();
-
-        this.parent?.setEvent({
-            elem: this.element,
-            action: this.method!,
-            type: "click",
-        });
-    }
-
-    searchMethod(): Function {
-        const attr = this.element.getAttribute("data-click")!;
-
-        let sanitized: string = attr.replace("()", "");
-
-        let method: Function = this.parent.methods![sanitized];
-
-        if (!method)
-            throw new ReferenceError(
-                `There's no method ${attr} in the data-attached scope`,
-            );
-
-        return method;
     }
 }
 

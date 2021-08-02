@@ -37,6 +37,9 @@ const Chevere: ChevereWindow = {
 
            const getData: ChevereData = this.findItsData(dataAttachedAttr, props);
 
+           if((getData.init == undefined) && (Helper.htmlArgsDataAttr(dataAttachedAttr) != undefined))
+                throw new Error(`There's no init method defined in your '${getData.name}' component`);
+                
            //If the init method isn't undefined
            if(getData.init != undefined) {
                //Check for arguments

@@ -1,10 +1,12 @@
 import { ArgsErrors, CompareArguments, ParsedArgs } from "../interfaces";
-
 /**
  * Helper class, it provide usefull methods to Chevere elements
  * @class
  */
 export const Helper = {
+    isEmpty(obj: object) {
+        return Object.keys(obj).length == 0;
+    },
     setDataId(length: number): string {
         let final: string = "";
 
@@ -32,6 +34,8 @@ export const Helper = {
             );
     },
     htmlArgsDataAttr(dataAttached: string): ParsedArgs {
+        if(!dataAttached.match(/\(.+/)) return;
+
         let onlyAttrs: string = dataAttached.replace(/^(\w+\()|\)+$/g, "").replace(" ", "");
 
         return (onlyAttrs) ? onlyAttrs.split(",") : undefined;

@@ -9,6 +9,8 @@ export type MethodType = { [method: string]: Function };
 export type Child = { [type: string]: any[] };
 
 export type ParsedArgs = undefined|string[];
+
+export type EventElements = [Element, string, string][]|undefined;
 //#endregion
 
 //#region Interfaces
@@ -16,8 +18,9 @@ export interface InputModel extends CheverexChild {
     variable?: string;
 }
 
-export interface Click extends CheverexChild {
-    _action?: Function;
+export interface EventChild extends CheverexChild {
+    event: string,
+    attrVal: string
 }
 
 export interface TextRelation extends CheverexChild {}
@@ -56,6 +59,11 @@ export interface ChevereNodeData {
     init?: Function;
     methods?: MethodType;
 }
+
+export interface FindsEvents {
+    element: Element,
+    dataId: string,
+};
 
 export interface ChevereElement extends ChevereNodeData {
     element: Element;
@@ -98,5 +106,25 @@ export interface ChevereEvent {
     elem: HTMLElement | Element;
     type: string;
     action: Function;
+    args?: {}
+};
+
+export interface LoopElement {
+    element: HTMLTemplateElement,
+    parent: ChevereNode,
+    variable?: ParsedData,
+    count?: number
+};
+
+export interface ParsedFor {
+    variable?: ParsedData,
+    count?: number
 }
+
+export interface InlineParser {
+    patterns: {
+        [pattern: string]: RegExp
+    },
+    parseDataForAttr(attr: string, node: ChevereNode): ParsedFor 
+};
 //#endregion
