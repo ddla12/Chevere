@@ -113,18 +113,33 @@ export interface LoopElement {
     element: HTMLTemplateElement,
     parent: ChevereNode,
     variable?: ParsedData,
-    count?: number
+    expressions?: string[]
+};
+
+export interface findProp {
+    obj: any,
+    key: any,
+    pos: number,
+    nested: number,
 };
 
 export interface ParsedFor {
     variable?: ParsedData,
-    count?: number
+    expressions?: string[],
 }
 
 export interface InlineParser {
     patterns: {
-        [pattern: string]: RegExp
+        [attr: string]: {
+            [pattern: string]: RegExp
+        }
     },
+    parseDataTextAttr(attr: string, node: ChevereNode): ParsedText,
     parseDataForAttr(attr: string, node: ChevereNode): ParsedFor 
 };
+
+export interface ParsedText {
+    variable: ParsedData,
+    value?: any
+}
 //#endregion

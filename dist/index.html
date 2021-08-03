@@ -9,13 +9,11 @@
 <body>
 
     <div data-attached="forin()">
-        <span>Test</span>
         <template data-for="l in list">
             <div>
-                <span data-text>8y78</span>
+                <span data-text="l"></span>
             </div>
         </template>
-        <span>Test 2</span>
     </div>
 
       <script src="bundle.js"></script>
@@ -24,8 +22,19 @@
             const forin = Chevere.data({
                 name: "forin",
                 data: {
-                    list: ["Esto", "es", "una", "prueba"]
+                    test: true,
+                    list: [
+                        "Esto",
+                        "es",
+                        "una",
+                        "prueba"
+                    ]
                 },
+                methods: {
+                    toggle() {
+                        $this.data.test = !$this.data.test
+                    }
+                }
             });
 
             window.addEventListener("load", () => {

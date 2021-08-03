@@ -92,7 +92,7 @@ export const Helper = {
     },
     contentOfFunction(func: Function): string {
         return func.toString()
-            .replace(/(^\w.*\{)/gs, "")
+            .replace(/(^\w.*\{)/g, "")
             .replace(/\}$/, "")
             .trim();
     }

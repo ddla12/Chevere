@@ -62,6 +62,7 @@ export default class ChevereData implements ChevereNodeData {
             });
         }
 
+        
         //Create the new parsed init function
         let newFunc: Function = new Function(
             "{$this = undefined, $args = undefined}",

@@ -1,5 +1,6 @@
 import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, Selectors, EventElements, ParsedArgs } from "../interfaces";
-import { TextAction, InputAction } from "../Actions/Index";
+import { InputAction } from "../Actions/Index";
+import TextNode from "../Actions/TextNode";
 import ChevereData from "./ChevereData";
 import EventNode from "../Actions/EventNode";
 import { Helper } from "../utils/Helper";
@@ -134,7 +135,7 @@ export default class ChevereNode implements ChevereElement {
         //Data-text
         if (textNodes) {
             textNodes.forEach((text) => {
-                this.childs!["data-text"].push(new TextAction({
+                this.childs!["data-text"].push(new TextNode({
                     element: text,
                     parent: this,
                 }));
@@ -180,7 +181,7 @@ export default class ChevereNode implements ChevereElement {
                     self.childs!["data-text"].filter(
                         (text) => text._variable.nombre == this.nombre,
                     ).forEach((text) => {
-                        text.setText(this.value);
+                        text.value = value
                     });
                 }, 100);
 

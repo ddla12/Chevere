@@ -1,13 +1,13 @@
 import ChevereNode from "../chevere/ChevereNode";
 import { LoopElement, ParsedData, ParsedFor } from "../interfaces";
-import { Helper } from "../utils/Helper";
+import TextNode from "./TextNode";
 import Parser from "../utils/InlineParser";
 
 export default class LoopNode implements LoopElement {
     element: HTMLTemplateElement;
     parent: ChevereNode;
-    count: number;
     variable: ParsedData;
+    expressions?: string[];
 
     constructor(data: LoopElement) {
         this.element = data.element;
@@ -15,32 +15,62 @@ export default class LoopNode implements LoopElement {
 
         let parsed: ParsedFor = Parser.parseDataForAttr(this.element.getAttribute("data-for")!, this.parent);
 
-        this.count = parsed.count!;
-        this.variable = parsed.variable!;
+        this.variable       = parsed.variable!;
+        this.expressions    = parsed.expressions!;
+
+        if(typeof this.variable.value == "string") 
+            throw new EvalError(`Cannot set a 'for..in' loop in type ${typeof this.variable.value}`);        
 
         this.loopElements();
+        this.element.remove();
     };
 
     loopElements(): void {
         let pos: number = Array.from(this.parent.element.children).indexOf(this.element);
-        const template: DocumentFragment = document.createDocumentFragment();
 
-        for (let i = 0; i <= this.count; i++) {
-            const element = this.element.content.querySelector("div:first-of-type");
+        const template: DocumentFragment = document.createDocumentFragment(),
+            element = this.element.content.querySelector("div:first-child");
 
-            if(!element) 
-                throw new Error("The first child of your data-for element must be a div element");
+        if(!element) throw new Error("The first child of your data-for element must be a div element");
 
-            element.querySelectorAll("*[data-text]").forEach(element => {
-                element.setAttribute("data-id", Helper.setDataId(10))
-                element.textContent = this.variable.value[i];
-            });
+        const thisChilds = [...element!.querySelectorAll(`*`)];
+            
+        const LoopText = thisChilds
+            .filter((child) => child.getAttribute("data-text")?.startsWith(this.expressions![0]));
 
-            template.appendChild(element?.cloneNode(true)!);
+        const parentText = thisChilds
+            .filter((child) => !child.getAttribute("data-text")?.startsWith(this.expressions![0]));
 
-            this.element.remove();
+        LoopText.forEach(el => {
+            el.setAttribute("data-text", 
+            `${this.variable.nombre}[]` + el.getAttribute("data-text")?.replace(this.expressions![0], "")!)
+            console.log(el.getAttribute("data-text"))
+        });
+
+        for (let i in this.variable.value) {
+            LoopText
+                .forEach(element => {
+                    let attrVal: string = (Number(i) == 0) 
+                        ? element.getAttribute("data-text")?.replace("[]" , `[${i}]`)! 
+                        : element.getAttribute("data-text")?.replace(/\[[0-9]+\]/, `[${i}]`)!
+                    
+                    element.setAttribute("data-text", attrVal)
+                    this.parent.childs!["data-text"].push(new TextNode({
+                        element: element,
+                        parent: this.parent
+                    }));
+                });
+
+            parentText
+                .forEach(element => {
+                    this.parent.childs!["data-text"].push(new TextNode({
+                        element: element,
+                        parent: this.parent
+                    }));
+                });
+
+            template.appendChild(document.importNode(element, true));
         };
-
         this.parent.element.insertBefore(template, this.parent.element.children[pos]);
     }
 }
