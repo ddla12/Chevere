@@ -1,8 +1,8 @@
-import { EventChild, ParsedArgs, ArgumentsObject } from "../interfaces";
-import ChevereNode from "../chevere/ChevereNode";
-import { Helper } from "../utils/Helper";
+import { EventChild, ParsedArgs, ArgumentsObject } from "@interfaces";
+import { ChevereNode } from "@chevere";
+import { Helper } from "@helpers";
 
-export default class EventNode implements EventChild {
+export class EventNode implements EventChild {
     element: Element;
     parent: ChevereNode;
     method?: Function;
@@ -63,7 +63,7 @@ export default class EventNode implements EventChild {
         //Create the argument object
         let argsObj: ArgumentsObject = {};
 
-        for(let i in parentArgs) argsObj[parentArgs[i]] = final[i];
+        for(let i in parentArgs) argsObj[parentArgs[+(i)]] = final[+(i)];
 
         return argsObj;
     }

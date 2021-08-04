@@ -1,7 +1,7 @@
-import ChevereNode from "../chevere/ChevereNode";
-import { InlineParser, ParsedFor, ParsedText } from "../interfaces";
+import {ChevereNode} from "@chevere";
+import { InlineParser, ParsedFor, ParsedText } from "@interfaces";
 
-const Parser: InlineParser = {
+export const Parser: InlineParser = {
     patterns: {
         global: {
             variableExpression: /^\w+|\<\=|\>\=|\=|\<|\>|\![a-zA-z]+|[a-zA-Z]+/,
@@ -68,5 +68,3 @@ const Parser: InlineParser = {
         return parsedData;
     },
 };
-
-export default Parser;

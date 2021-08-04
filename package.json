@@ -1,25 +1,33 @@
 {
   "name": "chevere",
   "version": "1.0.0",
-  "description": "A microframework for Javascript, based on Dom manipulation",
+  "description": "A microframework for Javascript, based on DOM manipulation",
   "main": "index.js",
   "scripts": {
     "test": "jest -c ./jest.config.js",
     "format": "prettier --write \"src/**/*.{ts,js}\""
   },
+  "_moduleAliases": {
+    "@actions":"./src/actions/index.ts",
+    "@chevere":"./src/chevere/index.ts",
+    "@helpers":"./src/utils/index.ts",
+    "@interfaces":"./src/interfaces.ts"
+  },
   "prettier": {
-      "printWidth": 80,
-      "tabWidth": 4,
-      "semi": true,
-      "singleQuote": false,
-      "trailingComma": "all",
-      "bracketSpacing": true,
-      "arrowParens": "always",
-      "parser": "typescript"
+    "printWidth": 80,
+    "tabWidth": 4,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "arrowParens": "always",
+    "parser": "typescript"
   },
   "author": "Darud Lingilien",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "module-alias": "^2.2.2"
+  },
   "devDependencies": {
     "@types/jest": "^26.0.24",
     "jest": "^27.0.6",

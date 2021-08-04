@@ -1,6 +1,6 @@
-import { EventElements } from "../interfaces";
+import { EventElements } from "@interfaces";
 
-const ChildsHelper = {
+export const ChildsHelper = {
     getElementsByDataOnAttr(element: Element): EventElements {
         let nodes: EventElements = [];
 
@@ -32,5 +32,3 @@ const ChildsHelper = {
         return element.querySelectorAll("*[data-show]");
     }
 };
-
-export default ChildsHelper;

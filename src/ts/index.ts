@@ -1,7 +1,6 @@
-import { ChevereWindow, ParsedArgs, ChevereNodeData } from "./interfaces";
-import ChevereNode from "./chevere/ChevereNode";
-import ChevereData from "./chevere/ChevereData";
-import { Helper } from "./utils/Helper";
+import { ChevereWindow, ParsedArgs, ChevereNodeData } from "@interfaces";
+import {ChevereNode, ChevereData} from "@chevere";
+import { Helper } from "@helpers";
 
 const Chevere: ChevereWindow = {
    nodes: [],

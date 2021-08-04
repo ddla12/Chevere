@@ -1,9 +1,9 @@
-import ChevereNode from "../chevere/ChevereNode";
-import { LoopElement, ParsedData, ParsedFor } from "../interfaces";
-import TextNode from "./TextNode";
-import Parser from "../utils/InlineParser";
+import {ChevereNode} from "@chevere";
+import { LoopElement, ParsedData, ParsedFor } from "@interfaces";
+import {TextNode} from "./TextNode";
+import {Parser} from "@helpers";
 
-export default class LoopNode implements LoopElement {
+export class LoopNode implements LoopElement {
     element: HTMLTemplateElement;
     parent: ChevereNode;
     variable: ParsedData;
@@ -50,7 +50,7 @@ export default class LoopNode implements LoopElement {
         for (let i in this.variable.value) {
             LoopText
                 .forEach(element => {
-                    let attrVal: string = (Number(i) == 0) 
+                    let attrVal: string = (+(i) == 0) 
                         ? element.getAttribute("data-text")?.replace("[]" , `[${i}]`)! 
                         : element.getAttribute("data-text")?.replace(/\[[0-9]+\]/, `[${i}]`)!
                     

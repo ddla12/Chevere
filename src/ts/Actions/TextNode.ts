@@ -1,9 +1,9 @@
-import Parser from "../utils/InlineParser";
-import { TextRelation, findProp } from "../interfaces";
-import ChevereNode from "../chevere/ChevereNode";
-import { Helper } from "../utils/Helper";
+import {Parser} from "@helpers";
+import { TextRelation, } from "@interfaces";
+import {ChevereNode} from "@chevere";
+import { Helper } from "@helpers";
 
-export default class TextNode implements TextRelation {
+export class TextNode implements TextRelation {
     element: Element;
     parent: ChevereNode;
     _variable?: any;

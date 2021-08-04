@@ -1,4 +1,4 @@
-import { ArgsErrors, CompareArguments, ParsedArgs } from "../interfaces";
+import { ArgsErrors, CompareArguments, ParsedArgs } from "@interfaces";
 /**
  * Helper class, it provide usefull methods to Chevere elements
  * @class

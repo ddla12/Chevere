@@ -1,5 +1,4 @@
-import ChevereNode from "./chevere/ChevereNode";
-import ChevereData from "./chevere/ChevereData";
+import { ChevereNode, ChevereData } from "@chevere";
 
 //#region Types
 export type DataType = { [prop: string]: any };

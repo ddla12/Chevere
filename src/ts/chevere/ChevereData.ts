@@ -1,11 +1,11 @@
-import { ChevereNodeData, DataType, MethodType, ArgumentsObject, Init } from "../interfaces";
-import { Helper } from "../utils/Helper";
+import { ChevereNodeData, DataType, MethodType, ArgumentsObject, Init } from "@interfaces";
+import { Helper } from "@helpers";
 
 /**
  *  The class that users create their components
  *  @class
  */
-export default class ChevereData implements ChevereNodeData {
+export class ChevereData implements ChevereNodeData {
     name: string;
     data: DataType;
     init?: Function;

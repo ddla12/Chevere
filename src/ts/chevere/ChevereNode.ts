@@ -1,13 +1,9 @@
-import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, Selectors, EventElements, ParsedArgs } from "../interfaces";
-import { InputAction } from "../Actions/Index";
-import TextNode from "../Actions/TextNode";
-import ChevereData from "./ChevereData";
-import EventNode from "../Actions/EventNode";
-import { Helper } from "../utils/Helper";
-import ChildsHelper from "../utils/ChildsHelper";
-import LoopNode from "../Actions/LoopNode";
+import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, EventElements, ParsedArgs } from "@interfaces";
+import {ChevereData} from "./ChevereData";
+import {EventNode, TextNode, ModelNode, LoopNode } from "@actions";
+import { Helper, ChildsHelper } from "@helpers";
 
-export default class ChevereNode implements ChevereElement {
+export class ChevereNode implements ChevereElement {
     name: string;
     data: DataType;
     id: string;
@@ -88,7 +84,7 @@ export default class ChevereNode implements ChevereElement {
                 });
 
                 if(this.args[method] != undefined) {
-                    this.args[method].forEach((arg) => {
+                    this.args[method]?.forEach((arg) => {
                         let str: string = `(?<=(=\\s)|(\\()|(=))(${arg})`;
                         parsed = parsed.replace(new RegExp(str, "g"), `$args.${arg}`);
                     });
@@ -145,7 +141,7 @@ export default class ChevereNode implements ChevereElement {
         //Text Inputs with model
         if (modelNodes) {
             modelNodes.forEach((input) => {
-                this.childs!["data-model"].push(new InputAction({
+                this.childs!["data-model"].push(new ModelNode({
                     element: input,
                     parent: this,
                 }));

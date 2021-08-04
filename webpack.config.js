@@ -14,6 +14,12 @@ module.exports = {
         ],
     },
     resolve: {
+        alias: {
+            "@actions": path.resolve(__dirname, './src/ts/actions/index.ts'),
+            "@chevere": path.resolve(__dirname, './src/ts/chevere/index.ts'),
+            "@helpers": path.resolve(__dirname, './src/ts/utils/index.ts'),
+            "@interfaces": path.resolve(__dirname, './src/ts/interfaces.ts'),
+          },
         extensions: [".tsx", ".ts", ".js"],
     },
     output: {
