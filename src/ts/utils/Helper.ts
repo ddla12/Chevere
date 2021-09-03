@@ -10,7 +10,7 @@ export const Helper = {
     setDataId(length: number): string {
         let final: string = "";
 
-        const rounded: Function = (num: number): number => Math.floor(Math.random() * num);
+        const rounded: Function = (num: number): number => ~~(Math.random() * num);
 
         const chars: { [type: string]: string } = {
             letters : "abcdefghijklmnopqrstuvwxyz",
@@ -18,53 +18,40 @@ export const Helper = {
             numbers : "0123456789",
         };
 
-        for (let i = 0; i <= length; i++) {
-            let rkey: string = Object.keys(chars)[rounded(2)];
-            final += chars[rkey][rounded(length)];
-        }
+        for (let i = 0; i <= length; i++) final += chars[Object.keys(chars)[rounded(2)]][rounded(length)];
 
         return final;
     },
     checkForErrorInVariable(str: string): void {
-        const pattern: RegExp = /^[0-9]|\s/g;
-
-        if (pattern.test(str))
+        if (/^[0-9]|\W/g.test(str))
             throw new SyntaxError(
                 "Variable name cannot start with a number or have spaces",
             );
     },
     htmlArgsDataAttr(dataAttached: string): ParsedArgs {
-        if(!dataAttached.match(/\(.+/)) return;
+        if(!dataAttached.match(/\(.+\)/g)) return;
 
-        let onlyAttrs: string = dataAttached.replace(/^(\w+\()|\)+$/g, "").replace(" ", "");
+        let onlyAttrs: string = dataAttached.trim().replace(/.+\(|\).+/g, "");
 
         return (onlyAttrs) ? onlyAttrs.split(",") : undefined;
     },
     methodArguments(method: Function): ParsedArgs {
         let onlyArgs: string = method.toString()
             .replace(/\{.*/gs, "")
-            .replace(/\s/g, "")
-            .replace(/^(\w+\()|\)+$/g, "");
+            .replace(/.+\(|\).+/g, "");
 
         return (onlyArgs) ? onlyArgs.split(",") : undefined;            
     },
     getRealValuesInArguments(data: ArgsErrors): any[] {
-        let final: any[] = data.args.map((arg) => {
-
-            //Try get a valid value
-            const func: Function = (): Function => new Function(`return ${arg}`);
-
-            try {
-                func()();
-            } catch (error) {
-                throw new Error(
-                    `${error}, check the values of your ${data.method}, at one of your '${data.name}' components`,
-                );
-            }
-
-            //Return the value
-            return func()();
-        });
+        let final: any[] = [];
+        
+        try {
+            final = data.args.map((arg) => new Function(`return ${arg}`)());
+        } catch (error) {
+            throw new Error(
+                `${error}, check the values of your ${data.method}, at one of your '${data.name}' components`,
+            );
+        }
 
         return final;
     },
@@ -92,8 +79,10 @@ export const Helper = {
     },
     contentOfFunction(func: Function): string {
         return func.toString()
-            .replace(/(^\w.*\{)/g, "")
-            .replace(/\}$/, "")
+            .replace(/.+\{|\}$/gs, "")
             .trim();
-    }
+    },
+    nameOfFunction(attr: string): string {
+        return attr.trim().replace(/\(.+/,"");
+    },
 };

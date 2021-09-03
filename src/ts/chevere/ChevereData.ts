@@ -12,10 +12,7 @@ export class ChevereData implements ChevereNodeData {
     methods?: MethodType;
 
     constructor(data: ChevereNodeData) {
-        this.name = data.name;
-        this.data = data.data;
-        this.init = data.init;
-        this.methods = data.methods;
+        ({ name: this.name, data: this.data, init: this.init, methods: this.methods } = data);
     }
 
     /**
@@ -23,7 +20,7 @@ export class ChevereData implements ChevereNodeData {
      * @param {string[]} htmlArgs The arguments of de data-attached attribute
      * @param {string[]} initArgs The arguments defined in the init() method
      */
-    parseArguments(htmlArgs: string[], methodArgs: string[]): void {
+    async parseArguments(htmlArgs: string[], methodArgs: string[]): Promise<Function> {
 
         //Get a valid value for the argument, for example, check for strings with unclosed quotes
         let final = Helper.getRealValuesInArguments({
@@ -38,7 +35,7 @@ export class ChevereData implements ChevereNodeData {
         for(let i in methodArgs) argsObj[methodArgs[i]] = final[i];
 
         //...and pass it to the unparsed init function
-        this.parseInit({
+        return await this.parseInit({
             init: this.init!,
             args: argsObj,
         });
@@ -50,7 +47,7 @@ export class ChevereData implements ChevereNodeData {
      * @param {object} args The parsed custom arguments
      * @returns the init function
      */
-    parseInit(init: Init): Function {
+    async parseInit(init: Init): Promise<Function> {
 
         let initFunc: string = Helper.contentOfFunction(init.init);
 
@@ -61,18 +58,17 @@ export class ChevereData implements ChevereNodeData {
                 initFunc = initFunc.replace(new RegExp(str, "g"), `$args.${arg}`);
             });
         }
-
         
         //Create the new parsed init function
         let newFunc: Function = new Function(
             "{$this = undefined, $args = undefined}",
-            initFunc,
+            `return async() => { ${initFunc} };`,
         );
 
         //Return the new init function and executes it
-        return newFunc({
+        return await newFunc({
             $this: this,
             $args: init.args,
-        });
+        })();
     }
 }

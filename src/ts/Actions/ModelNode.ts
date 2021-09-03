@@ -7,13 +7,12 @@ import { Helper } from "@helpers";
  *  @class
  */
 export class ModelNode implements InputModel {
-    element: HTMLTextAreaElement | HTMLInputElement;
+    element: HTMLInputElement;
     parent: ChevereNode;
     variable: string;
 
     constructor(input: InputModel) {
-        this.parent = input.parent;
-        this.element = input.element as HTMLInputElement;
+        ({ parent: this.parent, element: this.element } = input);
 
         //Search if the indicated variable of the data-model attribute exists in the scope
         this.variable = this.getVariable();
@@ -22,9 +21,7 @@ export class ModelNode implements InputModel {
         this.element.value = this.parent.data[this.variable].value.toString();
 
         //Add the listener
-        this.element.addEventListener("input", () => {
-            this.syncText();
-        });
+        this.element.addEventListener("input", this.syncText.bind(this));
     }
 
     assignText(value: any) {
@@ -40,9 +37,7 @@ export class ModelNode implements InputModel {
 
         Helper.checkForErrorInVariable(attr);
 
-        let variable = Object.keys(this.parent.data).find(
-            (data) => data == attr,
-        );
+        let variable = Object.keys(this.parent.data).find((data) => data == attr);
 
         if (!variable)
             throw new ReferenceError(

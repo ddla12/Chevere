@@ -7,37 +7,33 @@
     <title>Document</title>
 </head>
 <body>
-
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
     <div data-attached="forin()">
-        <template data-for="l in list">
-            <div>
-                <span data-text="l"></span>
-            </div>
-        </template>
+        <button @onClick="toggle" data-text="toggle"></button>
+        <span data-show="toggle">Test</span>
     </div>
 
       <script src="bundle.js"></script>
       <script>
-
+  
             const forin = Chevere.data({
                 name: "forin",
                 data: {
-                    test: true,
-                    list: [
-                        "Esto",
-                        "es",
-                        "una",
-                        "prueba"
-                    ]
+                    toggle: true,
                 },
                 methods: {
                     toggle() {
-                        $this.data.test = !$this.data.test
+                        $this.data.toggle = !$this.data.toggle;
                     }
                 }
             });
 
-            window.addEventListener("load", () => {
+            window.addEventListener("DOMContentLoaded", () => {
                 Chevere.start(forin);
             });
       </script>

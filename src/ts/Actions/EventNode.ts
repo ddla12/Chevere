@@ -1,4 +1,4 @@
-import { EventChild, ParsedArgs, ArgumentsObject } from "@interfaces";
+import { EventChild, ParsedArgs, ArgumentsObject, Arguments } from "@interfaces";
 import { ChevereNode } from "@chevere";
 import { Helper } from "@helpers";
 
@@ -11,18 +11,15 @@ export class EventNode implements EventChild {
     args?: {};
 
     constructor(data: EventChild) {
+        ({
+            element : this.element, 
+            event   : this.event, 
+            attrVal : this.attrVal, 
+            parent  : this.parent
+        } = data);
+        
         //Give it an ID for the element
-        this.element = data.element;
         this.element.setAttribute("data-id", Helper.setDataId(10));
-
-        //Get the type of event
-        this.event = data.event;
-
-        //The value of the attribure
-        this.attrVal = data.attrVal;
-
-
-        this.parent = data.parent;
 
         //Search method and check if it has arguments
         this.method = this.searchMethod();
@@ -38,24 +35,26 @@ export class EventNode implements EventChild {
     }
 
     findArguments(): ArgumentsObject|undefined {
-        let methodName: string = this.attrVal.replace(/\(.+/, "");
+        let methodName: string = this.attrVal.trim().replace(/\(.+/, "");
 
         if((!this.parent.args[methodName]) || (Helper.isEmpty(this.parent.args[methodName]!))) return;
 
         //The args
-        let htmlArgs: ParsedArgs = Helper.htmlArgsDataAttr(this.attrVal),
-            parentArgs: ParsedArgs = this.parent.args[methodName];
+        const args: Arguments = {
+            htmlArgs: Helper.htmlArgsDataAttr(this.attrVal),
+            parentArgs: this.parent.args[methodName]
+        };
 
         //Check for errors in the argments
         Helper.compareArguments({
             method: methodName,
             component: this.parent.name,
-            htmlArgs: htmlArgs,
-            methodArgs: parentArgs,
+            htmlArgs: args.htmlArgs,
+            methodArgs: args.parentArgs,
         });
 
-        let final = Helper.getRealValuesInArguments({
-            args: htmlArgs as string[],
+        let final: any[] = Helper.getRealValuesInArguments({
+            args: args.htmlArgs as string[],
             name: this.parent.name,
             method: methodName
         });
@@ -63,17 +62,17 @@ export class EventNode implements EventChild {
         //Create the argument object
         let argsObj: ArgumentsObject = {};
 
-        for(let i in parentArgs) argsObj[parentArgs[+(i)]] = final[+(i)];
+        for(let i in args.parentArgs) argsObj[args.parentArgs[+(i)]] = final[+(i)];
 
         return argsObj;
     }
     
     searchMethod(): Function {
-        let val: string = this.attrVal.replace(/\(.+/, "");
+        let val     : string = this.attrVal.trim().replace(/\(.+/, ""),
+            method  : Function = this.parent.methods![val];
 
-        let method: Function = this.parent.methods![val];
-
-        if (!method) throw new ReferenceError(`There's no method ${val} in the data-attached scope`);
+        if(!method) 
+            throw new ReferenceError(`There's no a method named '${val}' in the data-attached scope`);
 
         return method;
     }

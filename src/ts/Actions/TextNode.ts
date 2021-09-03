@@ -1,7 +1,7 @@
-import {Parser} from "@helpers";
+
 import { TextRelation, } from "@interfaces";
 import {ChevereNode} from "@chevere";
-import { Helper } from "@helpers";
+import { Helper, Parser } from "@helpers";
 
 export class TextNode implements TextRelation {
     element: Element;
@@ -10,25 +10,24 @@ export class TextNode implements TextRelation {
     _value: any;
 
     constructor(data: TextRelation) {
-        this.element = data.element;
+        ({ element: this.element, parent: this.parent } = data);
+        
         this.element.setAttribute("data-id", Helper.setDataId(10));
-
-        this.parent = data.parent;
-
         this.variable = this.element.getAttribute("data-text")!;
     }
 
     set value(value: any) {
-        this._value = value.toString();
-        this.element.textContent = this._value;
+        this.element.textContent = this._value = value.toString();
     }
 
     set variable(attr: string) {
         Helper.checkForErrorInVariable(attr);
 
-        let data = Parser.parseDataTextAttr(attr, this.parent);
+        const data = Parser.parseDataTextAttr({
+            attr: attr, 
+            node: this.parent
+        });
 
-        this._variable = data.variable;
-        this.value = data.value;
+        ({variable: this._variable, value: this.value} = data);
     }
 }

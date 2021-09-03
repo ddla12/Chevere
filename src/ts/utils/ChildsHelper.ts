@@ -30,5 +30,5 @@ export const ChildsHelper = {
     },
     getElementsByDataShow(element: Element): NodeListOf<Element> {
         return element.querySelectorAll("*[data-show]");
-    }
+    },
 };

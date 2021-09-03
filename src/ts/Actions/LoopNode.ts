@@ -1,7 +1,7 @@
 import {ChevereNode} from "@chevere";
 import { LoopElement, ParsedData, ParsedFor } from "@interfaces";
-import {TextNode} from "./TextNode";
-import {Parser} from "@helpers";
+import { TextNode } from "./TextNode";
+import { Parser } from "@helpers";
 
 export class LoopNode implements LoopElement {
     element: HTMLTemplateElement;
@@ -10,19 +10,19 @@ export class LoopNode implements LoopElement {
     expressions?: string[];
 
     constructor(data: LoopElement) {
-        this.element = data.element;
-        this.parent = data.parent;
+        ({ element: this.element, parent: this.parent } = data);
 
-        let parsed: ParsedFor = Parser.parseDataForAttr(this.element.getAttribute("data-for")!, this.parent);
+        const parsed: ParsedFor = Parser.parseDataForAttr({
+            attr: this.element.getAttribute("data-for")!, 
+            node: this.parent
+        });
 
-        this.variable       = parsed.variable!;
-        this.expressions    = parsed.expressions!;
+        ({ expressions: this.expressions, variable: this.variable } = parsed);
 
         if(typeof this.variable.value == "string") 
             throw new EvalError(`Cannot set a 'for..in' loop in type ${typeof this.variable.value}`);        
 
         this.loopElements();
-        this.element.remove();
     };
 
     loopElements(): void {
@@ -33,18 +33,14 @@ export class LoopNode implements LoopElement {
 
         if(!element) throw new Error("The first child of your data-for element must be a div element");
 
-        const thisChilds = [...element!.querySelectorAll(`*`)];
+        const thisChilds = [...element!.querySelectorAll("*[data-text]")];
             
         const LoopText = thisChilds
             .filter((child) => child.getAttribute("data-text")?.startsWith(this.expressions![0]));
 
-        const parentText = thisChilds
-            .filter((child) => !child.getAttribute("data-text")?.startsWith(this.expressions![0]));
-
         LoopText.forEach(el => {
             el.setAttribute("data-text", 
             `${this.variable.nombre}[]` + el.getAttribute("data-text")?.replace(this.expressions![0], "")!)
-            console.log(el.getAttribute("data-text"))
         });
 
         for (let i in this.variable.value) {
@@ -54,15 +50,8 @@ export class LoopNode implements LoopElement {
                         ? element.getAttribute("data-text")?.replace("[]" , `[${i}]`)! 
                         : element.getAttribute("data-text")?.replace(/\[[0-9]+\]/, `[${i}]`)!
                     
-                    element.setAttribute("data-text", attrVal)
-                    this.parent.childs!["data-text"].push(new TextNode({
-                        element: element,
-                        parent: this.parent
-                    }));
-                });
+                    element.setAttribute("data-text", attrVal);
 
-            parentText
-                .forEach(element => {
                     this.parent.childs!["data-text"].push(new TextNode({
                         element: element,
                         parent: this.parent
@@ -71,6 +60,9 @@ export class LoopNode implements LoopElement {
 
             template.appendChild(document.importNode(element, true));
         };
-        this.parent.element.insertBefore(template, this.parent.element.children[pos]);
+        
+        this.parent.element.prepend(template);
+
+        this.parent.canSet = true;
     }
 }

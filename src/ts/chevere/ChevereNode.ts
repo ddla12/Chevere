@@ -1,6 +1,6 @@
 import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, EventElements, ParsedArgs } from "@interfaces";
 import {ChevereData} from "./ChevereData";
-import {EventNode, TextNode, ModelNode, LoopNode } from "@actions";
+import {EventNode, TextNode, ModelNode, LoopNode, ShowNode } from "@actions";
 import { Helper, ChildsHelper } from "@helpers";
 
 export class ChevereNode implements ChevereElement {
@@ -14,13 +14,14 @@ export class ChevereNode implements ChevereElement {
         "event": [],
         "data-text": [],
         "data-model": [],
-        "data-for": []
+        "data-for": [],
+        "data-show": []
     };
+    canSet: boolean = false;
 
     constructor(data: ChevereData, el: Element) {
         this.name = data.name;
         this.data = this.parseData(data.data);
-
         /**
          *  Parse all $this, $self, $data...
          */
@@ -46,8 +47,8 @@ export class ChevereNode implements ChevereElement {
     parseData(data: DataType) {
         let obj: [string, ParsedData][] = [];
 
-        Object.keys(data).forEach((d) => {
-            obj.push([d, this.parsedObj(d, data[d])]);
+        Object.entries(data).forEach(([key, value]) => {
+            obj.push([key, this.parsedObj(key, value)]);
         });
 
         return Object.fromEntries(obj);
@@ -110,52 +111,66 @@ export class ChevereNode implements ChevereElement {
          * All the elements supported with Cheverex
          * @const
          */
-        const
-            eventNodes: EventElements           = ChildsHelper.getElementsByDataOnAttr(this.element), 
-            textNodes   : NodeListOf<Element>   = ChildsHelper.getElementsByDataTextAttr(this.element),
-            modelNodes  : NodeListOf<Element>   = ChildsHelper.getElementsByDataModelAttr(this.element),
-            loopNodes   : NodeListOf<HTMLTemplateElement> = ChildsHelper.getElementsByDataFor(this.element);
-
-        //EventNodes
-        if (eventNodes) {
-            eventNodes.forEach((node) => {
-                this.childs!["event"].push(new EventNode({
-                    element: node[0],
-                    parent: this,
-                    event: node[1],
-                    attrVal: node[2],
-                }));
-            });
-        };
-
-        //Data-text
-        if (textNodes) {
-            textNodes.forEach((text) => {
-                this.childs!["data-text"].push(new TextNode({
-                    element: text,
-                    parent: this,
-                }));
-            });
-        };
-
-        //Text Inputs with model
-        if (modelNodes) {
-            modelNodes.forEach((input) => {
-                this.childs!["data-model"].push(new ModelNode({
-                    element: input,
-                    parent: this,
-                }));
-            });
-        };
+        const loopNodes   : NodeListOf<HTMLTemplateElement> = ChildsHelper.getElementsByDataFor(this.element);
 
         //For nodes
-        if (loopNodes) {
+        if (loopNodes.length) {
             loopNodes.forEach((loop) => {
                 this.childs!["data-for"].push(new LoopNode({
                     element: loop,
                     parent: this
                 }));
             });
+        } else this.canSet = true;
+
+        if(this.canSet) {
+            
+            const eventNodes  : EventElements       = ChildsHelper.getElementsByDataOnAttr(this.element), 
+                textNodes   : NodeListOf<Element>   = ChildsHelper.getElementsByDataTextAttr(this.element),
+                modelNodes  : NodeListOf<Element>   = ChildsHelper.getElementsByDataModelAttr(this.element),
+                showNodes   : NodeListOf<Element>   = ChildsHelper.getElementsByDataShow(this.element);
+            
+            //EventNodes
+            if (eventNodes) {
+                eventNodes.forEach((node) => {
+                    this.childs!["event"].push(new EventNode({
+                        element: node[0],
+                        parent: this,
+                        event: node[1],
+                        attrVal: node[2],
+                    }));
+                });
+            };
+
+            //Data-text
+            if (textNodes.length) {
+                textNodes.forEach((text) => {
+                    this.childs!["data-text"].push(new TextNode({
+                        element: text,
+                        parent: this,
+                    }));
+                });
+            };
+
+            //Data-show
+            if (showNodes.length) {
+                showNodes.forEach((show) => {
+                    this.childs!["data-show"].push(new ShowNode({
+                        element: show as HTMLElement,
+                        parent: this,
+                    }));
+                });
+            };
+
+            //Text Inputs with model
+            if (modelNodes.length) {
+                modelNodes.forEach((input) => {
+                    this.childs!["data-model"].push(new ModelNode({
+                        element: input,
+                        parent: this,
+                    }));
+                });
+            };
         };
     }
 
@@ -172,23 +187,21 @@ export class ChevereNode implements ChevereElement {
             nombre: name,
             _value: value,
             set value(value: any) {
+                this._value = value;
+
                 //There's a weird delay when you try to sync all inputs, I don't know why
-                window.setTimeout(() => {
-                    self.childs!["data-text"].filter(
+                self.childs!["data-text"].filter(
                         (text) => text._variable.nombre == this.nombre,
                     ).forEach((text) => {
                         text.value = value
                     });
-                }, 100);
 
                 //Sync text with all inputs that have this variable as model in their 'data-model' attribute
-                self.childs!["data-model"].filter(
-                    (input) => input.variable == this.nombre,
-                ).forEach((input) => {
-                    input.assignText(value);
-                });
+                self.childs!["data-model"].filter((input) => input.variable == this.nombre)
+                    .forEach((input) => input.assignText(value));
 
-                this._value = value;
+                self.childs!["data-show"].filter((node) => node.variable.nombre == this.nombre)
+                    .forEach((show) => show.toggleHidden());
             },
             get value() {
                 return this._value;
