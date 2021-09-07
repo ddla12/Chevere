@@ -9,7 +9,7 @@ export class ShowNode implements ShowChild {
     value: any;
 
     constructor(data: ShowChild) {
-        ({ element : this.element,  parent  : this.parent } = data);
+        ({ element : this.element,  parent : this.parent } = data);
 
         let parsedAttr: ParsedShow = Parser.parsedDataShowAttr({
             attr: this.element.getAttribute("data-show")!,
@@ -22,6 +22,11 @@ export class ShowNode implements ShowChild {
     };
 
     toggleHidden(): void {
-        this.element.hidden = !(Parser.parser(`${(typeof this.variable.value == "string") ? (this.variable.value + "") : this.variable.value} ${this.value}`));
+        this.element.hidden = !(Parser.parser(`
+            ${(typeof this.variable.value == "string") 
+                ? `"${this.variable.value}"` 
+                : this.variable.value} ${this.value}`
+            )
+        );
     }
 };

@@ -1,39 +1,19 @@
 import { InlineParser, ParsedFor, ParsedText, Attribute, ParsedShow } from "@interfaces";
+import { Patterns } from "./Patterns";
 
 export const Parser: InlineParser = {
-    patterns: {
-        vars: {
-            variableExpression: /^[a-zA-Z]+(\s|<|>|!)?=(\s)?/g,
-            variableName: /^[a-zA-Z]+/,
-            equality: /(<|>|!)?={1,3}/g,
-            string: /^(\"|\')\w.+\1$/g,
-            number: /^(\-)?[0-9]+(\.)?[0-9]+$/g,
-            boolean: /true|false$/g,
-            value: /^.*=/g,
-        },
-        text: {
-            justVariable: /^[a-zA-Z]+$/,
-            singleObject : /^[a-zA-Z]+((\.[a-zA-z]*)|(\[[0-9]{1,}\]))$/,
-            nestedObject: /^[a-zA-Z]+((\.|\[)[a-zA-Z0-9]+(\.|\])?){1,}[a-zA-z]$/
-        },
-        show: {
-            true: /^[a-zA-Z]+$/,
-            false: /^\![a-zA-Z]+$/,
-        }
+    escape(str: string): string {
+        return str.replaceAll("$", "\\$").replaceAll(".", "\\.");
     },
     parser(expr: any): any {
         return new Function(`return ${expr}`)();
     },
     parsedDataShowAttr(data: Attribute): ParsedShow {
+        let val = (Patterns.vars.variableExpression.test(data.attr)) 
+            ? data.attr.replace(Patterns.vars.value, "").trim()
+            : Object.entries(Patterns.show).find(([, regexp]) => regexp.test(data.attr))![0];
 
-        let val = (this.patterns.vars.variableExpression.test(data.attr)) 
-            ? data.attr.replace(this.patterns.vars.value, "").trim()
-            : Object.entries(this.patterns.show).find(([, regexp]) => regexp.test(data.attr))![0];
-
-        let parse = `${((this.patterns.vars.equality.exec(data.attr)) || ["=="])[0]} ${val}`;
-
-        if(!parse) 
-            throw new SyntaxError("The value of the 'data-show' attribute contains invalid expressions");
+        let parse = `${((Patterns.vars.equality.exec(data.attr)) || ["=="])[0]} ${val}`;
 
         const varName: string = data.attr.match(/\w+/)![0],
             parentVar = data.node.data[varName];
@@ -47,13 +27,13 @@ export const Parser: InlineParser = {
         };
     },
     parseDataTextAttr(data: Attribute): ParsedText {
-        let type = Object.keys(this.patterns.text)
-            .find((pattern) => this.patterns.text[pattern].test(data.attr));
+        let type = Object.keys(Patterns.text)
+            .find((pattern) => Patterns.text[pattern].test(data.attr));
 
         if(!type) 
             throw new SyntaxError("The value of the 'data-text' attribute contains invalid expressions");
         
-        const varName: string = this.patterns.text.justVariable.exec(data.attr)![0];
+        const varName: string = Patterns.text.justVariable.exec(data.attr)![0];
         
         let parsed: ParsedText = { variable: data.node.data[varName] };
 
@@ -63,7 +43,7 @@ export const Parser: InlineParser = {
             } break;
 
             case "singleObject" : {
-                parsed.value = parsed.variable.value[data.attr.match(this.patterns.text.indexValue)![0]];
+                parsed.value = parsed.variable.value[data.attr.match(Patterns.text.indexValue)![0]];
             } break;
 
             case "nestedObject" : {

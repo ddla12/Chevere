@@ -3,3 +3,4 @@ export * from "./LoopNode";
 export * from "./ModelNode";
 export * from "./TextNode";
 export * from "./ShowNode";
+export * from "./BindNode";

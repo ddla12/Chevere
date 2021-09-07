@@ -1,7 +1,7 @@
-import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, EventElements, ParsedArgs } from "@interfaces";
+import { ChevereElement, MethodType, DataType, Child, ChevereEvent, ParsedData, EventElements, ParsedArgs, BindChild } from "@interfaces";
 import {ChevereData} from "./ChevereData";
-import {EventNode, TextNode, ModelNode, LoopNode, ShowNode } from "@actions";
-import { Helper, ChildsHelper } from "@helpers";
+import {EventNode, TextNode, ModelNode, LoopNode, ShowNode, BindNode } from "@actions";
+import { Helper, ChildsHelper, Magics, Parser } from "@helpers";
 
 export class ChevereNode implements ChevereElement {
     name: string;
@@ -15,8 +15,11 @@ export class ChevereNode implements ChevereElement {
         "data-text": [],
         "data-model": [],
         "data-for": [],
-        "data-show": []
+        "data-show": [],
+        "data-ref": [],
+        "data-bind": [],
     };
+    refs: { [name: string]: Element } = {};
     canSet: boolean = false;
 
     constructor(data: ChevereData, el: Element) {
@@ -128,7 +131,8 @@ export class ChevereNode implements ChevereElement {
             const eventNodes  : EventElements       = ChildsHelper.getElementsByDataOnAttr(this.element), 
                 textNodes   : NodeListOf<Element>   = ChildsHelper.getElementsByDataTextAttr(this.element),
                 modelNodes  : NodeListOf<Element>   = ChildsHelper.getElementsByDataModelAttr(this.element),
-                showNodes   : NodeListOf<Element>   = ChildsHelper.getElementsByDataShow(this.element);
+                showNodes   : NodeListOf<Element>   = ChildsHelper.getElementsByDataShow(this.element),
+                bindNodes   : BindChild[]   = ChildsHelper.getElementsByDataBind(this.element, this);
             
             //EventNodes
             if (eventNodes) {
@@ -171,6 +175,13 @@ export class ChevereNode implements ChevereElement {
                     }));
                 });
             };
+
+            if(bindNodes.length) {
+                bindNodes.forEach((node) => this.childs!["data-bind"].push(new BindNode(node)));
+            };
+
+            this.refs = Object.fromEntries([...ChildsHelper.getElementsByDataRef(this.element)]
+                .map((ref) => [ ref.getAttribute("data-ref")!, ref]));
         };
     }
 
@@ -189,14 +200,16 @@ export class ChevereNode implements ChevereElement {
             set value(value: any) {
                 this._value = value;
 
-                //There's a weird delay when you try to sync all inputs, I don't know why
-                self.childs!["data-text"].filter(
-                        (text) => text._variable.nombre == this.nombre,
-                    ).forEach((text) => {
-                        text.value = value
-                    });
-
                 //Sync text with all inputs that have this variable as model in their 'data-model' attribute
+                self.childs!["data-text"].filter(
+                    (text) => (text._variable.nombre == this.nombre) && !(["radio", "checkbox"].includes(text.element.type))
+                ).forEach((text) => {
+                    text.value = value;
+                });
+
+                self.childs!["data-bind"].filter((node: BindNode) => node.variables.includes(this.nombre))
+                    .forEach((node) => node.setData());
+                    
                 self.childs!["data-model"].filter((input) => input.variable == this.nombre)
                     .forEach((input) => input.assignText(value));
 
@@ -214,10 +227,12 @@ export class ChevereNode implements ChevereElement {
      * @param event The event type, the element, and the function without executing
      */
     setEvent(event: ChevereEvent) {
-        event.elem.addEventListener(event.type, () => {
+        event.elem.addEventListener(event.type, (e) => {
             event.action({
                 $this: this,
-                $args: event.args
+                $args: event.args,
+                $magics: Magics,
+                $event: e
             });
         });
     }

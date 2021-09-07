@@ -1,4 +1,6 @@
-import { EventElements } from "@interfaces";
+import { BindChild, EventElements } from "@interfaces";
+import { ChevereNode } from "@chevere";
+import { Patterns } from "@helpers";
 
 export const ChildsHelper = {
     getElementsByDataOnAttr(element: Element): EventElements {
@@ -19,6 +21,26 @@ export const ChildsHelper = {
 
         return (nodes.length == 0) ? undefined : nodes;
     },
+    getElementsByDataBind(element: Element, node: ChevereNode): BindChild[] {
+        return [...element.querySelectorAll("*")].filter((e) => 
+            [...e.attributes].some((attr) => Patterns.bind.attr.test(attr.name))
+        ).map((element) => {
+            let attr: string = [...element.attributes].map((attr) => attr.name).find((attr) => Patterns.bind.attr.test(attr))!;
+            
+            return { 
+                element: element as HTMLElement,
+                parent: node,
+                attribute: {
+                    attribute: attr,
+                    modifier: (attr.match(Patterns.bind.modifier) ?? ["string"])[0],
+                    values: {
+                        original: element.getAttribute(attr)!,
+                        current: element.getAttribute(attr)!,
+                    }
+                }
+            };
+        });
+    },
     getElementsByDataTextAttr(element: Element): NodeListOf<Element> {
         return element.querySelectorAll("*[data-text]");
     },
@@ -31,4 +53,7 @@ export const ChildsHelper = {
     getElementsByDataShow(element: Element): NodeListOf<Element> {
         return element.querySelectorAll("*[data-show]");
     },
+    getElementsByDataRef(element: Element): NodeListOf<Element> {
+        return element.querySelectorAll("*[data-ref]");
+    }
 };

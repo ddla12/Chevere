@@ -12,29 +12,36 @@
             background-color: black;
             color: white;
         }
+
+        .success {
+            background-color: chartreuse;
+            padding: 4px;
+            border: 2px solid green;
+        }
+
+        .danger {
+            background-color: red;
+            padding: 4px;
+            border: 2px solid darkred;
+        }
+
     </style>
-    <div data-attached="forin()">
-        <button @onClick="toggle" data-text="toggle"></button>
-        <span data-show="toggle">Test</span>
+    <div data-attached="picker">
+        <span @bindClass="`${$this.data.value ? 'success' : 'danger'}`" class="span"></span>
+        <button @onClick="$magics.toggle($this.data.value)">oijoi</button>
     </div>
 
       <script src="bundle.js"></script>
       <script>
-  
-            const forin = Chevere.data({
-                name: "forin",
+            const picker = Chevere.data({
+                name: "picker",
                 data: {
-                    toggle: true,
+                    value: false
                 },
-                methods: {
-                    toggle() {
-                        $this.data.toggle = !$this.data.toggle;
-                    }
-                }
             });
 
             window.addEventListener("DOMContentLoaded", () => {
-                Chevere.start(forin);
+                Chevere.start(picker);
             });
       </script>
 </body>

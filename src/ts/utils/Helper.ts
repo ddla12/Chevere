@@ -31,7 +31,7 @@ export const Helper = {
     htmlArgsDataAttr(dataAttached: string): ParsedArgs {
         if(!dataAttached.match(/\(.+\)/g)) return;
 
-        let onlyAttrs: string = dataAttached.trim().replace(/.+\(|\).+/g, "");
+        let onlyAttrs: string = dataAttached.trim().replace(/.*\(|\).*/g, "");
 
         return (onlyAttrs) ? onlyAttrs.split(",") : undefined;
     },

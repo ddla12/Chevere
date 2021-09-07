@@ -5,6 +5,8 @@ export type DataType = { [prop: string]: any };
 
 export type MethodType = { [method: string]: Function };
 
+export type Bindable = { [name: string]: string};
+
 export type Child = { [type: string]: any[] };
 
 export type Arguments = { [args: string]: ParsedArgs};
@@ -19,9 +21,35 @@ export type CheverexNodeList = CheverexDataNode[];
 //#endregion
 
 //#region Interfaces
+
+//Bind interfaces
+export interface BindAttr {
+    readonly name: string,
+    readonly exists: boolean,
+    readonly value: string
+};
+
+export interface BindChild {
+    element: HTMLElement|HTMLInputElement,
+    parent: ChevereNode,
+    attribute: ExpAttribute,
+    variables?: string[],
+};
+
 export interface InputModel extends CheverexChild {
+    element: HTMLInputElement,
     variable?: string;
 }
+
+export interface ExpAttribute {
+    readonly attribute: string,
+    readonly modifier: string,
+    values: {
+        readonly original: string,
+        current: string
+    },
+    parsed?: any,
+};
 
 export interface EventChild extends CheverexChild {
     event: string,
@@ -63,6 +91,7 @@ export interface ChevereNodeData {
     data: DataType;
     init?: Function;
     methods?: MethodType;
+    bind?: Bindable;
 }
 
 export interface FindsEvents {
@@ -71,8 +100,8 @@ export interface FindsEvents {
 };
 
 export interface ChevereElement extends ChevereNodeData {
-    element: Element;
-    childs?: Child;
+    element: Element,
+    childs?: Child,
 }
 
 export interface Init {
@@ -151,15 +180,17 @@ export interface Attribute {
 };
 
 export interface InlineParser {
-    patterns: {
-        [attr: string]: {
-            [pattern: string]: RegExp,
-        },
-    },
+    escape(str: string): string,
     parser(expr: any): any,
     parsedDataShowAttr(data: Attribute): ParsedShow
     parseDataTextAttr(data: Attribute): ParsedText,
     parseDataForAttr(data: Attribute): ParsedFor 
+};
+
+export interface Pattern {
+    [attr: string]: {
+        [pattern: string]: RegExp,
+    },
 };
 
 export interface ParsedText {

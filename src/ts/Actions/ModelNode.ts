@@ -17,21 +17,45 @@ export class ModelNode implements InputModel {
         //Search if the indicated variable of the data-model attribute exists in the scope
         this.variable = this.getVariable();
 
-        //Set the default value
-        this.element.value = this.parent.data[this.variable].value.toString();
+        this.assignText(this.parent.data[this.variable].value.toString());
 
         //Add the listener
         this.element.addEventListener("input", this.syncText.bind(this));
     }
 
-    assignText(value: any) {
-        this.element.value = value.toString();
+    /**
+     * If input is neither type 'radio' nor type 'checkbox', sets its value according to the variable
+     * @param {any} value The value
+     */
+    assignText(value: any): void {
+        this.element.value = String(value);
     }
 
-    syncText() {
-        this.parent.data[this.variable].value = this.element.value.toString();
+    syncText(): void {
+        if(this.element.type == "checkbox") {
+            const related = [...this.parent.element.querySelectorAll(
+                `input[type="checkbox"][data-model="${this.element.getAttribute("data-model")}"]`
+            )].filter((e) => e != this.element) as HTMLInputElement[];
+
+            if(related.length) {
+                this.parent.data[this.variable].value = (related.some((e) => (e.checked == true) && (e != this.element)))
+                    ? related.filter((e) => e.checked == true).map((e) => e.value)
+                    : ((this.element.checked) ? this.element.value : "");
+            } else {
+                this.parent.data[this.variable].value = (this.element.value == "on")
+                    ? String(this.element.checked)
+                    : (this.element.checked) ? this.element.value : "";
+            }
+        } else {
+            this.parent.data[this.variable].value = String(this.element.value);
+        }
+
     }
 
+    /**
+     * Find the variable that was indicated in the 'data-model' attribute 
+     * @returns The variable to model
+     */
     getVariable(): string {
         let attr = this.element.getAttribute("data-model")!;
 

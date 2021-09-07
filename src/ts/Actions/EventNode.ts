@@ -1,6 +1,6 @@
 import { EventChild, ParsedArgs, ArgumentsObject, Arguments } from "@interfaces";
 import { ChevereNode } from "@chevere";
-import { Helper } from "@helpers";
+import { Helper, Magics, Parser } from "@helpers";
 
 export class EventNode implements EventChild {
     element: Element;
@@ -35,7 +35,7 @@ export class EventNode implements EventChild {
     }
 
     findArguments(): ArgumentsObject|undefined {
-        let methodName: string = this.attrVal.trim().replace(/\(.+/, "");
+        let methodName: string = this.attrVal.trim().replace(/\(.*/, "");
 
         if((!this.parent.args[methodName]) || (Helper.isEmpty(this.parent.args[methodName]!))) return;
 
@@ -68,12 +68,13 @@ export class EventNode implements EventChild {
     }
     
     searchMethod(): Function {
-        let val     : string = this.attrVal.trim().replace(/\(.+/, ""),
-            method  : Function = this.parent.methods![val];
+        let val: string = this.attrVal.trim().replace(/\(.*/g, "");
+            
+        let method: Function = this.parent.methods![val];
 
         if(!method) 
             throw new ReferenceError(`There's no a method named '${val}' in the data-attached scope`);
 
-        return method;
+            return method;
     }
 }
