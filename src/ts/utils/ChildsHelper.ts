@@ -27,12 +27,17 @@ export const ChildsHelper = {
         ).map((element) => {
             let attr: string = [...element.attributes].map((attr) => attr.name).find((attr) => Patterns.bind.attr.test(attr))!;
             
+            let modifier = Patterns.bind.string.test(element.getAttribute(attr)!) 
+                ? "string"
+                : Patterns.bind.object.test(element.getAttribute(attr)!) ? "object"
+                : "";
+
             return { 
                 element: element as HTMLElement,
                 parent: node,
                 attribute: {
                     attribute: attr,
-                    modifier: (attr.match(Patterns.bind.modifier) ?? ["string"])[0],
+                    modifier: modifier,
                     values: {
                         original: element.getAttribute(attr)!,
                         current: element.getAttribute(attr)!,

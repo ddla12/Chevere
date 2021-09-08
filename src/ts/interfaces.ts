@@ -9,6 +9,8 @@ export type Bindable = { [name: string]: string};
 
 export type Child = { [type: string]: any[] };
 
+export type Args = Map<string, any>|undefined;
+
 export type Arguments = { [args: string]: ParsedArgs};
 
 export type ParsedArgs = undefined|string[];
@@ -41,6 +43,11 @@ export interface InputModel extends CheverexChild {
     variable?: string;
 }
 
+export interface MethodInfo {
+    readonly typeOfMethod: string,
+    readonly method: Function
+};
+
 export interface ExpAttribute {
     readonly attribute: string,
     readonly modifier: string,
@@ -49,6 +56,16 @@ export interface ExpAttribute {
         current: string
     },
     parsed?: any,
+};
+
+export interface MethodData {
+    readonly typeOfMethod: string,
+    readonly name: string,
+    function: {
+        readonly original: Function,
+        parsed?: Function,
+    },
+    args?: Args
 };
 
 export interface EventChild extends CheverexChild {
@@ -182,6 +199,8 @@ export interface Attribute {
 export interface InlineParser {
     escape(str: string): string,
     parser(expr: any): any,
+    parentEscape(parent: ParsedData): any
+    parseArgs(args: string[], data: ChevereNode, typeOfMethod: string): any[],
     parsedDataShowAttr(data: Attribute): ParsedShow
     parseDataTextAttr(data: Attribute): ParsedText,
     parseDataForAttr(data: Attribute): ParsedFor 

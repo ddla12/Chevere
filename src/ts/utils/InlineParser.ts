@@ -1,9 +1,28 @@
-import { InlineParser, ParsedFor, ParsedText, Attribute, ParsedShow } from "@interfaces";
+import { ChevereNode } from "@chevere";
+import { InlineParser, ParsedFor, ParsedText, Attribute, ParsedShow, ParsedData } from "@interfaces";
 import { Patterns } from "./Patterns";
 
 export const Parser: InlineParser = {
     escape(str: string): string {
         return str.replaceAll("$", "\\$").replaceAll(".", "\\.");
+    },
+    parentEscape(parent: ParsedData): any {
+        return (typeof parent.value == "string") ? `"${parent.value}"`: parent.value; 
+    },
+    parseArgs(args: string[], data: ChevereNode, typeOfMethod: string): any[] {
+        try {
+            args = args.map((v) =>
+                (!Patterns.bind.$this.test(v)) 
+                    ? this.parser(v) 
+                    : ((typeOfMethod != "magic")
+                        ? this.parser(v.replaceAll(Patterns.bind.$this, this.parentEscape(data.data[v.replace("$this.data.", "")])))
+                        : data.data[v.replace("$this.data.", "")])
+            );
+        } catch(e) {
+            throw e;
+        }
+
+        return args;
     },
     parser(expr: any): any {
         return new Function(`return ${expr}`)();

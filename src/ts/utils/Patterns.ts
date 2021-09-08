@@ -20,6 +20,12 @@ export const Patterns: Pattern = {
         true: /^[a-zA-Z]+$/,
         false: /^\![a-zA-Z]+$/,
     },
+    attr: {
+        isMagic: /^(\$magics)/,
+        isMethod: /^[a-zA-Z]+\(/,
+        methodName: /(?=.)(\w+)(?=\()/,
+        methodArgs: /(?<=\().*(?=\))/
+    },
     bind: {
         string: /^(\`).*\1$/,
         object: /^\{.*\}$/,
@@ -27,5 +33,6 @@ export const Patterns: Pattern = {
         attr: /^(@|data-)bind(:)?/,
         bindable: /(?<=^(@|data-)bind(:)?)\w+/,
         modifier: /(?<=\.).*/,
+        variable: /(?<=\$this\.data\.)\w+/,
     }
 };

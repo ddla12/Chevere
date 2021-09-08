@@ -1,14 +1,13 @@
-import { EventChild, ParsedArgs, ArgumentsObject, Arguments } from "@interfaces";
+import { EventChild, Args, ArgumentsObject, MethodData, MethodInfo } from "@interfaces";
 import { ChevereNode } from "@chevere";
-import { Helper, Magics, Parser } from "@helpers";
+import { Helper, Magics, Parser, Patterns } from "@helpers";
 
 export class EventNode implements EventChild {
     element: Element;
     parent: ChevereNode;
-    method?: Function;
+    method: MethodData;
     event: string;
     attrVal: string;
-    args?: {};
 
     constructor(data: EventChild) {
         ({
@@ -22,59 +21,73 @@ export class EventNode implements EventChild {
         this.element.setAttribute("data-id", Helper.setDataId(10));
 
         //Search method and check if it has arguments
-        this.method = this.searchMethod();
-        this.args = this.findArguments();
+        this.method = this.getMethod();
 
-        //If everything is ok, then set the Event
+        if(this.method.typeOfMethod == "magic") {
+            this.element.addEventListener(
+                this.event, 
+                this.method.function.original.bind(this, ...this.method.args!.values())
+            );
+        }
+
+        /*If everything is ok, then set the Event
         this.parent?.setEvent({
             elem: this.element,
             action: this.method!,
             type: this.event,
             args: this.args
-        });
+        });*/
     }
 
-    findArguments(): ArgumentsObject|undefined {
-        let methodName: string = this.attrVal.trim().replace(/\(.*/, "");
-
-        if((!this.parent.args[methodName]) || (Helper.isEmpty(this.parent.args[methodName]!))) return;
-
-        //The args
-        const args: Arguments = {
-            htmlArgs: Helper.htmlArgsDataAttr(this.attrVal),
-            parentArgs: this.parent.args[methodName]
+    getMethod(): MethodData {
+        let name: string = this.searchMethodName(),
+            func: MethodInfo = this.searchMethod(name);
+        
+        return {
+            typeOfMethod: func.typeOfMethod,
+            name,
+            function: {
+                original: func.method,
+            },
+            args: this.searchArguments(func),
         };
+    }
 
-        //Check for errors in the argments
-        Helper.compareArguments({
-            method: methodName,
-            component: this.parent.name,
-            htmlArgs: args.htmlArgs,
-            methodArgs: args.parentArgs,
-        });
+    searchMethodName(): string {
+        let methodName: string = this.attrVal.match(Patterns.attr.methodName)![0];
 
-        let final: any[] = Helper.getRealValuesInArguments({
-            args: args.htmlArgs as string[],
-            name: this.parent.name,
-            method: methodName
-        });
+        if(!methodName) 
+            throw new Error(`Invalid method name at one of your "${this.parent.name}"" components`);
 
-        //Create the argument object
-        let argsObj: ArgumentsObject = {};
+        return methodName;
+    };
 
-        for(let i in args.parentArgs) argsObj[args.parentArgs[+(i)]] = final[+(i)];
+    searchArguments(func: MethodInfo): Args {
+        let originalArgs = func.method.toString().trim().match(Patterns.attr.methodArgs),
+            htmlArgs   = this.attrVal.trim().match(Patterns.attr.methodArgs);
 
-        return argsObj;
+        if((!originalArgs) && (!htmlArgs)) return;
+
+        htmlArgs = Parser.parseArgs(htmlArgs![0].split(","), this.parent, func.typeOfMethod);
+
+        return new Map([...originalArgs![0].split(",").map((v, i) => [v, htmlArgs[i]])]);
     }
     
-    searchMethod(): Function {
-        let val: string = this.attrVal.trim().replace(/\(.*/g, "");
+    searchMethod(name: string): MethodInfo {
+        let typeOfMethod: string = Patterns.attr.isMethod.test(this.attrVal.trim()) 
+            ? "method" 
+            : (Patterns.attr.isMagic.test(this.attrVal.trim()) ? "magic" : "");
+
+        if(!typeOfMethod) throw new Error(`The value of the attribute contains invalid expressions`);
             
-        let method: Function = this.parent.methods![val];
+        let method: Function = ((typeOfMethod == "magic") ? Magics : this.parent.methods!)[name];
 
         if(!method) 
-            throw new ReferenceError(`There's no a method named '${val}' in the data-attached scope`);
+            throw new ReferenceError(`There's no a method named '${name}' in the ${(typeOfMethod == "magic") ? "Magics" : `${this.parent.name} component`}`);
 
-            return method;
+        return {
+            method,
+            typeOfMethod
+        };
     }
 }

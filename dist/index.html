@@ -27,8 +27,8 @@
 
     </style>
     <div data-attached="picker">
-        <span @bindClass="`${$this.data.value ? 'success' : 'danger'}`" class="span"></span>
-        <button @onClick="$magics.toggle($this.data.value)">oijoi</button>
+        <span @bindClass="{ 'danger': ($this.data.value == 0), 'success': ($this.data.value == 2) }" ></span>
+        <button @onClick="$magics.increment($this.data.value)">oijoi</button>
     </div>
 
       <script src="bundle.js"></script>
@@ -36,7 +36,7 @@
             const picker = Chevere.data({
                 name: "picker",
                 data: {
-                    value: false
+                    value: 0
                 },
             });
 
