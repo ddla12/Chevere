@@ -1,219 +1,101 @@
 import { ChevereNode, ChevereData } from "@chevere";
-
 //#region Types
-export type DataType = { [prop: string]: any };
+export type Helper = { [func: string]: Function };
 
-export type MethodType = { [method: string]: Function };
+export type Data<T> = { [name: string]: T };
 
-export type Bindable = { [name: string]: string};
+export type initFunc = ((...rest: any[]) => void) | undefined;
 
-export type Child = { [type: string]: any[] };
+export type Args = Map<string, any>;
 
-export type Args = Map<string, any>|undefined;
+export type ChevereNodeList = ChevereDataNode[];
 
-export type Arguments = { [args: string]: ParsedArgs};
+export type Attributes = Attribute|Attribute[];
 
-export type ParsedArgs = undefined|string[];
-
-export type EventElements = [Element, string, string][]|undefined;
-
-export type CheverexDataNode = { elem: Element, dataAttr: string|null };
-
-export type CheverexNodeList = CheverexDataNode[];
 //#endregion
 
-//#region Interfaces
-
-//Bind interfaces
-export interface BindAttr {
-    readonly name: string,
-    readonly exists: boolean,
-    readonly value: string
-};
-
-export interface BindChild {
-    element: HTMLElement|HTMLInputElement,
-    parent: ChevereNode,
-    attribute: ExpAttribute,
-    variables?: string[],
-};
-
-export interface InputModel extends CheverexChild {
-    element: HTMLInputElement,
-    variable?: string;
-}
-
-export interface MethodInfo {
-    readonly typeOfMethod: string,
-    readonly method: Function
-};
-
-export interface ExpAttribute {
+//#region Utils
+export interface Attribute {
     readonly attribute: string,
-    readonly modifier: string,
     values: {
         readonly original: string,
-        current: string
-    },
-    parsed?: any,
-};
-
-export interface MethodData {
-    readonly typeOfMethod: string,
-    readonly name: string,
-    function: {
-        readonly original: Function,
-        parsed?: Function,
-    },
-    args?: Args
-};
-
-export interface EventChild extends CheverexChild {
-    event: string,
-    attrVal: string
+        current?: any
+    }
 }
 
-export interface TextRelation extends CheverexChild {}
-
-export interface Selectors {
-    [group: string]: NodeListOf<Element>;
+export interface ActionDynamic<Attributes> {
+    new (data: ChevereChild<Attributes>): ChevereChild<Attributes>,
 }
+
+export interface FindChilds<Attributes> {
+    selector: string,
+    attribute: string,
+    element: Element,
+    parent: ChevereNode,
+    child: ActionDynamic<Attributes>
+}
+
+export interface Relation {
+    type: string,
+    nodes: ChevereChild<Attributes>[]
+}
+
+export interface DataOn {
+    parent: ChevereNode, 
+    attribute: string,
+    child: ActionDynamic<Attribute[]>
+}
+
+
 //#endregion
-
-//#region Cheverex
-export interface ChevereChilds {
-    id: string;
-    type: string;
-    action: string;
-    variable: string;
-    element: Element;
-    relations: string[];
+//#region Chevere
+export interface ChevereNodeData {
+    readonly name: string;
+    data: Data<any>;
+    init?: initFunc,
+    methods?: Data<Function>;
+    bind?: Data<string|object>;
 }
 
-export interface CheverexChild {
-    element: Element;
-    parent: ChevereNode;
-    method?: Function;
+export interface ChevereDataNode { 
+    el: Element,
+    attr: string
+}
+
+export interface ChevereElement extends ChevereNodeData {
+    name    : string,
+    data    : Data<object>,
+    id      : string,
+    methods?: Data<Function>,
+    element : Element,
+    refs?:  Data<HTMLElement>,
 }
 
 export interface ChevereWindow {
-    nodes: ChevereNode[];
-    findItsData(attr: string, data: ChevereData[]): ChevereData;
-    start(...data: ChevereData[]): void;
-    data(data: ChevereNodeData): ChevereData;
+    nodes: ChevereNode[],
+    findItsData(attr: string, ...data: ChevereData[]): ChevereData,
+    start(...data: ChevereData[]): void,
+    data(data: ChevereNodeData): ChevereData,
 }
 
-export interface ChevereNodeData {
-    name: string;
-    data: DataType;
-    init?: Function;
-    methods?: MethodType;
-    bind?: Bindable;
+export interface ChevereChild<T = Attributes> {
+    element : Element,
+    parent  : ChevereNode,
+    attr?   : T,
 }
 
-export interface FindsEvents {
-    element: Element,
-    dataId: string,
-};
+//#endregion
 
-export interface ChevereElement extends ChevereNodeData {
-    element: Element,
-    childs?: Child,
-}
-
-export interface Init {
-    init: Function;
-    args?: ArgumentsObject;
-}
-
-export interface MainData {
-    [name: string]: ParsedData;
-}
-
-export interface ParsedData {
-    nombre: string;
-    _value: any;
-    value: any;
-}
-
-export interface ShowChild {
-    element : HTMLElement;
-    parent  : ChevereNode;
-    variable?: ParsedData;
-    value?: any;
-};
-
-export interface ParsedShow {
-    variable: ParsedData,
-    value: any
-};
-
-export interface ArgumentsObject {
-    [arg: string]: any,
-};
-
-export interface CompareArguments {
-    htmlArgs: ParsedArgs, 
-    methodArgs: ParsedArgs,
-    method: string,
-    component: string,
-};
-
-export interface ArgsErrors {
-    args: string[], 
-    name: string, 
-    method: string
-};
-
-export interface ChevereEvent {
-    elem: HTMLElement | Element;
-    type: string;
-    action: Function;
-    args?: {}
-};
-
-export interface LoopElement {
-    element: HTMLTemplateElement,
-    parent: ChevereNode,
-    variable?: ParsedData,
-    expressions?: string[]
-};
-
-export interface findProp {
-    obj: any,
-    key: any,
-    pos: number,
-    nested: number,
-};
-
-export interface ParsedFor {
-    variable?: ParsedData,
-    expressions?: string[],
-}
-
-export interface Attribute {
-    attr: string, 
-    node: ChevereNode
-};
-
-export interface InlineParser {
-    escape(str: string): string,
-    parser(expr: any): any,
-    parentEscape(parent: ParsedData): any
-    parseArgs(args: string[], data: ChevereNode, typeOfMethod: string): any[],
-    parsedDataShowAttr(data: Attribute): ParsedShow
-    parseDataTextAttr(data: Attribute): ParsedText,
-    parseDataForAttr(data: Attribute): ParsedFor 
-};
-
+//#region Parser
 export interface Pattern {
     [attr: string]: {
         [pattern: string]: RegExp,
     },
 };
 
-export interface ParsedText {
-    variable: ParsedData,
-    value?: any
+export interface Parse {
+    expr: string,
+    args?: Args,
+    node?: ChevereNode
 }
 //#endregion

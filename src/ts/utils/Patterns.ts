@@ -1,30 +1,31 @@
 import { Pattern } from "@interfaces";
 
+const commonRegexp = {
+    $this: "^this\.data\.[a-zA-Z]+$",
+    words: "[a-zA-Z]+",
+};
+
 export const Patterns: Pattern = {
-    magics: {
-        el: /\$el/,
-        checkMagic: /^\$magics./,
+    global: {
+        getName: new RegExp(`^${commonRegexp.words}`),
+        $data: new RegExp(commonRegexp.$this, "g"),
+        arguments: /(?<=\().*(?=\))/,
     },
-    vars: {
-        variableExpression: /^[a-zA-Z]+(\s)?(<|>|!|=)?=/g,
-        variableName: /^[a-zA-Z]+/,
+    variables: {
         equality: /(<|>|!)?={1,3}/g,
-        value: /^.*(<|>|=)/g,
-    },
-    text: {
-        justVariable: /^[a-zA-Z]+$/,
-        singleObject : /^[a-zA-Z]+((\.[a-zA-z]*)|(\[[0-9]{1,}\]))$/,
-        nestedObject: /^[a-zA-Z]+((\.|\[)[a-zA-Z0-9]+(\.|\])?){1,}[a-zA-z]$/
-    },
-    show: {
-        true: /^[a-zA-Z]+$/,
-        false: /^\![a-zA-Z]+$/,
+        value: /(?<=\=).*(?=\;)/g,
     },
     attr: {
         isMagic: /^(\$magics)/,
-        isMethod: /^[a-zA-Z]+\(/,
-        methodName: /(?=.)(\w+)(?=\()/,
-        methodArgs: /(?<=\().*(?=\))/
+        isMethod: /^this\.methods\.[a-zA-Z]+\(/,
+        isLogicalExpression: /^this\.data\.[a-zA-Z]+(\s)?(<|>|!|=)?=/,
+        isVariableAssign: /^this\.data\.[a-zA-Z]+(\s)?(\?\?||\+|\-|\*|\/|\%|\*\*|<<?|>>(>)?|\|(\|)?||\&(\&)?|\^)?=/,
+        isString: /^(\`).*\1$/,
+        isObject: /^\{.*\}$/,
+        isBoolean: /^(\!)?this\.data\.[a-zA-Z]+$/,
+        methodSyntax: /(^\w+$)|(^\w+\((.*)?\)$)/,
+        bindAndOn: /^(data-(on|bind):|@(on|bind))/,
+        bind: /^(data-)/
     },
     bind: {
         string: /^(\`).*\1$/,

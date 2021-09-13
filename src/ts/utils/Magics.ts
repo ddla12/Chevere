@@ -1,16 +1,16 @@
-import { ParsedData } from "@interfaces";
+import { Helper } from "@interfaces";
 
-export const Magics: { [func: string]: Function } = {
-    increment(variable: ParsedData): void {
-        variable.value++;
+export const Magics: Helper = {
+    increment(variable: any): void {
+        variable++;
     },
-    decrement(variable: ParsedData): void {
-        variable.value--;
+    decrement(variable: any): void {
+        variable--;
     },
-    toggle(variable: ParsedData): void {
-        variable.value = !variable.value;
+    toggle(variable: any): void {
+        variable = !variable;
     },
-    set(variable: ParsedData, value: any): void {
-        variable.value = value;
+    set(variable: any, value: any): void {
+        variable = value;
     },
 };

@@ -1,6 +1,6 @@
-import { ChevereWindow, ChevereNodeData, CheverexNodeList, CheverexDataNode, Arguments } from "@interfaces";
-import {ChevereNode, ChevereData} from "@chevere";
-import { Helper } from "@helpers";
+import { ChevereWindow, ChevereNodeData, ChevereDataNode, ChevereNodeList } from "@interfaces";
+import { ChevereData, ChevereNode } from "@chevere";
+import { Patterns } from "@helpers";
 
 const Chevere: ChevereWindow = {
    nodes: [],
@@ -10,8 +10,8 @@ const Chevere: ChevereWindow = {
     * @param {ChevereData[]} data
     * @returns The data ready for instance a NodeListOf<Element>
     */
-   findItsData(attr: string, data: ChevereData[]): ChevereData {
-       let search: ChevereData | undefined = data.find((d) => d.name == attr.trim().replace(/\(.*\)/, ""));
+   findItsData(attr: string, ...data: ChevereData[]): ChevereData {
+       let search: ChevereData | undefined = data.find((d) => d.name == attr.trim().replace(/\(.*/, ""));
 
         if(!search) 
             throw new ReferenceError(`'${attr}' couldn't be found in any of your declared components`);
@@ -23,44 +23,26 @@ const Chevere: ChevereWindow = {
     * @param data All the Chevere components
     */
     start(...data: ChevereData[]): void {
-        const elements: CheverexNodeList = [...document.querySelectorAll("div[data-attached]")]
-            .map((element) => ({ elem: element, dataAttr: element.getAttribute("data-attached")}));
+        const elements: ChevereNodeList = [...document.querySelectorAll("div[data-attached]")]
+            .map((element) => ({ el: element, attr: element.getAttribute("data-attached")!}));
 
        //Create a ChevereNode for each data-attached
-       elements.forEach((el: CheverexDataNode) => {
-           const node: ChevereData = this.findItsData(el.dataAttr!, data);
+       elements.forEach((el: ChevereDataNode) => {
+           const node: ChevereData = this.findItsData(el.attr, ...data);
 
-           if((node.init == undefined) && (Helper.htmlArgsDataAttr(el.dataAttr!) != undefined))
-                throw new Error(`There's no init method defined in your '${node.name}' component`);
-                
-           //If the init method isn't undefined
-           if(node.init != undefined) {
-                //Check for arguments
-                let args: Arguments = {
-                    initArgs: Helper.methodArguments(node.init),
-                    HTMLArgs: Helper.htmlArgsDataAttr(el.dataAttr!)
-                };
+            if(!Patterns.attr.methodSyntax.test(el.attr))
+                throw new SyntaxError(`There are syntax error in the 'data-attached' attribute, unrecognized expression "${el.attr}"`);
 
-                /**
-                * Check the diff between the aruments at the HTML and those ones declared at 
-                * the init() method
-                */
-                let checkForInitArguments: boolean = Helper.compareArguments({
-                    component: node.name,
-                    method: "init()",
-                    htmlArgs: args.HTMLArgs,
-                    methodArgs: args.initArgs
-                });
+            if((node.init == undefined) && (Patterns.global.arguments.test(el.attr)))
+                throw new EvalError(`The ${node.name} components don't have an init() function, therefore they do not accept any parameters`)
 
-                (async() => {
-                    //If there's no errors, parse the arguments, and execute the init() method
-                    return (checkForInitArguments) 
-                        ? await node.parseArguments(args.HTMLArgs!, args.initArgs!) 
-                        : await node.parseInit({ init: node.init! });
-                })();
-            };
+            if(node.init != undefined) {
+                (el.attr.match(Patterns.global.arguments)![0])
+                    ? node.initFunc(el.attr.match(Patterns.global.arguments)!.join(","))
+                    : node.initFunc();
+            }
 
-            this.nodes.push(new ChevereNode(node, el.elem));
+            this.nodes.push(new ChevereNode(node, el.el));
        });
    },
    data(data: ChevereNodeData): ChevereData {

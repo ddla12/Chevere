@@ -26,22 +26,22 @@
         }
 
     </style>
-    <div data-attached="picker">
-        <span @bindClass="{ 'danger': ($this.data.value == 0), 'success': ($this.data.value == 2) }" ></span>
-        <button @onClick="$magics.increment($this.data.value)">oijoi</button>
+    <div data-attached="test">
+        <span data-text="this.data.text" @onClick="this.data.test = !this.data.test" @onMouseHover=""></span>
+        <span data-show="this.data.test">Test</span>
     </div>
 
       <script src="bundle.js"></script>
       <script>
-            const picker = Chevere.data({
-                name: "picker",
+            const test = Chevere.data({
+                name: "test",
                 data: {
-                    value: 0
+                    test: false,
                 },
             });
 
             window.addEventListener("DOMContentLoaded", () => {
-                Chevere.start(picker);
+                Chevere.start(test);
             });
       </script>
 </body>

@@ -31,9 +31,9 @@ export class BindNode implements BindChild {
             attribute   : this.attribute,
         } = data);
 
-        if(!(["string", "object"].includes(this.attribute.modifier))) {
+        if(!(["string", "object", "$this"].includes(this.attribute.modifier))) {
             throw new TypeError(
-                `The 'data-bind/@bind' attribute only accept two modifiers: 'string' (default) and 'object'`);
+                `The 'data-bind/@bind' attribute can be: 'string' (default) and 'object' if it binds 'style' or 'class'`);
         };
 
         /**
@@ -56,8 +56,9 @@ export class BindNode implements BindChild {
          * Find all the '$this.data' placed in the attribute, 
          * and return the real variable name
          */
+
         this.variables = [...new Set([
-            ...[...this.attribute.values.original.matchAll(Patterns.bind.$this)]
+            ...[this.attribute.values.original.match(Patterns.bind.$this)!]
                 .map((m) => m[0])
                 .map((variable) => variable.replace("$this.data.", ""))
         ])];
@@ -73,6 +74,15 @@ export class BindNode implements BindChild {
 
     parse(value: string): string {
         this.hasError(this.attribute.modifier, Patterns.bind[this.attribute.modifier]);
+
+        if(this.attribute.modifier == "$this") {
+            this.attribute.values.current = value.replace(
+                `$this.data.${value.match(Patterns.bind.variable)![0]}`,
+                this.parent.data[value.match(Patterns.bind.variable)![0]].value);
+
+            console.log(this.attribute.values.current);
+            return Parser.parser(this.attribute.values.current);
+        };
 
         if(this.bindAttr.name == "class") {
             const objectClass = value.replace(/\{|\}/g, "").split(",")
@@ -94,7 +104,6 @@ export class BindNode implements BindChild {
             return objectClass.filter((e) => Boolean(e[1])).map((c) => c.shift()).join(" ");
         };
 
-
         this.variables.forEach((variable) => {
             let v = this.parent.data[variable].value;
 
@@ -111,6 +120,11 @@ export class BindNode implements BindChild {
      * Bind the attribute
      */
     setData(): void {
+        if(this.attribute.modifier == "$this") {
+            this.element.setAttribute(this.bindAttr.name, this.parse(this.attribute.values.original));
+            return;
+        }
+
         if(this.attribute.modifier == "object") {
             (this.bindAttr.name == "style") 
                 && Object.assign(this.element.style, this.parse(this.attribute.values.original));
@@ -120,7 +134,6 @@ export class BindNode implements BindChild {
             
             return;
         }
-
         (this.bindAttr.name == "class")
             && (this.element.className = `${this.parse(this.attribute.values.original)} ${(this.bindAttr.value ?? "")}`);
 

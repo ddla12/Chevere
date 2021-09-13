@@ -1,33 +1,34 @@
 
-import { TextRelation, } from "@interfaces";
-import {ChevereNode} from "@chevere";
-import { Helper, Parser } from "@helpers";
+import { Attribute, ChevereChild } from "@interfaces";
+import { ChevereAction } from "./ActionNode";
+import { Helper, Patterns } from "@helpers";
 
-export class TextNode implements TextRelation {
-    element: Element;
-    parent: ChevereNode;
-    _variable?: any;
-    _value: any;
+export class TextNode extends ChevereAction<Attribute> { 
+    constructor(data: ChevereChild<Attribute>) {
+        super(data);
 
-    constructor(data: TextRelation) {
-        ({ element: this.element, parent: this.parent } = data);
-        
-        this.element.setAttribute("data-id", Helper.setDataId(10));
-        this.variable = this.element.getAttribute("data-text")!;
+        this.ifAttrIsEmpty(this.attr!);
+        this.parseAttribute();
     }
 
-    set value(value: any) {
-        this.element.textContent = this._value = value.toString();
-    }
-
-    set variable(attr: string) {
-        Helper.checkForErrorInVariable(attr);
-
-        const data = Parser.parseDataTextAttr({
-            attr: attr, 
-            node: this.parent
+    refreshAttribute(): void {
+        this.attr!.values.current = Helper.parser<String>({
+            expr: this.attr?.values.original!,
+            node: this.parent,
         });
 
-        ({variable: this._variable, value: this.value} = data);
+        this.element.textContent = this.attr!.values.current;
+    }
+
+    parseAttribute(): void {
+        try {
+            if((Patterns.attr.isObject.test(this.attr?.values.original!)) 
+            || (Patterns.attr.isMethod.test(this.attr?.values.original!))) 
+                throw new SyntaxError("The 'data-text' attribute only accept strings concatenation, and a variable as reference");
+
+            this.refreshAttribute();
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
