@@ -30,10 +30,9 @@
         }
 
     </style>
-    <div data-attached="test">
-        <span data-text="`Hello word`"></span>
-        <div data-attached="child"></div>
-    </div>
+    <span data-inline="{ test: 'hola'}">
+        <span data-text="this.data.test"></span>
+    </span>
 
       <script src="bundle.js"></script>
       <script>
@@ -45,16 +44,8 @@
                 },
             });
 
-            const child = Chevere.data({
-                name: "child",
-                data: {},
-                init() {
-                    console.log(this.$parent);
-                }
-            });
-
             window.addEventListener("DOMContentLoaded", () => {
-                Chevere.start(test, child);
+                Chevere.start(test);
             });
       </script>
 </body>

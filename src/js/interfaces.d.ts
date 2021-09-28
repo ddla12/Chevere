@@ -1,4 +1,4 @@
-import { ChevereNode, ChevereData, Chevere } from "@chevere";
+import { ChevereData, Chevere } from "@chevere";
 export declare type Helper = {
     [func: string]: Function;
 };
@@ -38,7 +38,7 @@ export interface FindChilds<Attributes> {
     selector: string;
     attribute: string;
     element: Element;
-    parent: ChevereNode;
+    parent: Chevere;
     Child: ActionDynamic<Attributes>;
 }
 export interface Relation {
@@ -46,7 +46,7 @@ export interface Relation {
     nodes: ChevereChild<Attributes>[];
 }
 export interface DataOn {
-    parent: ChevereNode;
+    parent: Chevere;
     attribute: string;
     Child: ActionDynamic<Attribute[]>;
 }
@@ -85,14 +85,13 @@ export interface ChevereElement extends ChevereNodeData {
     refs?: Data<HTMLElement>;
 }
 export interface ChevereWindow {
-    nodes: Chevere[];
     findItsData(attr: string, ...data: ChevereData[]): ChevereData;
     start(...data: ChevereData[]): void;
     data(data: ChevereNodeData): ChevereData;
 }
 export interface ChevereChild<T = Attributes> {
     element: HTMLElement;
-    parent: ChevereNode;
+    parent: Chevere;
     attr?: T;
 }
 export interface Pattern {
@@ -103,5 +102,5 @@ export interface Pattern {
 export interface Parse {
     expr: string;
     args?: Args;
-    node?: ChevereNode;
+    node?: Chevere;
 }

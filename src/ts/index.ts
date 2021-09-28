@@ -2,8 +2,7 @@ import { ChevereWindow, ChevereNodeData, ChevereDataNode, ChevereNodeList } from
 import { ChevereData, ChevereInline, ChevereNode } from "@chevere";
 import { Patterns } from "@helpers";
 
-const Chevere: ChevereWindow = {
-   nodes: [],
+export const Chevere: ChevereWindow = {
    /**
     * Find a ChevereData by the value of the 'data-attached' attribute
     * @param {string} attr
@@ -23,7 +22,7 @@ const Chevere: ChevereWindow = {
     * @param data All the Chevere components
     */
     start(...data: ChevereData[]): void {
-        const elements: ChevereNodeList = ([...document.querySelectorAll("div[data-attached]")] as HTMLElement[])
+        const elements: ChevereNodeList = ([...document.querySelectorAll("*[data-attached]")] as HTMLElement[])
             .map((element) => ({ el: element, attr: element.dataset.attached! }));
 
        //Create a ChevereNode for each data-attached
@@ -44,14 +43,14 @@ const Chevere: ChevereWindow = {
                 })();
             }
 
-            this.nodes.push(new ChevereNode(node, el.el));
+            new ChevereNode(node, el.el);
        });
 
-       this.nodes.push(...[...document.querySelectorAll("*[data-inline]")].map((e) => new ChevereInline(e as HTMLElement)));
+       [...document.querySelectorAll("*[data-inline]")].map((e) => new ChevereInline(e as HTMLElement));
    },
    data(data: ChevereNodeData): ChevereData {
        return new ChevereData(data);
    },
 };
 
-window.Chevere = Chevere;
+Object.defineProperty(window, "Chevere", { value: Chevere });

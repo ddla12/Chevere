@@ -1,9 +1,9 @@
 import { ChevereChild, Attribute } from "@interfaces";
-import { ChevereNode } from "@chevere";
+import { Chevere } from "@chevere";
 
 export abstract class ChevereAction<Attributes> {
     element : HTMLElement;
-    parent  : ChevereNode;
+    parent  : Chevere;
     attr?   : Attributes;
     
     constructor(data: ChevereChild<Attributes>) {

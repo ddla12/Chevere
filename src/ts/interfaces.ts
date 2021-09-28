@@ -46,7 +46,7 @@ export interface FindChilds<Attributes> {
     selector: string,
     attribute: string,
     element: Element,
-    parent: ChevereNode,
+    parent: Chevere,
     Child: ActionDynamic<Attributes>
 }
 
@@ -56,7 +56,7 @@ export interface Relation {
 }
 
 export interface DataOn {
-    parent: ChevereNode, 
+    parent: Chevere, 
     attribute: string,
     Child: ActionDynamic<Attribute[]>
 }
@@ -103,7 +103,6 @@ export interface ChevereElement extends ChevereNodeData {
 }
 
 export interface ChevereWindow {
-    nodes: Chevere[],
     findItsData(attr: string, ...data: ChevereData[]): ChevereData,
     start(...data: ChevereData[]): void,
     data(data: ChevereNodeData): ChevereData,
@@ -111,7 +110,7 @@ export interface ChevereWindow {
 
 export interface ChevereChild<T = Attributes> {
     element : HTMLElement,
-    parent  : ChevereNode,
+    parent  : Chevere,
     attr?   : T,
 }
 
@@ -127,6 +126,6 @@ export interface Pattern {
 export interface Parse {
     expr: string,
     args?: Args,
-    node?: ChevereNode
+    node?: Chevere
 }
 //#endregion

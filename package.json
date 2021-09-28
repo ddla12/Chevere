@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest -c ./jest.config.js",
-    "format": "prettier --write \"src/**/*.{ts,js}\""
+    "format": "prettier --write \"src/**/*.{ts,js}\"",
+    "build": "tsc"
   },
   "_moduleAliases": {
     "@actions":"./src/actions/index.ts",

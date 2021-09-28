@@ -26,13 +26,13 @@ export class LoopNode extends ChevereAction<Attribute> {
     }
 
     refreshAttribute(): void {
-        if(!(this.parent.data[this.variables.parent] instanceof Array)) {
+        if(!(this.parent.data![this.variables.parent] instanceof Array)) {
             throw new TypeError(
             `Cannot execute a for loop with the '${this.variables.parent}' variable,` +
             `it must be an array`);
         }
                 
-        (this.parent.data[this.variables.parent] as any[]).forEach((_, i) => {
+        (this.parent.data![this.variables.parent] as any[]).forEach((_, i) => {
             const childs = [...this.templates.content.querySelectorAll("*")] as HTMLElement[],
                 toReplace = {
                     before: `this.data.${this.variables.parent}[${i - 1}]`,

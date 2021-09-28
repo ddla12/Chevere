@@ -1,8 +1,7 @@
 import { Chevere } from "@chevere";
 import { Data } from "@interfaces";
 export declare class ChevereInline extends Chevere {
-    _attributes: Data<boolean>;
+    data?: Data<any>;
     constructor(el: HTMLElement);
-    set attributes(attributes: string[]);
-    actions(): void;
+    parseData(data: Data<any>): Data<any>;
 }

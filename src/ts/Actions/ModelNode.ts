@@ -23,11 +23,11 @@ export class ModelNode extends ChevereAction<Attribute> {
 
     bindData(): void {
         if(!["radio", "checkbox"].includes(this.inputType))
-            (this.element as HTMLInputElement).value = String(this.parent.data[this.variable]);
+            (this.element as HTMLInputElement).value = String(this.parent.data![this.variable]);
     }
 
     setAction(): void {
-        this.parent.data[this.variable] = (this.inputType != "checkbox")
+        this.parent.data![this.variable] = (this.inputType != "checkbox")
             ? (this.element as HTMLInputElement).value
             : ((!this.related?.length)
                 ? (this.element as HTMLInputElement).checked
