@@ -3,13 +3,23 @@ import { Chevere } from "@chevere";
 import { Helper } from "@helpers";
 import { Data } from "@interfaces";
 
+/**
+ * All components defined with the 'data-inline' attribute
+ * @class
+ * @extends {Chevere}
+ */
 export class ChevereInline extends Chevere {
     data?: Data<any> = {};
 
     constructor(el: HTMLElement) {
         super(el);
 
-        this.data = this.parseData(Helper.parser<object>({ expr: this.element.dataset.inline || "{}" }));
+        //Make the data reactive if it isn't undefined
+        this.data = this.parseData(
+            Helper.parser<object>({
+                expr: this.element.dataset.inline || "{}",
+            }),
+        );
 
         this.checkForActionsAndChilds();
         this.findRefs();
@@ -30,9 +40,7 @@ export class ChevereInline extends Chevere {
                 self.updateRelated(name as string);
 
                 return true;
-            }
+            },
         });
     }
-
-
 }

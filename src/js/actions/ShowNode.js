@@ -8,21 +8,21 @@ export class ShowNode extends ChevereAction {
         this.parseAttribute();
     }
     setAction() {
-        this.element.style.display = !(this.attr.values.current())
+        this.element.style.display = !this.attr.values.current()
             ? "none"
             : this.display;
     }
     refreshAttribute() {
         this.attr.values.current = () => Helper.parser({
             expr: this.attr.values.original,
-            node: this.parent
+            node: this.parent,
         });
         this.setAction();
     }
     parseAttribute() {
         try {
-            if ((!Patterns.attr.isBoolean.test(this.attr.values.original))
-                && (!Patterns.attr.isLogicalExpression.test(this.attr.values.original)))
+            if (!Patterns.isBoolean.test(this.attr.values.original) &&
+                !Patterns.isLogicalExpression.test(this.attr.values.original))
                 throw new SyntaxError("data-show attribute only accept booleans");
             this.refreshAttribute();
         }
@@ -30,7 +30,5 @@ export class ShowNode extends ChevereAction {
             console.error(error);
         }
     }
-    ;
 }
-;
 //# sourceMappingURL=ShowNode.js.map

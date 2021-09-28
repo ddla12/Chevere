@@ -1,131 +1,233 @@
-import { ChevereNode, ChevereData, Chevere } from "@chevere";
+import { ChevereData, Chevere } from "@chevere";
 //#region Types
 export type Helper = { [func: string]: Function };
 
 export type Data<T> = { [name: string]: T };
 
-export type initFunc = ((...rest: any[]) => void|Promise<void>) | undefined;
+export type initFunc = ((...rest: any[]) => void | Promise<void>) | undefined;
 
 export type Args = Map<string, any>;
 
 export type ChevereNodeList = ChevereDataNode[];
 
-export type Attributes = Attribute|Attribute[]|undefined;
-
-export type BindType = { [name: string]: BindData };
+export type Attributes = Attribute | Attribute[] | undefined;
 
 export type Watch = ((value: any, oldValue?: any) => void) | undefined;
+
+export type Pattern = Data<RegExp>;
 //#endregion
 
+//#region Helpers interfaces
+/**
+ * The parser function argument
+ */
+export interface Parse {
+    /**
+     * The expression that will be parse
+     */
+    expr: string;
+    /**
+     * The arguments to apply to the callback
+     */
+    args?: Args;
+    /**
+     * 'This' scope
+     */
+    node?: Chevere;
+}
+
 export interface Attribute {
-    readonly attribute: string,
+    /**
+     * The real attribute, with or without 'data-' prefix
+     */
+    readonly attribute: string;
     values: {
-        readonly original: string,
-        current?: (() => any)
-    }
+        /**
+         * The value placed on the DOM
+         */
+        readonly original: string;
+        /**
+         * The value after reactivity (It isn't in the attribute)
+         */
+        current?: () => any;
+    };
 }
 
 export interface EventCallback {
-    $event: Event,
-    expr: string,
-    node: Chevere
+    /**
+     * Event data
+     */
+    $event: Event;
+    /**
+     * The expresion to be evaluate
+     */
+    expr: string;
+    /**
+     * This scope
+     */
+    node: Chevere;
 }
 
 export interface BindableAttr extends Attribute {
-    readonly bindAttr: string,
-    readonly bindValue?: string,
-    readonly type: string,
-    predicate?: () => void,
+    /**
+     * The attribute to bind
+     */
+    readonly bindAttr: string;
+    /**
+     * The value of the attribute
+     */
+    readonly bindValue?: string;
+    /**
+     * If the attribute value is an object, template literal or a variable reference
+     */
+    readonly type: string;
+    /**
+     * The callback to be call on each refresh
+     */
+    predicate?: () => void;
 }
 
 export interface ActionDynamic<Attributes> {
-    new (data: ChevereChild<Attributes>): ChevereChild<Attributes>,
+    new (data: ChevereChild<Attributes>): ChevereChild<Attributes>;
 }
 
 export interface FindChilds<Attributes> {
-    selector: string,
-    attribute: string,
-    element: Element,
-    parent: Chevere,
-    Child: ActionDynamic<Attributes>
+    /**
+     * The 'querySelector' value
+     */
+    selector: string;
+    /**
+     * The 'data-' attribute
+     */
+    attribute: string;
+    /**
+     * The component element
+     */
+    element: Element;
+    /**
+     * The Chevere component
+     */
+    parent: Chevere;
+    /**
+     * The child node class
+     */
+    Child: ActionDynamic<Attributes>;
 }
 
 export interface Relation {
-    type: string,
-    nodes: ChevereChild<Attributes>[]
+    /**
+     * Related attribute
+     */
+    type: string;
+    /**
+     *  List of childs
+     */
+    nodes: ChevereChild<Attributes>[];
 }
 
 export interface DataOn {
-    parent: Chevere, 
-    attribute: string,
-    Child: ActionDynamic<Attribute[]>
+    /**
+     * Chevere component
+     */
+    parent: Chevere;
+    /**
+     * 'data-bind' or 'data-on',
+     */
+    attribute: string;
+    /**
+     * List of childs
+     */
+    Child: ActionDynamic<Attribute[]>;
 }
 
 export interface LoopFragment {
-    readonly content: DocumentFragment,
-    readonly fragment: DocumentFragment
+    /**
+     * Content of the template
+     */
+    readonly content: DocumentFragment;
+    /**
+     * Fragment where the LoopNode is
+     */
+    readonly fragment: DocumentFragment;
 }
 
 export interface BindData {
-    readonly original   : string,
-    current             : string,
-    callback            : () => string|object
+    /**
+     * Original bind value
+     */
+    readonly original: string;
+    /**
+     * The bind value after callback() is called
+     */
+    current: string;
+    /**
+     * Callback that refresh the bind value
+     */
+    callback: () => string | object;
 }
 
 export interface Dispatch {
-    readonly name: string,
-    readonly detail?: object, 
+    /**
+     * Name of the event
+     */
+    readonly name: string;
+    /**
+     * Details of the event
+     */
+    readonly detail?: object;
 }
 //#endregion
+
 //#region Chevere
 export interface ChevereNodeData {
-    readonly name: string,
-    data        : Data<any>,
-    init?       : initFunc,
-    methods?    : Data<Function>,
-    watch?      : Data<Watch>,
-    updating?   : () => void,
-    updated?    : () => void
+    /**
+     * Name of the component
+     */
+    readonly name: string;
+    /**
+     * Component data
+     */
+    data: Data<any>;
+    /**
+     * Init function of the data
+     */
+    init?: initFunc;
+    /**
+     * Component methods
+     */
+    methods?: Data<Function>;
+    /**
+     * Watch component methods
+     */
+    watch?: Data<Watch>;
+    /**
+     * Function to be call before an update
+     */
+    updating?: () => void;
+    /**
+     * Function to be call after an update
+     */
+    updated?: () => void;
 }
 
-export interface ChevereDataNode { 
-    el: HTMLElement,
-    attr: string
-}
-
-export interface ChevereElement extends ChevereNodeData {
-    name    : string,
-    data    : Data<object>,
-    id      : string,
-    methods?: Data<Function>,
-    element : HTMLElement,
-    refs?:  Data<HTMLElement>,
+/**
+ * Node data found on the DOM
+ */
+export interface ChevereDataNode {
+    el: HTMLElement;
+    attr: string;
 }
 
 export interface ChevereWindow {
-    findItsData(attr: string, ...data: ChevereData[]): ChevereData,
-    start(...data: ChevereData[]): void,
-    data(data: ChevereNodeData): ChevereData,
+    findItsData(attr: string, ...data: ChevereData[]): ChevereData;
+    start(...data: ChevereData[]): void;
+    data(data: ChevereNodeData): ChevereData;
 }
 
 export interface ChevereChild<T = Attributes> {
-    element : HTMLElement,
-    parent  : Chevere,
-    attr?   : T,
+    element: HTMLElement;
+    parent: Chevere;
+    attr?: T;
 }
 
-//#endregion
-
-//#region Parser
-export interface Pattern {
-    [attr: string]: {
-        [pattern: string]: RegExp,
-    },
-};
-
-export interface Parse {
-    expr: string,
-    args?: Args,
-    node?: Chevere
-}
 //#endregion

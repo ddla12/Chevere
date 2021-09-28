@@ -7,46 +7,29 @@
     <title>Document</title>
 </head>
 <body>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-        }
-
-        .success {
-            background-color: chartreuse;
-            padding: 4px;
-            border: 2px solid green;
-        }
-
-        .danger {
-            background-color: red;
-            padding: 4px;
-            border: 2px solid darkred;
-        }
-
-        .test {
-            padding: 1rem;
-        }
-
-    </style>
-    <span data-inline="{ test: 'hola'}">
-        <span data-text="this.data.test"></span>
+    <span data-attached="test">
+        <button @onClick="console.log(this.methods.say())">Click</button>
     </span>
-
-      <script src="bundle.js"></script>
-      <script>
-            const test = Chevere.data({
-                name: "test",
-                data: {
-                    test: "Hello word!",
-                    otra: "Prueba de childs"
-                },
-            });
-
-            window.addEventListener("DOMContentLoaded", () => {
-                Chevere.start(test);
-            });
-      </script>
 </body>
+<script src="./chevere.min.js"></script>
+<script>
+    const test = Chevere.data({
+        name: "test",
+            data: {
+                msg: "Hello world"
+            },
+            helpers: {
+                say() {
+                    return "Hello world";
+                }
+            },
+            methods: {
+                say() {
+                    console.log(this.helpers.say());
+                }
+            }
+    });
+
+    Chevere.start(test);
+</script>
 </html>
