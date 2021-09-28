@@ -11,13 +11,17 @@ export class TextNode extends ChevereAction<Attribute> {
         this.parseAttribute();
     }
 
+    setAction(): void {
+        this.element.textContent = this.attr!.values.current!();
+    }
+    
     refreshAttribute(): void {
-        this.attr!.values.current = Helper.parser<String>({
+        this.attr!.values.current = () => Helper.parser<string>({
             expr: this.attr?.values.original!,
             node: this.parent,
         });
 
-        this.element.textContent = this.attr!.values.current;
+        this.setAction();
     }
 
     parseAttribute(): void {

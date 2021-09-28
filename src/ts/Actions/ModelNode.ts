@@ -1,73 +1,56 @@
-import { ChevereNode } from "@chevere";
-import { InputModel } from "@interfaces";
-import { Helper } from "@helpers";
+import { Attribute, ChevereChild } from "@interfaces";
+import { ChevereAction } from "./ActionNode";
+import { Patterns } from "@helpers";
 
-/**
- * The class for those inputs elements that have the `data-model` attribute
- *  @class
- */
-export class ModelNode implements InputModel {
-    element: HTMLInputElement;
-    parent: ChevereNode;
-    variable: string;
+export class ModelNode extends ChevereAction<Attribute> { 
+    readonly variable: string;
+    readonly inputType: string;
+    readonly related?: HTMLInputElement[];
 
-    constructor(input: InputModel) {
-        ({ parent: this.parent, element: this.element } = input);
+    constructor(data: ChevereChild<Attribute>) {
+        super(data);
 
-        //Search if the indicated variable of the data-model attribute exists in the scope
-        this.variable = this.getVariable();
+        this.variable = this.attr!.values.original.replace("this.data.", "");
+        this.inputType = (this.element as HTMLInputElement).type;
 
-        this.assignText(this.parent.data[this.variable].value.toString());
+        (this.inputType == "checkbox") && (this.related = ([...this.parent.element
+            .querySelectorAll(`input[type='checkbox'][data-model='this.data.${this.variable}']`)] as HTMLInputElement[])
+            .filter((e) => e != this.element));
 
-        //Add the listener
-        this.element.addEventListener("input", this.syncText.bind(this));
+        this.ifAttrIsEmpty(this.attr!);
+        this.parseAttribute();
     }
 
-    /**
-     * If input is neither type 'radio' nor type 'checkbox', sets its value according to the variable
-     * @param {any} value The value
-     */
-    assignText(value: any): void {
-        this.element.value = String(value);
+    bindData(): void {
+        if(!["radio", "checkbox"].includes(this.inputType))
+            (this.element as HTMLInputElement).value = String(this.parent.data[this.variable]);
     }
 
-    syncText(): void {
-        if(this.element.type == "checkbox") {
-            const related = [...this.parent.element.querySelectorAll(
-                `input[type="checkbox"][data-model="${this.element.getAttribute("data-model")}"]`
-            )].filter((e) => e != this.element) as HTMLInputElement[];
+    setAction(): void {
+        this.parent.data[this.variable] = (this.inputType != "checkbox")
+            ? (this.element as HTMLInputElement).value
+            : ((!this.related?.length)
+                ? (this.element as HTMLInputElement).checked
+                : [...this.related!, (this.element as HTMLInputElement)]
+                    .filter((c) => c.checked)
+                    .map((c) => c.value)
+                    .join(","));
+    };
 
-            if(related.length) {
-                this.parent.data[this.variable].value = (related.some((e) => (e.checked == true) && (e != this.element)))
-                    ? related.filter((e) => e.checked == true).map((e) => e.value)
-                    : ((this.element.checked) ? this.element.value : "");
-            } else {
-                this.parent.data[this.variable].value = (this.element.value == "on")
-                    ? String(this.element.checked)
-                    : (this.element.checked) ? this.element.value : "";
-            }
-        } else {
-            this.parent.data[this.variable].value = String(this.element.value);
+    refreshAttribute(): void {
+        this.element.addEventListener("input", this.setAction.bind(this));
+
+        this.bindData();
+    }
+
+    parseAttribute(): void {
+        try {
+            if(!this.attr?.values.original!.match(Patterns.global.$data))
+                throw new SyntaxError("The 'data-model' attribute only accept a property reference as value");
+
+            this.refreshAttribute();
+        } catch (error) {
+            console.error(error);
         }
-
-    }
-
-    /**
-     * Find the variable that was indicated in the 'data-model' attribute 
-     * @returns The variable to model
-     */
-    getVariable(): string {
-        let attr = this.element.getAttribute("data-model")!;
-
-        Helper.checkForErrorInVariable(attr);
-
-        let variable = Object.keys(this.parent.data).find((data) => data == attr);
-
-        if (!variable)
-            throw new ReferenceError(
-                `There's no a '${attr}' variable in the data-attached scope`,
-            );
-
-        return variable;
     }
 }

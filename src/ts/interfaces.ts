@@ -1,26 +1,41 @@
-import { ChevereNode, ChevereData } from "@chevere";
+import { ChevereNode, ChevereData, Chevere } from "@chevere";
 //#region Types
 export type Helper = { [func: string]: Function };
 
 export type Data<T> = { [name: string]: T };
 
-export type initFunc = ((...rest: any[]) => void) | undefined;
+export type initFunc = ((...rest: any[]) => void|Promise<void>) | undefined;
 
 export type Args = Map<string, any>;
 
 export type ChevereNodeList = ChevereDataNode[];
 
-export type Attributes = Attribute|Attribute[];
+export type Attributes = Attribute|Attribute[]|undefined;
 
+export type BindType = { [name: string]: BindData };
+
+export type Watch = ((value: any, oldValue?: any) => void) | undefined;
 //#endregion
 
-//#region Utils
 export interface Attribute {
     readonly attribute: string,
     values: {
         readonly original: string,
-        current?: any
+        current?: (() => any)
     }
+}
+
+export interface EventCallback {
+    $event: Event,
+    expr: string,
+    node: Chevere
+}
+
+export interface BindableAttr extends Attribute {
+    readonly bindAttr: string,
+    readonly bindValue?: string,
+    readonly type: string,
+    predicate?: () => void,
 }
 
 export interface ActionDynamic<Attributes> {
@@ -32,7 +47,7 @@ export interface FindChilds<Attributes> {
     attribute: string,
     element: Element,
     parent: ChevereNode,
-    child: ActionDynamic<Attributes>
+    Child: ActionDynamic<Attributes>
 }
 
 export interface Relation {
@@ -43,22 +58,38 @@ export interface Relation {
 export interface DataOn {
     parent: ChevereNode, 
     attribute: string,
-    child: ActionDynamic<Attribute[]>
+    Child: ActionDynamic<Attribute[]>
 }
 
+export interface LoopFragment {
+    readonly content: DocumentFragment,
+    readonly fragment: DocumentFragment
+}
 
+export interface BindData {
+    readonly original   : string,
+    current             : string,
+    callback            : () => string|object
+}
+
+export interface Dispatch {
+    readonly name: string,
+    readonly detail?: object, 
+}
 //#endregion
 //#region Chevere
 export interface ChevereNodeData {
-    readonly name: string;
-    data: Data<any>;
-    init?: initFunc,
-    methods?: Data<Function>;
-    bind?: Data<string|object>;
+    readonly name: string,
+    data        : Data<any>,
+    init?       : initFunc,
+    methods?    : Data<Function>,
+    watch?      : Data<Watch>,
+    updating?   : () => void,
+    updated?    : () => void
 }
 
 export interface ChevereDataNode { 
-    el: Element,
+    el: HTMLElement,
     attr: string
 }
 
@@ -67,19 +98,19 @@ export interface ChevereElement extends ChevereNodeData {
     data    : Data<object>,
     id      : string,
     methods?: Data<Function>,
-    element : Element,
+    element : HTMLElement,
     refs?:  Data<HTMLElement>,
 }
 
 export interface ChevereWindow {
-    nodes: ChevereNode[],
+    nodes: Chevere[],
     findItsData(attr: string, ...data: ChevereData[]): ChevereData,
     start(...data: ChevereData[]): void,
     data(data: ChevereNodeData): ChevereData,
 }
 
 export interface ChevereChild<T = Attributes> {
-    element : Element,
+    element : HTMLElement,
     parent  : ChevereNode,
     attr?   : T,
 }

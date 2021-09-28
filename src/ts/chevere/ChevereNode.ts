@@ -1,17 +1,16 @@
-import { Attribute, Attributes, ChevereChild, ChevereElement, Data, Relation } from "@interfaces";
+import { Attribute, Attributes, ChevereChild, ChevereElement, Data, Dispatch, Relation, Watch } from "@interfaces";
 import { ChevereData } from "./ChevereData";
 import { Helper } from "@helpers";
-import { ChevereAction, EventNode, ShowNode, TextNode } from "@actions";
+import { BindNode, ChevereAction, EventNode, LoopNode, ModelNode, ShowNode, TextNode } from "@actions";
+import { Chevere } from "./Chevere";
 
-export class ChevereNode implements ChevereElement {
-    name    : string;
-    data    : Data<object>;
-    id      : string;
-    methods?: Data<Function>;
-    element : Element;
-    refs?   : Data<HTMLElement>;
-    #childs? : Data<ChevereChild<Attributes>[]> = {
-        "event"     : [],
+export class ChevereNode extends Chevere implements ChevereElement {
+    name        : string;
+    data        : Data<any>;
+    methods?    : Data<Function>;
+    refs?       : Data<HTMLElement>;
+    #childs?    : Data<ChevereChild<Attributes>[]> = {
+        "data-on"   : [],
         "data-text" : [],
         "data-model": [],
         "data-for"  : [],
@@ -19,43 +18,45 @@ export class ChevereNode implements ChevereElement {
         "data-ref"  : [],
         "data-bind" : [],
     };
+    #watch?     : Data<Watch>;
+    updated?    : () => void;
+    updating?   : () => void;
 
-    constructor(data: ChevereData, el: Element) {
-        ({ name: this.name, methods: this.methods, } = data)
+    constructor(data: ChevereData, el: HTMLElement) {
+        super(el);
+        ({ 
+            name: this.name, 
+            methods: this.methods, 
+            watch: this.#watch, 
+            updated: this.updated,
+            updating: this.updating,
+        } = data);
 
         this.data = this.parseData(data.data);
 
-        /**
-         * Get the parent `div` and give it a value for the data-id attribute
-         */
-        this.element = el;
-        this.id = this.setId();
-        this.element.setAttribute("data-id", this.id);
-
+        (this.methods) && this.parseMethods();
         /**
          *  Get the events and actions of the component
          */
         this.checkForActionsAndChilds();
 
         this.findRefs();
-    }
 
-    setId(): string {
-        return Math.random().toString(32).substr(2);
+        Object.freeze(this);
     }
 
     findRefs(): void {
-        this.refs = [...this.element.querySelectorAll("*[data-ref]")]
+        this.refs = ([...this.element.querySelectorAll("*[data-ref]")] as HTMLElement[])
             .reduce((props, el) => {
-                if(!el.getAttribute("data-ref"))
+                if(!el.dataset.ref)
                     throw new SyntaxError("data-ref attribute cannot be empty");
 
-                if(Object.keys({...props}).some((p) => p == el.getAttribute("data-ref")!))
+                if(Object.keys({...props}).some((p) => p == el.dataset.ref!))
                     throw new SyntaxError("It seems like there are repeated 'data-ref' values, check your 'data-ref' attributes")
 
                 return {
                     ...props,
-                    [el.getAttribute("data-ref")!]: el,
+                    [el.dataset.ref!]: el,
                 }
             }, {});
     }
@@ -64,7 +65,7 @@ export class ChevereNode implements ChevereElement {
         this.#childs![attr].filter(
             (node) => ((node as ChevereChild<Attribute>).attr?.values.original.includes(name))
         ).forEach((node) => {
-            (node as ChevereAction<Attribute>).refreshAttribute();
+            (node as ChevereAction<Attribute>).setAction();
         });
     }
     /**
@@ -79,12 +80,40 @@ export class ChevereNode implements ChevereElement {
                 return Reflect.get(target, name, receiver);
             },
             set(target, name, value, receiver) {
-            
+                (self.updating) && self.updating();
+
+                (self.#watch!) 
+                    && self.#watch![name as string]?.apply(self, [value, target[name as string]]);
+
+                Reflect.set(target, name, value, receiver);
+
                 ["data-show", "data-text"].forEach((attr) => self.refreshChilds(attr, (name as string)));
 
-                return Reflect.set(target, name, value, receiver);
+                self.#childs!["data-model"].filter((node)=> (node as ModelNode).variable == name)
+                    .forEach((node) => (node as ModelNode).bindData());
+
+                self.#childs!["data-bind"].forEach((child) => (child as BindNode).setAction());
+                
+                (self.updated) && self.updated();
+                return true;
             }
         });
+    }
+
+    parseMethods(): void {
+        const self = this;
+
+        this.methods! = Object.values(this.methods!)
+            .reduce((rest, func) => ({ 
+                ...rest, 
+                [func.name]: new Proxy(func, {
+                    apply(target, _, args) {
+                        (self.updating) && self.updating();
+                        target.apply(self, [...args]);
+                        (self.updated) && self.updated();
+                    }
+                })
+            }), {});
     }
 
     setChilds(data: Relation) {
@@ -96,24 +125,64 @@ export class ChevereNode implements ChevereElement {
      * Find all the childrens that have an action and data
      */
     checkForActionsAndChilds(): void {
+        if(this.element.querySelectorAll("*[data-inline], *[data-attached]").length)
+            throw Error(`Child components is an unsupported feature, sorry about that`);
 
-            const childs  = [
-                Helper.getElementsBy({
-                    attribute: "data-text",
-                    element: this.element,
-                    parent: this,
-                    selector: "*[data-text]",
-                    child: TextNode
-                }),
-                Helper.getElementsBy({
-                    attribute: "data-show",
-                    element: this.element,
-                    parent: this,
-                    selector: "*[data-show]",
-                    child: ShowNode
-                }),
-            ];
+        const childs  = [
+            Helper.getElementsBy({
+                attribute: "data-for",
+                element: this.element,
+                parent: this,
+                selector: "template[data-for]",
+                Child: LoopNode
+            }),
+            Helper.getElementsBy({
+                attribute: "data-text",
+                element: this.element,
+                parent: this,
+                selector: "*[data-text]",
+                Child: TextNode
+            }),
+            Helper.getElementsBy({
+                attribute: "data-show",
+                element: this.element,
+                parent: this,
+                selector: "*[data-show]",
+                Child: ShowNode
+            }),
+            Helper.getElementsBy({
+                 attribute: "data-model",
+                element: this.element,
+                parent: this,
+                selector: "input[data-model], select[data-model], textarea[data-model]",
+                Child: ModelNode
+            }),
+            Helper.getElementsByDataOn({
+                attribute: "on",
+                Child: EventNode,
+                parent: this
+            }),
+            Helper.getElementsByDataOn({
+                attribute: "bind",
+                Child: BindNode,
+                parent: this
+            })
+        ];
 
-            childs.forEach((child) => (child.nodes.length) && this.setChilds(child));
+        childs.forEach((child) => (child.nodes.length) && this.setChilds(child));
+    }
+    
+    $emitSelf(data: Dispatch): void {
+        this.#childs!["data-on"]
+            .filter((node) => (node as EventNode).attr!
+                .some((attrs) => attrs.attribute.includes(data.name))
+            ).forEach((node) => node.element.dispatchEvent(
+                new CustomEvent(data.name, {
+                    detail      : data.detail,
+                    bubbles     : true,
+                    composed    : true,
+                    cancelable  : true,
+            }))
+        );
     }
 }

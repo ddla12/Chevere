@@ -1,5 +1,5 @@
 import { ChevereWindow, ChevereNodeData, ChevereDataNode, ChevereNodeList } from "@interfaces";
-import { ChevereData, ChevereNode } from "@chevere";
+import { ChevereData, ChevereInline, ChevereNode } from "@chevere";
 import { Patterns } from "@helpers";
 
 const Chevere: ChevereWindow = {
@@ -23,11 +23,11 @@ const Chevere: ChevereWindow = {
     * @param data All the Chevere components
     */
     start(...data: ChevereData[]): void {
-        const elements: ChevereNodeList = [...document.querySelectorAll("div[data-attached]")]
-            .map((element) => ({ el: element, attr: element.getAttribute("data-attached")!}));
+        const elements: ChevereNodeList = ([...document.querySelectorAll("div[data-attached]")] as HTMLElement[])
+            .map((element) => ({ el: element, attr: element.dataset.attached! }));
 
        //Create a ChevereNode for each data-attached
-       elements.forEach((el: ChevereDataNode) => {
+       elements.forEach(async(el: ChevereDataNode) => {
            const node: ChevereData = this.findItsData(el.attr, ...data);
 
             if(!Patterns.attr.methodSyntax.test(el.attr))
@@ -37,13 +37,17 @@ const Chevere: ChevereWindow = {
                 throw new EvalError(`The ${node.name} components don't have an init() function, therefore they do not accept any parameters`)
 
             if(node.init != undefined) {
-                (el.attr.match(Patterns.global.arguments)![0])
-                    ? node.initFunc(el.attr.match(Patterns.global.arguments)!.join(","))
-                    : node.initFunc();
+                await (async() => {
+                    return (Patterns.global.arguments.test(el.attr))
+                        ? node.initFunc(el.attr.match(Patterns.global.arguments)!.join(","))
+                        : node.initFunc();
+                })();
             }
 
             this.nodes.push(new ChevereNode(node, el.el));
        });
+
+       this.nodes.push(...[...document.querySelectorAll("*[data-inline]")].map((e) => new ChevereInline(e as HTMLElement)));
    },
    data(data: ChevereNodeData): ChevereData {
        return new ChevereData(data);

@@ -1,15 +1,29 @@
 import { Pattern } from "@interfaces";
 
+export const RegExpFactory = {
+    loop: (variable: string) => new RegExp(
+        String.raw`^${variable}|(?<=\[)${variable}(?=\])|(?!\,)${variable}(?=\,)|(?<=\:(\s+)?)${variable}|(?<=\,|\()${variable}`, "g"
+    ),
+    $this: (prop: string) => new RegExp(
+        String.raw`^this\.${prop}\.[a-zA-Z]`, "g"
+    ),
+    bindOrOn: (val: string) => new RegExp(
+        String.raw`^data-${val}:|@${val}`
+    )
+};
+
 const commonRegexp = {
-    $this: "^this\.data\.[a-zA-Z]+$",
+    $this: RegExpFactory.$this("data"),
     words: "[a-zA-Z]+",
+    methods: String.raw`^this\.(methods|\$emit|\$emitSelf)\.[a-zA-Z]+`,
+    bool: String.raw`^(\!)?(true|false|this\.data\.\w+)`,
 };
 
 export const Patterns: Pattern = {
     global: {
-        getName: new RegExp(`^${commonRegexp.words}`),
-        $data: new RegExp(commonRegexp.$this, "g"),
-        arguments: /(?<=\().*(?=\))/,
+        getName: new RegExp(commonRegexp.words),
+        $data: commonRegexp.$this,
+        arguments: /(?<=\().*(?=\))/g,
     },
     variables: {
         equality: /(<|>|!)?={1,3}/g,
@@ -17,23 +31,17 @@ export const Patterns: Pattern = {
     },
     attr: {
         isMagic: /^(\$magics)/,
-        isMethod: /^this\.methods\.[a-zA-Z]+\(/,
-        isLogicalExpression: /^this\.data\.[a-zA-Z]+(\s)?(<|>|!|=)?=/,
-        isVariableAssign: /^this\.data\.[a-zA-Z]+(\s)?(\?\?||\+|\-|\*|\/|\%|\*\*|<<?|>>(>)?|\|(\|)?||\&(\&)?|\^)?=/,
+        methodName: new RegExp(commonRegexp.methods),
+        isMethod: /^.+\(.*\)(\;)?$/,
+        isLogicalExpression: new RegExp(String.raw`${commonRegexp.bool}(\s+)?(\||&|=|!=|(>|<)(=)?)`),
+        isVariableAssign: /^this\.data\.\w+(\s)?(\?\?||\+|\-|\*|\/|\%|\*\*|<<?|>>(>)?|\|(\|)?||\&(\&)?|\^)?=/,
         isString: /^(\`).*\1$/,
         isObject: /^\{.*\}$/,
-        isBoolean: /^(\!)?this\.data\.[a-zA-Z]+$/,
+        isBoolean: new RegExp(`${commonRegexp.bool}$`),
         methodSyntax: /(^\w+$)|(^\w+\((.*)?\)$)/,
         bindAndOn: /^(data-(on|bind):|@(on|bind))/,
-        bind: /^(data-)/
+        bind: /^(data-)/,
+        for: /^\w+(\s+)in(\s+)this\.data\.\w+/,
+        forParent: /this\..*/g,
     },
-    bind: {
-        string: /^(\`).*\1$/,
-        object: /^\{.*\}$/,
-        $this: /\$this\.data\.[a-zA-Z]+/g,
-        attr: /^(@|data-)bind(:)?/,
-        bindable: /(?<=^(@|data-)bind(:)?)\w+/,
-        modifier: /(?<=\.).*/,
-        variable: /(?<=\$this\.data\.)\w+/,
-    }
 };

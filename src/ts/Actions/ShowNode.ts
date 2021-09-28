@@ -3,20 +3,30 @@ import { Attribute, ChevereChild } from "@interfaces";
 import { ChevereAction } from "./ActionNode";
 
 export class ShowNode extends ChevereAction<Attribute> {
+    readonly display?: string;
+
     constructor(data: ChevereChild<Attribute>) {
         super(data);
+
+        this.display = getComputedStyle(this.element).display;
 
         this.ifAttrIsEmpty(this.attr!);
         this.parseAttribute();
     }
 
+    setAction(): void {
+        this.element.style.display = !(this.attr!.values.current!()) 
+            ? "none" 
+            : this.display!;
+    }
+
     refreshAttribute(): void {
-        this.attr!.values.current = Helper.parser<Boolean>({
+        this.attr!.values.current = (): boolean =>  Helper.parser<boolean>({
             expr: this.attr!.values.original,
             node: this.parent
         });
 
-        (this.element as HTMLElement).hidden = !(this.attr!.values.current);
+        this.setAction();
     }
 
     parseAttribute(): void {

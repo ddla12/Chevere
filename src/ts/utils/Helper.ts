@@ -1,4 +1,5 @@
-import { FindChilds, Relation, Parse, Attribute, ChevereChild, DataOn } from "@interfaces";
+import { RegExpFactory } from "@helpers";
+import { FindChilds, Relation, Parse, Attribute, DataOn, EventCallback } from "@interfaces";
 
 export const Helper = {
     getElementsBy(data: FindChilds<Attribute>): Relation {
@@ -6,8 +7,8 @@ export const Helper = {
     
         return {
             type: data.attribute,
-            nodes: nodes.map((node) => new data.child({
-                element: node,
+            nodes: nodes.map((node) => new data.Child({
+                element: node as HTMLElement,
                 parent: data.parent,
                 attr: {
                     attribute: data.attribute,
@@ -25,7 +26,7 @@ export const Helper = {
         ).bind(data.node)(...[...(data.args?.values() || "")]);
     },
     getElementsByDataOn(data: DataOn): Relation {
-        const regexp = new RegExp(`^(data-(${data.attribute}):|@(${data.attribute}))`),
+        const regexp = RegExpFactory.bindOrOn(data.attribute),
             nodes = [...data.parent.element.querySelectorAll("*")]
             .filter((el) => [...el.attributes]
                 .map((attr) => attr.name)
@@ -33,21 +34,22 @@ export const Helper = {
 
         return {
             type: `data-${data.attribute}`,
-            nodes: nodes.map((node) => new data.child({
-                element: node,
+            nodes: nodes.map((node) => new data.Child({
+                element: node as HTMLElement,
                 parent: data.parent,
-                attr: nodes.map((node) => 
-                    [...node.attributes]
-                        .map((attr) => attr.name)
-                        .filter(attr => regexp.test(attr))
-                ).reduce((attrs,attr) => [...attrs, ...attr], [])
-                .map((attr) => ({
-                    attribute: attr,
-                    values: {
-                        original: node.getAttribute(attr)!
-                    }
-                })) as Attribute[]
-            }))
-        }
+                attr: [...node.attributes]
+                    .map((attr) => attr.name)
+                    .filter(attr => regexp.test(attr))
+                    .map((attr) => ({
+                        attribute: attr,
+                        values: {
+                            original: node.getAttribute(attr)!
+                        }
+                    }))
+            })),
+        };
+    },
+    eventCallback(data: EventCallback): (() => void) {
+        return new Function("$event, $el", data.expr).bind(data.node, data.$event, data.node.element)()
     }
 };

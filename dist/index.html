@@ -25,10 +25,14 @@
             border: 2px solid darkred;
         }
 
+        .test {
+            padding: 1rem;
+        }
+
     </style>
     <div data-attached="test">
-        <span data-text="this.data.text" @onClick="this.data.test = !this.data.test" @onMouseHover=""></span>
-        <span data-show="this.data.test">Test</span>
+        <span data-text="`Hello word`"></span>
+        <div data-attached="child"></div>
     </div>
 
       <script src="bundle.js"></script>
@@ -36,12 +40,21 @@
             const test = Chevere.data({
                 name: "test",
                 data: {
-                    test: false,
+                    test: "Hello word!",
+                    otra: "Prueba de childs"
                 },
             });
 
+            const child = Chevere.data({
+                name: "child",
+                data: {},
+                init() {
+                    console.log(this.$parent);
+                }
+            });
+
             window.addEventListener("DOMContentLoaded", () => {
-                Chevere.start(test);
+                Chevere.start(test, child);
             });
       </script>
 </body>

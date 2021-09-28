@@ -1,4 +1,4 @@
-import { ChevereNodeData, Data, initFunc } from "@interfaces";
+import { ChevereNodeData, Data, initFunc, Watch } from "@interfaces";
 import { Helper } from "@helpers";
 
 /**
@@ -10,16 +10,35 @@ export class ChevereData implements ChevereNodeData {
     data            : Data<any>;
     methods?        : Data<Function>;
     init            : initFunc;
+    watch?          : Data<Watch>;
+    updated?        : () => void;
+    updating?       : () => void;
 
     constructor(data: ChevereNodeData) {
-        ({ name: this.name, data: this.data, methods: this.methods, init: this.init } = data);
+        ({ 
+            name: this.name, 
+            data: this.data, 
+            methods: this.methods, 
+            init: this.init,
+            watch: this.watch,
+            updated: this.updated,
+            updating: this.updating
+        } = data);
+
+
+        (this.watch) && Object.keys(this.watch!).some((func) => {
+            if(!this.data[func])
+                throw new ReferenceError(`You're trying to watch an undefined property '${func}'`);
+        });
+
+        Object.freeze(this);
     }
 
-    initFunc(args?: string): void {
+    async initFunc(args?: string): Promise<void> {
         let parsedArgs: any[] = (args)
             ? (args?.split(",").map((a) => Helper.parser({ expr: a })))
             : [];
 
-        this.init?.bind(this)(...parsedArgs || "");
+        await this.init!(...parsedArgs || "");
     }
 }

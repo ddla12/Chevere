@@ -2,7 +2,7 @@ import { ChevereChild, Attribute } from "@interfaces";
 import { ChevereNode } from "@chevere";
 
 export abstract class ChevereAction<Attributes> {
-    element : Element;
+    element : HTMLElement;
     parent  : ChevereNode;
     attr?   : Attributes;
     
@@ -16,6 +16,8 @@ export abstract class ChevereAction<Attributes> {
 
     protected abstract parseAttribute(): void;
     abstract refreshAttribute(): void;
+
+    setAction(): void {};
 
     protected ifAttrIsEmpty(attr: Attribute): void {
         if(!attr.values.original)
