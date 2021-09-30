@@ -6,9 +6,10 @@ module.exports = {
     testMatch: ["**/*.(test|spec).js"],
     coveragePathIgnorePatterns: ["/node_modules/"],
     moduleNameMapper: {
-        "@helpers": "<rootDir>/src/js/utils/index.js",
-        "@chevere": "<rootDir>/src/js/chevere/index.js",
-        "@interfaces": "<rootDir>/src/js/interfaces.js",
-        "@actions": "<rootDir>/src/js/actions/index.js"
+        "@helpers": "<rootDir>/dist/module/utils/index.js",
+        "@chevere": "<rootDir>/dist/module/chevere/index.js",
+        "@types": "<rootDir>/dist/module/@tpyes.js",
+        "@actions": "<rootDir>/dist/module/actions/index.js"
     },
+    verbose: false
 };

@@ -1,0 +1,8 @@
+{
+    "name": "chevere",
+    "version": "1.0.0",
+    "description": "A framework for javascript, it makes your DOM code easy to setup and maintain",
+    "main": "./module/index.js",
+    "author": "Darud Lingilien",
+    "license": "MIT"
+}

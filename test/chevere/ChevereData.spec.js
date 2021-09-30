@@ -11,6 +11,12 @@ describe("Basic ChevereData", () => {
             this.data.test = true;
             this.data.change = val;
         },
+        updated() {
+            return;
+        },
+        updating() {
+            return;
+        }
     });
     
     test("Data name is 'test'", () => {
@@ -29,6 +35,10 @@ describe("Basic ChevereData", () => {
     test("'change' property is equal to 'hello world' when 'init' function is called", () => {
         Basic.init("Hello world");
         expect(Basic.data.change).toBe("Hello world");
+    });
+    test("'updated' and 'updating' methods aren't undefined", () => {
+        expect(Basic.updated).not.toBeUndefined();
+        expect(Basic.updating).not.toBeUndefined();
     });
     test("The object is sealed", () => {
         expect(Object.isSealed(Basic)).toBeTruthy();

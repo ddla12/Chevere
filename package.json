@@ -1,19 +1,15 @@
 {
-  "name": "chevere",
-  "version": "1.0.0",
-  "description": "A framework for javascript, created to make your DOM code easy to setup and maintain",
-  "main": "index.js",
-  "scripts": {
+   "scripts": {
     "test": "jest -c ./jest.config.js",
     "format": "prettier --write \"src/**/*.{ts,js}\"",
-    "build": "tsc"
+    "webpack": "npx webpack",
+    "ts": "tsc",
+    "build": "npm-run-all ts webpack"
   },
-  "_moduleAliases": {
-    "@actions": "./src/js/actions/index.js",
-    "@chevere": "./src/js/chevere/index.js",
-    "@helpers": "./src/js/utils/index.js",
-    "@interfaces": "./src/js/interfaces.js"
-  },
+  "private": true,
+  "workspaces": [
+      "dist"
+  ],
   "prettier": {
     "printWidth": 80,
     "tabWidth": 4,
@@ -24,11 +20,6 @@
     "arrowParens": "always",
     "parser": "typescript"
   },
-  "author": "Darud Lingilien",
-  "license": "MIT",
-  "dependencies": {
-    "module-alias": "^2.2.2"
-  },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.15.4",
     "jest": "^27.2.3",
@@ -37,6 +28,7 @@
     "ts-loader": "^9.2.4",
     "typescript": "^4.3.5",
     "webpack": "^5.46.0",
-    "webpack-cli": "^4.7.2"
+    "webpack-cli": "^4.7.2",
+    "npm-run-all": "^4.1.5"
   }
 }
