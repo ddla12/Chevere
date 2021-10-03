@@ -1,4 +1,4 @@
-import { Helper, Patterns } from "@helpers";
+import { Helper, Patterns } from "../utils/index.js";
 import { ChevereAction } from "./ActionNode";
 export class ShowNode extends ChevereAction {
     constructor(data) {

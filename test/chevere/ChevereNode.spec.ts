@@ -36,7 +36,7 @@ describe("Create a basic ChevereNode", () => {
             },
             methods: {
                 say() {
-                    this.data.msg = "Bye world";
+                    (this as unknown as ChevereNode).data.msg = "Bye world";
                 }
             },
             updated() {
@@ -70,18 +70,18 @@ describe("Create a basic ChevereNode", () => {
             test("'updated', 'updating' and 'watch' aren't undefined", () => {
                 expect(Node.updating).not.toBeUndefined();
                 expect(Node.updated).not.toBeUndefined();
-                expect(Node.watch.msg).not.toBeUndefined();
+                expect((Node as any).watch!.msg).not.toBeUndefined();
             });
             test("'updated', 'updating' and 'watch' are called after a method call", () => {
-                jest.spyOn(Node.watch, 'msg');
+                jest.spyOn((Node as any).watch!, 'msg');
                 jest.spyOn(Node, "updated");
                 jest.spyOn(Node, "updating");
 
-                Node.methods.say();
+                Node.methods?.say();
 
                 expect(Node.updated).toHaveBeenCalled();
                 expect(Node.updating).toHaveBeenCalled();
-                expect(Node.watch.msg).toHaveBeenCalled();
+                expect((Node as any).watch.msg).toHaveBeenCalled();
             });
         });
         

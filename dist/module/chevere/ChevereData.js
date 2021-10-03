@@ -1,4 +1,4 @@
-import { Helper } from "@helpers";
+import { Helper } from "../utils/index.js";
 export class ChevereData {
     constructor(data) {
         ({

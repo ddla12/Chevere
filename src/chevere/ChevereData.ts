@@ -39,7 +39,7 @@ export class ChevereData implements ChevereNodeData {
     }
 
     /**
-     * Execute the init function, it is in the ChevereData scope, so $refs are undefined
+     * Execute the init function, it is in the ChevereData scope, so many properties are undefined
      * @param args if the 'data-attached' attribute has arguments
      */
     async initFunc(args?: string): Promise<void> {

@@ -1,5 +1,5 @@
 export const RegExpFactory = {
-    loop: (variable) => new RegExp(String.raw `^${variable}|(?<=\[)${variable}(?=\])|(?!\,)${variable}(?=\,)|(?<=\:(\s+)?)${variable}|(?<=\,|\()${variable}`, "g"),
+    loop: (v) => new RegExp(String.raw `^${v}|(?<=\[)${v}(?=\])?|((?<=(\,|\())|(?<=\s+))${v}(?!\:)|(?<=\$\{)${v}`, "g"),
     $this: (prop) => new RegExp(String.raw `^this\.${prop}\.[a-zA-Z]`, "g"),
     bindOrOn: (val) => new RegExp(String.raw `^data-${val}:|@${val}`),
 };

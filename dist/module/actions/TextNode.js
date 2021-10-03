@@ -1,5 +1,5 @@
 import { ChevereAction } from "./ActionNode";
-import { Helper, Patterns } from "@helpers";
+import { Helper, Patterns } from "../utils/index.js";
 export class TextNode extends ChevereAction {
     constructor(data) {
         super(data);
@@ -20,7 +20,8 @@ export class TextNode extends ChevereAction {
         try {
             if (Patterns.isObject.test(this.attr?.values.original) ||
                 Patterns.methodSyntax.test(this.attr?.values.original))
-                throw new SyntaxError("The 'data-text' attribute only accept strings concatenation, and a variable as reference");
+                throw new SyntaxError("The 'data-text' attribute only accept strings concatenation, template literals, " +
+                    "and a variable as reference");
             this.refreshAttribute();
         }
         catch (error) {

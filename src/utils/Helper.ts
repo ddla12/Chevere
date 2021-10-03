@@ -6,6 +6,9 @@ import {
     Attribute,
     DataOn,
     EventCallback,
+    Data,
+    ReactiveCallback,
+    Reactive,
 } from "@types";
 
 /**
@@ -92,7 +95,24 @@ export const Helper = {
         return new Function("$event, $el", data.expr).bind(
             data.node,
             data.$event,
-            data.node.element,
+            data.$el,
         )();
+    },
+    /**
+     * Make data Reactive
+     */
+    reactive<T extends object>(data: Reactive<T>): T {
+        return new Proxy(data.object, {
+            get: (target, name, receiver) => Reflect.get(target, name, receiver),
+            set: (target, name, value, receiver) => {
+                (data.beforeSet) && data.beforeSet(target, name as string, value);
+
+                Reflect.set(target, name, value, receiver);
+
+                (data.afterSet) && data.afterSet(target, name as string, value);
+
+                return true;
+            },
+        });
     },
 };

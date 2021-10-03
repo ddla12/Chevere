@@ -1,5 +1,5 @@
-import { BindNode, EventNode, LoopNode, ModelNode, ShowNode, TextNode, } from "@actions";
-import { Helper } from "@helpers";
+import { BindNode, EventNode, LoopNode, ModelNode, ShowNode, TextNode, } from "../actions/index.js";
+import { Helper } from "../utils/index.js";
 export class Chevere {
     constructor(element) {
         this.childs = {
@@ -104,5 +104,18 @@ export class Chevere {
         ["data-show", "data-text"].forEach((attr) => this.refreshChilds(attr, name));
         this.childs["data-model"].filter((node) => node.variable == name).forEach((node) => node.bindData());
         this.childs["data-bind"].forEach((child) => child.setAction());
+    }
+    parseMethods(data) {
+        return Object.values(data.object).reduce((rest, func) => ({
+            ...rest,
+            [func.name]: new Proxy(func, {
+                apply: (target, _, args) => {
+                    (data.beforeSet) && data.beforeSet();
+                    const result = target.apply(this, [...args]);
+                    (data.afterSet) && data.afterSet();
+                    return result;
+                }
+            })
+        }), {});
     }
 }

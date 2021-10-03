@@ -1,0 +1,27 @@
+{
+    "include": [
+        "./**/*.ts",
+    ],
+    "compilerOptions": {
+    "target": "es2021",
+    "module": "ES2020",
+    "lib": [
+        "DOM",
+        "ES2021",
+        "DOM.Iterable",
+    ],
+    "strict": true,
+    "noImplicitThis": false,
+    "baseUrl": "../src/",
+    "paths": {
+        "@actions":["actions/index.ts"],
+        "@chevere":["chevere/index.ts"],
+        "@helpers":["utils/index.ts"],
+        "@types":["@types.ts"],
+    },
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+    }
+  }
+  

@@ -1,5 +1,5 @@
-import { ChevereData, ChevereInline, ChevereNode } from "@chevere";
-import { Patterns } from "@helpers";
+import { ChevereData, ChevereInline, ChevereNode } from "./chevere/index.js";
+import { Patterns } from "./utils/index.js";
 const Chevere = {
     findItsData(attr, ...data) {
         let search = data.find((d) => d.name == attr.trim().replace(/\(.*/, ""));

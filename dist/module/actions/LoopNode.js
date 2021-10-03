@@ -1,5 +1,5 @@
 import { ChevereAction } from "./ActionNode";
-import { Patterns, RegExpFactory } from "@helpers";
+import { Patterns, RegExpFactory } from "../utils/index.js";
 export class LoopNode extends ChevereAction {
     constructor(data) {
         super(data);

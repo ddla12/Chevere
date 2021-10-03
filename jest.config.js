@@ -3,13 +3,14 @@ const { defaults } = require("jest-config");
 module.exports = {
     testEnvironment: "jsdom",
     moduleFileExtensions: [...defaults.moduleFileExtensions],
-    testMatch: ["**/*.(test|spec).js"],
+    testMatch: ["**/*.(test|spec).ts"],
     coveragePathIgnorePatterns: ["/node_modules/"],
     moduleNameMapper: {
-        "@helpers": "<rootDir>/dist/module/utils/index.js",
-        "@chevere": "<rootDir>/dist/module/chevere/index.js",
-        "@types": "<rootDir>/dist/module/@tpyes.js",
-        "@actions": "<rootDir>/dist/module/actions/index.js"
+        "@helpers": "<rootDir>/src/utils/index.ts",
+        "@chevere": "<rootDir>/src/chevere/index.ts",
+        "@interfaces": "<rootDir>/src/interfaces.ts",
+        "@actions": "<rootDir>/src/actions/index.ts"
     },
-    verbose: false
+    verbose: true,
+    preset: "ts-jest"
 };

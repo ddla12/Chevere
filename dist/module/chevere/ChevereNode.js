@@ -1,4 +1,5 @@
 import { Chevere } from "./Chevere";
+import { Helper } from "../utils/index.js";
 export class ChevereNode extends Chevere {
     constructor(data, el) {
         super(el);
@@ -9,39 +10,37 @@ export class ChevereNode extends Chevere {
             updated: this.updated,
             updating: this.updating,
         } = data);
+        if (!this.element.dataset.attached)
+            throw new Error("'data-attached' cannot be empty");
         this.data = this.parseData(data.data);
-        (this.methods) && this.parseMethods();
+        (this.methods) && (this.methods = this.parseMethods({
+            object: this.methods,
+            beforeSet: () => {
+                (this.updating) && this.updating();
+            },
+            afterSet: () => {
+                (this.updated) && this.updated();
+            }
+        }));
         this.checkForActionsAndChilds();
         this.findRefs();
         Object.seal(this);
     }
     parseData(data) {
-        return new Proxy(data, {
-            get: (target, name, receiver) => Reflect.get(target, name, receiver),
-            set: (target, name, value, receiver) => {
+        return Helper.reactive({
+            object: data,
+            beforeSet: (target, name, value) => {
                 (this.updating) && this.updating();
                 (this.watch) &&
                     this.watch[name]?.apply(this, [
                         value,
                         target[name],
                     ]);
-                Reflect.set(target, name, value, receiver);
+            },
+            afterSet: (_, name) => {
                 this.updateRelated(name);
                 (this.updated) && this.updated();
-                return true;
-            },
+            }
         });
-    }
-    parseMethods() {
-        this.methods = Object.values(this.methods).reduce((rest, func) => ({
-            ...rest,
-            [func.name]: new Proxy(func, {
-                apply: (target, _, args) => {
-                    (this.updating) && this.updating();
-                    target.apply(this, [...args]);
-                    (this.updated) && this.updated();
-                },
-            }),
-        }), {});
     }
 }

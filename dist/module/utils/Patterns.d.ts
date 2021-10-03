@@ -1,6 +1,6 @@
-import { Pattern } from "@types";
+import { Pattern } from "../@types.js";
 export declare const RegExpFactory: {
-    loop: (variable: string) => RegExp;
+    loop: (v: string) => RegExp;
     $this: (prop: string) => RegExp;
     bindOrOn: (val: string) => RegExp;
 };

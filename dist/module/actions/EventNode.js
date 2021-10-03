@@ -1,4 +1,4 @@
-import { Helper, Patterns } from "@helpers";
+import { Helper, Patterns } from "../utils/index.js";
 import { ChevereAction } from "./ActionNode";
 export class EventNode extends ChevereAction {
     constructor(data) {
@@ -17,6 +17,7 @@ export class EventNode extends ChevereAction {
                         ? attr.values.original
                         : `$event.stopPropagation();${attr.values.original}`,
                     node: this.parent,
+                    $el: this.element
                 });
             });
         });

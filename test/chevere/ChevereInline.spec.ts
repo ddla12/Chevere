@@ -13,7 +13,7 @@ describe("Basic Inline component", () => {
 
         const Inline = new ChevereInline(el);
 
-        expect(Inline.data.msg).toBe('Hola mundo');
+        expect(Inline.data!.msg).toBe('Hola mundo');
     });
     test("Is sealed", () => {
         expect(Object.isSealed(new ChevereInline(document.createElement("span")))).toBeTruthy();
@@ -26,7 +26,7 @@ test("Refs", () => {
 
     const Inline = new ChevereInline(el);
 
-    expect(Inline.refs.test).not.toBeUndefined();
+    expect(Inline.refs!.test).not.toBeUndefined();
 });
 
 describe("Childs", () => {
@@ -52,21 +52,21 @@ describe("Childs", () => {
     const Inline = new ChevereInline(el);
 
     test("Have those childs", () => {
-        expect(Object.values(Inline.childs)
+        expect(Object.values(Inline.childs!)
             .filter((arr) => Boolean(arr.length))
             .every((arr) => arr.length >= 1)
         ).toBeTruthy();
     });
     test("span with 'data-show' is hidden", () => {
-        expect(Inline.element.querySelector("span[data-show]").style.display).toBe("none");
+        expect((Inline.element.querySelector("span[data-show]")! as HTMLSpanElement).style.display).toBe("none");
     });
     test("style of span with 'data-bind' is 'padding: 1rem'", () => {
-        expect(Inline.childs["data-bind"][0].element.style.padding).toBe("1rem");
+        expect(Inline.childs!["data-bind"][0].element.style.padding).toBe("1rem");
     });
     test("Childs react to changes", () => {
-        Inline.data.msg = "Reactive";
+        Inline.data!.msg = "Reactive";
 
-        expect(Inline.element.querySelector("span[data-text]").textContent).toBe("Reactive");
-        expect(Inline.element.querySelector("input").value).toBe("Reactive");
+        expect((Inline.element.querySelector("span[data-text]") as HTMLSpanElement).textContent).toBe("Reactive");
+        expect((Inline.element.querySelector("input") as HTMLInputElement).value).toBe("Reactive");
     });
 });

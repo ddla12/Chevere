@@ -1,5 +1,5 @@
 import { ChevereAction } from "./ActionNode";
-import { Patterns } from "@helpers";
+import { Patterns } from "../utils/index.js";
 export class ModelNode extends ChevereAction {
     constructor(data) {
         super(data);

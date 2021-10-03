@@ -1,4 +1,4 @@
-import { ChevereNodeData, Data, initFunc, Watch } from "@types";
+import { ChevereNodeData, Data, initFunc, Watch } from "../@types.js";
 export declare class ChevereData implements ChevereNodeData {
     readonly name: string;
     data: Data<any>;

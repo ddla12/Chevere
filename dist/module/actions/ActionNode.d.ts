@@ -1,5 +1,5 @@
-import { ChevereChild, Attribute } from "@types";
-import { Chevere } from "@chevere";
+import { ChevereChild, Attribute } from "../@types.js";
+import { Chevere } from "../chevere/index.js";
 export declare abstract class ChevereAction<Attributes> {
     element: HTMLElement;
     parent: Chevere;

@@ -15,6 +15,8 @@ export type Attributes = Attribute | Attribute[] | undefined;
 export type Watch = ((value?: any, oldValue?: any) => void) | undefined;
 
 export type Pattern = Data<RegExp>;
+
+export type ReactiveCallback = (target?: Data<any>, name?: string, value?: any) => void;
 //#endregion
 
 //#region Helpers interfaces
@@ -34,6 +36,12 @@ export interface Parse {
      * 'This' scope
      */
     node?: Chevere;
+}
+
+export interface Reactive<T extends object> {
+    object: T, 
+    beforeSet?: ReactiveCallback, 
+    afterSet?: ReactiveCallback
 }
 
 export interface Attribute {
@@ -58,6 +66,10 @@ export interface EventCallback {
      * Event data
      */
     $event: Event;
+    /**
+     *  Target element
+     */
+    $el: HTMLElement;
     /**
      * The expresion to be evaluate
      */

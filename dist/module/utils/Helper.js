@@ -1,4 +1,4 @@
-import { RegExpFactory } from "@helpers";
+import { RegExpFactory } from "./index.js";
 export const Helper = {
     getElementsBy(data) {
         const nodes = [...data.element.querySelectorAll(data.selector)];
@@ -41,6 +41,17 @@ export const Helper = {
         };
     },
     eventCallback(data) {
-        return new Function("$event, $el", data.expr).bind(data.node, data.$event, data.node.element)();
+        return new Function("$event, $el", data.expr).bind(data.node, data.$event, data.$el)();
+    },
+    reactive(data) {
+        return new Proxy(data.object, {
+            get: (target, name, receiver) => Reflect.get(target, name, receiver),
+            set: (target, name, value, receiver) => {
+                (data.beforeSet) && data.beforeSet(target, name, value);
+                Reflect.set(target, name, value, receiver);
+                (data.afterSet) && data.afterSet(target, name, value);
+                return true;
+            },
+        });
     },
 };

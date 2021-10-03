@@ -1,6 +1,7 @@
-import { Data, Watch } from "@types";
+import { Data, Reactive, Watch } from "@types";
 import { ChevereData } from "./ChevereData";
 import { Chevere } from "./Chevere";
+import { Helper } from "@helpers";
 
 /**
  * Components with the 'data-attached' attribute
@@ -9,7 +10,6 @@ import { Chevere } from "./Chevere";
 export class ChevereNode extends Chevere {
     readonly name: string;
     data: Data<any>;
-    methods?: Data<Function>;
     protected watch?: Data<Watch>;
     readonly updated?: () => void;
     readonly updating?: () => void;
@@ -24,9 +24,20 @@ export class ChevereNode extends Chevere {
             updating: this.updating,
         } = data);
 
+        //Nodes cannot be created without a 'data-attached' attribute
+        if(!this.element.dataset.attached) throw new Error("'data-attached' cannot be empty");
+
         //ChevereNodes also have reactive methods
         this.data = this.parseData(data.data);
-        (this.methods) && this.parseMethods();
+        (this.methods) && (this.methods = this.parseMethods({
+            object: this.methods,
+            beforeSet: () => {
+                (this.updating) && this.updating();
+            },
+            afterSet: () => {
+                (this.updated) && this.updated();
+            }
+        }));
 
         //Get the refs and actions of the component
         this.checkForActionsAndChilds();
@@ -36,43 +47,22 @@ export class ChevereNode extends Chevere {
     }
 
     parseData(data: Data<any>): Data<any> {
-        return new Proxy(data, {
-            get: (target, name, receiver) => Reflect.get(target, name, receiver),
-            set: (target, name, value, receiver) => {
+        return Helper.reactive({
+            object: data,
+            beforeSet: (target, name, value) => {
                 (this.updating) && this.updating();
 
                 (this.watch!) &&
                 this.watch![name as string]?.apply(this, [
                         value,
-                        target[name as string],
-                    ]);
-
-                Reflect.set(target, name, value, receiver);
-
+                        target![name as string],
+                ]);
+            },
+            afterSet: (_, name) => {
                 this.updateRelated(name as string);
 
                 (this.updated) && this.updated();
-                return true;
-            },
+            }
         });
-    }
-
-    /**
-     * Make the methods reactive
-     */
-    parseMethods(): void {
-        this.methods! = Object.values(this.methods!).reduce(
-            (rest, func) => ({
-                ...rest,
-                [func.name]: new Proxy(func, {
-                    apply: (target, _, args) => {
-                        (this.updating) && this.updating();
-                        target.apply(this, [...args]);
-                        (this.updated) && this.updated();
-                    },
-                }),
-            }),
-            {},
-        );
     }
 }

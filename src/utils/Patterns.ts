@@ -9,9 +9,9 @@ export const RegExpFactory = {
      * @param variable
      * @returns A RegExp that differentiates between the real 'data-for' variable and others with the same name
      */
-    loop: (variable: string) =>
+    loop: (v: string) =>
         new RegExp(
-            String.raw`^${variable}|(?<=\[)${variable}(?=\])|(?!\,)${variable}(?=\,)|(?<=\:(\s+)?)${variable}|(?<=\,|\()${variable}`,
+            String.raw`^${v}|(?<=\[)${v}(?=\])?|((?<=(\,|\())|(?<=\s+))${v}(?!\:)|(?<=\$\{)${v}`,
             "g",
         ),
     /**

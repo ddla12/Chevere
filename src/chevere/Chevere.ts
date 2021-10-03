@@ -14,6 +14,7 @@ import {
     ChevereChild,
     Data,
     Dispatch,
+    Reactive,
     Relation,
 } from "@types";
 
@@ -35,6 +36,7 @@ export abstract class Chevere {
         "data-show": [],
         "data-bind": [],
     };
+    methods?: Data<Function>;
     //ChevereInline can have an undefined data
     readonly abstract data?: Data<any>;
 
@@ -220,6 +222,27 @@ export abstract class Chevere {
 
         this.childs!["data-bind"].forEach((child) =>
             (child as BindNode).setAction(),
+        );
+    }
+
+    /**
+     * Make the methods reactive
+     */
+    parseMethods(data: Reactive<Data<Function>>): Data<Function> {
+        return Object.values(data.object).reduce(
+            (rest, func) => ({
+                ...rest,
+                [func.name]: new Proxy(func, {
+                    apply: (target, _, args) => {
+                        (data.beforeSet) && data.beforeSet();
+                        const result = target.apply(this, [...args]);
+                        (data.afterSet) && data.afterSet();
+
+                        return result;
+                    }
+                })
+            }),
+            {}
         );
     }
 }

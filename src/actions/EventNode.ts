@@ -35,6 +35,7 @@ export class EventNode extends ChevereAction<Attribute[]> {
                             ? attr.values.original
                             : `$event.stopPropagation();${attr.values.original}`,
                         node: this.parent,
+                        $el: this.element
                     });
                 },
             );

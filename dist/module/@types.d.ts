@@ -1,4 +1,4 @@
-import { ChevereData, Chevere } from "@chevere";
+import { ChevereData, Chevere } from "./chevere/index.js";
 export declare type Helper = {
     [func: string]: Function;
 };
@@ -11,10 +11,16 @@ export declare type ChevereNodeList = ChevereDataNode[];
 export declare type Attributes = Attribute | Attribute[] | undefined;
 export declare type Watch = ((value?: any, oldValue?: any) => void) | undefined;
 export declare type Pattern = Data<RegExp>;
+export declare type ReactiveCallback = (target?: Data<any>, name?: string, value?: any) => void;
 export interface Parse {
     expr: string;
     args?: Args;
     node?: Chevere;
+}
+export interface Reactive<T extends object> {
+    object: T;
+    beforeSet?: ReactiveCallback;
+    afterSet?: ReactiveCallback;
 }
 export interface Attribute {
     readonly attribute: string;
@@ -25,6 +31,7 @@ export interface Attribute {
 }
 export interface EventCallback {
     $event: Event;
+    $el: HTMLElement;
     expr: string;
     node: Chevere;
 }
