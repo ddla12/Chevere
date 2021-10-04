@@ -1,7 +1,7 @@
 {
     "name": "chevere",
     "version": "1.0.0",
-    "description": "A framework for javascript, it makes your DOM code easy to setup and maintain",
+    "description": "A mini-framework for javascript, to help you with your frontend setup",
     "main": "./module/index.js",
     "author": "Darud Lingilien",
     "license": "MIT"
