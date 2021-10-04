@@ -1,11 +1,18 @@
-import { Attributes, ChevereChild, Data, Dispatch, Reactive, Relation } from "../@types.js";
+import {
+    Attributes,
+    ChevereChild,
+    Data,
+    Dispatch,
+    Reactive,
+    Relation,
+} from "../@types.js";
 export declare abstract class Chevere {
     readonly id: string;
     readonly element: HTMLElement;
     refs?: Data<HTMLElement>;
     childs?: Data<ChevereChild<Attributes>[]>;
     methods?: Data<Function>;
-    readonly abstract data?: Data<any>;
+    abstract readonly data?: Data<any>;
     constructor(element: HTMLElement);
     abstract parseData(data: Data<any>): Data<any>;
     setId(): string;

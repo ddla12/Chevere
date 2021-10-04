@@ -26,14 +26,14 @@ export class ModelNode extends ChevereAction<Attribute> {
         this.variable = this.attr!.values.original.replace("this.data.", "");
         this.inputType = (this.element as HTMLInputElement).type;
 
-        if(this.inputType == "checkbox")
-            (this.related = (
+        if (this.inputType == "checkbox")
+            this.related = (
                 [
                     ...this.parent.element.querySelectorAll(
                         `input[type='checkbox'][data-model='this.data.${this.variable}']`,
                     ),
                 ] as HTMLInputElement[]
-            ).filter((e) => e != this.element));
+            ).filter((e) => e != this.element);
 
         this.ifAttrIsEmpty(this.attr!);
         this.parseAttribute();
@@ -48,7 +48,6 @@ export class ModelNode extends ChevereAction<Attribute> {
                 this.parent.data![this.variable],
             );
         }
-
     }
 
     setAction(): void {
@@ -60,11 +59,13 @@ export class ModelNode extends ChevereAction<Attribute> {
                 ? //If there are not related checkbox, bind a boolean value
                   (this.element as HTMLInputElement).checked
                 : //else, push to array
-                  (([...this.related!, this.element as HTMLInputElement].filter((c) => c.checked).length != 0)
-                    ? [...this.related!, this.element as HTMLInputElement]
+                [...this.related!, this.element as HTMLInputElement].filter(
+                      (c) => c.checked,
+                  ).length != 0
+                ? [...this.related!, this.element as HTMLInputElement]
                       .filter((c) => c.checked)
                       .map((c) => c.value)
-                    : (this.element as HTMLInputElement).checked);
+                : (this.element as HTMLInputElement).checked;
     }
 
     refreshAttribute(): void {

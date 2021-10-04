@@ -103,13 +103,14 @@ export const Helper = {
      */
     reactive<T extends object>(data: Reactive<T>): T {
         return new Proxy(data.object, {
-            get: (target, name, receiver) => Reflect.get(target, name, receiver),
+            get: (target, name, receiver) =>
+                Reflect.get(target, name, receiver),
             set: (target, name, value, receiver) => {
-                (data.beforeSet) && data.beforeSet(target, name as string, value);
+                data.beforeSet && data.beforeSet(target, name as string, value);
 
                 Reflect.set(target, name, value, receiver);
 
-                (data.afterSet) && data.afterSet(target, name as string, value);
+                data.afterSet && data.afterSet(target, name as string, value);
 
                 return true;
             },

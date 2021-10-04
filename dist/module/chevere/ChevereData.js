@@ -10,10 +10,12 @@ export class ChevereData {
             updated: this.updated,
             updating: this.updating,
         } = data);
-        (this.watch) &&
+        this.watch &&
             Object.keys(this.watch).some((func) => {
                 if (!this.data[func])
-                    throw new ReferenceError(`You're trying to watch an undefined property '${func}'`);
+                    throw new ReferenceError(
+                        `You're trying to watch an undefined property '${func}'`,
+                    );
             });
         Object.freeze(this);
     }

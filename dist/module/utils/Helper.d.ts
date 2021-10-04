@@ -1,4 +1,12 @@
-import { FindChilds, Relation, Parse, Attribute, DataOn, EventCallback, Reactive } from "../@types.js";
+import {
+    FindChilds,
+    Relation,
+    Parse,
+    Attribute,
+    DataOn,
+    EventCallback,
+    Reactive,
+} from "../@types.js";
 export declare const Helper: {
     getElementsBy(data: FindChilds<Attribute>): Relation;
     parser<T>(data: Parse): T;

@@ -59,8 +59,8 @@ export class BindNode extends ChevereAction<Attribute[]> {
             this.attr.findIndex((attr) => attr.bindAttr == "class"),
         ];
 
-        if(this.attr[Style])
-            (this.attr[Style].predicate = () =>
+        if (this.attr[Style])
+            this.attr[Style].predicate = () =>
                 ["string", "variable"].includes(this.attr[Style].type)
                     ? //If 'style' bind value is a string or variable, pass it directly to the cssText of the element
                       (this.element.style.cssText =
@@ -70,10 +70,10 @@ export class BindNode extends ChevereAction<Attribute[]> {
                       Object.assign(
                           this.element.style,
                           this.attr[Style].values.current!(),
-                      ));
+                      );
 
-        if(this.attr[Class])
-            (this.attr[Class].predicate = () =>
+        if (this.attr[Class])
+            this.attr[Class].predicate = () =>
                 (this.element.className = ["string", "variable"].includes(
                     this.attr[Class].type,
                 )
@@ -87,7 +87,7 @@ export class BindNode extends ChevereAction<Attribute[]> {
                           .map(([key]) => key)
                           .join(" ") +
                       " " +
-                      this.attr[Class].bindValue));
+                      this.attr[Class].bindValue);
         //#endregion
 
         //Procedure with others attributes that are not 'style' and 'class' is simple...

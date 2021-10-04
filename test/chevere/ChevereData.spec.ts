@@ -5,7 +5,7 @@ describe("Basic ChevereData", () => {
         name: "test",
         data: {
             test: false,
-            change: ""
+            change: "",
         },
         init(val) {
             this.data.test = true;
@@ -16,9 +16,9 @@ describe("Basic ChevereData", () => {
         },
         updating() {
             return;
-        }
+        },
     });
-    
+
     test("Data name is 'test'", () => {
         expect(Basic.name).toBe("test");
     });
@@ -51,14 +51,14 @@ describe("Trying to watch an undefined property...", () => {
             new ChevereData({
                 name: "test",
                 data: {
-                    test: false
+                    test: false,
                 },
                 watch: {
                     tes() {
                         return;
-                    }
-                }
-            })
+                    },
+                },
+            });
         }).toThrow(ReferenceError);
     });
 });

@@ -14,10 +14,14 @@ jest.spyOn(console, "error").mockImplementation(jest.fn());
 
 describe("TextNode", () => {
     test("Simple variable reference", () => {
-        expect(document.querySelector("em")?.textContent).toStrictEqual("Hello world");
+        expect(document.querySelector("em")?.textContent).toStrictEqual(
+            "Hello world",
+        );
     });
     test("Template literals are accepted as attribute value", () => {
-        expect(document.querySelector("p")?.textContent).toStrictEqual("Hello world, How are you?");
+        expect(document.querySelector("p")?.textContent).toStrictEqual(
+            "Hello world, How are you?",
+        );
     });
     test("'data-text' attribute only accepts strings", () => {
         const span = document.createElement("span");

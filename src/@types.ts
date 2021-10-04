@@ -16,7 +16,11 @@ export type Watch = ((value?: any, oldValue?: any) => void) | undefined;
 
 export type Pattern = Data<RegExp>;
 
-export type ReactiveCallback = (target?: Data<any>, name?: string, value?: any) => void;
+export type ReactiveCallback = (
+    target?: Data<any>,
+    name?: string,
+    value?: any,
+) => void;
 //#endregion
 
 //#region Helpers interfaces
@@ -39,9 +43,9 @@ export interface Parse {
 }
 
 export interface Reactive<T extends object> {
-    object: T, 
-    beforeSet?: ReactiveCallback, 
-    afterSet?: ReactiveCallback
+    object: T;
+    beforeSet?: ReactiveCallback;
+    afterSet?: ReactiveCallback;
 }
 
 export interface Attribute {
@@ -219,7 +223,7 @@ export interface ChevereNodeData {
     /**
      * Function to be call after an update
      */
-     readonly updated?: () => void;
+    readonly updated?: () => void;
 }
 
 /**

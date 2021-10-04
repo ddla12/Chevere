@@ -14,12 +14,16 @@ jest.spyOn(console, "error").mockImplementation(jest.fn());
 
 describe("ShowNode", () => {
     test("The element is hidden at first", () => {
-        expect(getComputedStyle(document.querySelector("em")!).display).toStrictEqual("none");
+        expect(
+            getComputedStyle(document.querySelector("em")!).display,
+        ).toStrictEqual("none");
     });
     test("After data change, to 'true', the element is displayed in the DOM", () => {
         document.querySelector("button")?.click();
 
-        expect(getComputedStyle(document.querySelector("em")!).display).not.toStrictEqual("none");
+        expect(
+            getComputedStyle(document.querySelector("em")!).display,
+        ).not.toStrictEqual("none");
     });
     test("Only booleans in 'data-show' attribute", () => {
         const span = document.createElement("span");

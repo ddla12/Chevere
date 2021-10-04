@@ -10,30 +10,30 @@ document.documentElement.innerHTML += `
     </span>
 `;
 
-const Data = new ChevereData({ 
-    name: "test", 
+const Data = new ChevereData({
+    name: "test",
     data: {
-        msg: "Hello world"
-    } 
+        msg: "Hello world",
+    },
 });
 
 describe("Chevere window object", () => {
     test("Create a node data", () => {
-        
-
-        expect(Chevere.data({
-            name: "test",
-            data: {
-                msg: "Hello world"
-            }
-        })).toStrictEqual(Data);
+        expect(
+            Chevere.data({
+                name: "test",
+                data: {
+                    msg: "Hello world",
+                },
+            }),
+        ).toStrictEqual(Data);
     });
     test("Initialized successfully", () => {
         Chevere.start(Data);
 
         const helloWorld = [
             document.querySelector("small")?.textContent,
-            document.querySelector("b")?.textContent
+            document.querySelector("b")?.textContent,
         ].every((s) => s == "Hello world");
 
         expect(helloWorld).toBeTruthy();

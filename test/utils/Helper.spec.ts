@@ -16,33 +16,37 @@ describe("Helper", () => {
         new ChevereData({
             name: "test",
             data: {
-                msg: "Hello world"
+                msg: "Hello world",
             },
         }),
-        element
+        element,
     );
-    
+
     describe("Parser can parse anything", () => {
         test("Primitive types and arrays", () => {
             const values = {
                 before: {
-                    string  : Helper.parser<string>({ expr: "'Hello world'" }),
-                    number  : Helper.parser<number>({ expr: "17" }),
-                    boolean : Helper.parser<boolean>({ expr: "true || false" }),
-                    array   : Helper.parser<number[]>({ expr: "[1, 2, 3 ,4]" }),
+                    string: Helper.parser<string>({ expr: "'Hello world'" }),
+                    number: Helper.parser<number>({ expr: "17" }),
+                    boolean: Helper.parser<boolean>({ expr: "true || false" }),
+                    array: Helper.parser<number[]>({ expr: "[1, 2, 3 ,4]" }),
                 },
                 after: {
-                    string  : "Hello world",
-                    number  : 17,
-                    boolean : true,
-                    array   : [1, 2, 3, 4]
-                }
+                    string: "Hello world",
+                    number: 17,
+                    boolean: true,
+                    array: [1, 2, 3, 4],
+                },
             };
 
-            expect(Object.values(values.before)).toStrictEqual(Object.values(values.after));
+            expect(Object.values(values.before)).toStrictEqual(
+                Object.values(values.after),
+            );
         });
         test("With a ChevereNode", () => {
-            expect(Helper.parser<string>({ expr: "this.data.msg", node: Node })).toStrictEqual("Hello world");
+            expect(
+                Helper.parser<string>({ expr: "this.data.msg", node: Node }),
+            ).toStrictEqual("Hello world");
         });
     });
     test("Event callback is called", () => {
@@ -60,14 +64,14 @@ describe("Helper", () => {
     describe("Reactive", () => {
         test("Make any object reactive", () => {
             jest.spyOn(console, "log");
-            
+
             const reactive = Helper.reactive({
                 object: {
-                    msg: "Message"
+                    msg: "Message",
                 },
-                afterSet: (_, __, value) =>  {
-                    console.log(value)
-                }
+                afterSet: (_, __, value) => {
+                    console.log(value);
+                },
             });
 
             reactive.msg = "Hello world";

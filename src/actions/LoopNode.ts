@@ -87,8 +87,8 @@ export class LoopNode extends ChevereAction<Attribute> {
         });
 
         this.parent.element.insertBefore(
-            this.templates.fragment, 
-            this.parent.element.children[this.pos]
+            this.templates.fragment,
+            this.parent.element.children[this.pos],
         );
     }
 

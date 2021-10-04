@@ -35,8 +35,8 @@ export class TextNode extends ChevereAction<Attribute> {
                 Patterns.methodSyntax.test(this.attr?.values.original!)
             )
                 throw new SyntaxError(
-                    "The 'data-text' attribute only accept strings concatenation, template literals, " + 
-                    "and a variable as reference",
+                    "The 'data-text' attribute only accept strings concatenation, template literals, " +
+                        "and a variable as reference",
                 );
 
             this.refreshAttribute();

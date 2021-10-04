@@ -6,9 +6,11 @@ export class ChevereAction {
             attr: this.attr,
         } = data);
     }
-    setAction() { }
+    setAction() {}
     ifAttrIsEmpty(attr) {
         if (!attr.values.original)
-            throw new SyntaxError(`The '${attr.attribute}' attribute cannot be empty`);
+            throw new SyntaxError(
+                `The '${attr.attribute}' attribute cannot be empty`,
+            );
     }
 }

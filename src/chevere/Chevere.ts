@@ -38,7 +38,7 @@ export abstract class Chevere {
     };
     methods?: Data<Function>;
     //ChevereInline can have an undefined data
-    readonly abstract data?: Data<any>;
+    abstract readonly data?: Data<any>;
 
     /**
      * Create a Chevere instance with an HTMLElement, then set it an id
@@ -183,7 +183,7 @@ export abstract class Chevere {
         ];
 
         //Set childs by attribute group
-        childs.forEach((child) => (child.nodes.length) && this.setChilds(child));
+        childs.forEach((child) => child.nodes.length && this.setChilds(child));
     }
 
     /**
@@ -234,15 +234,15 @@ export abstract class Chevere {
                 ...rest,
                 [func.name]: new Proxy(func, {
                     apply: (target, _, args) => {
-                        (data.beforeSet) && data.beforeSet();
+                        data.beforeSet && data.beforeSet();
                         const result = target.apply(this, [...args]);
-                        (data.afterSet) && data.afterSet();
+                        data.afterSet && data.afterSet();
 
                         return result;
-                    }
-                })
+                    },
+                }),
             }),
-            {}
+            {},
         );
     }
 }

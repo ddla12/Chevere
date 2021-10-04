@@ -16,9 +16,9 @@ jest.spyOn(console, "log");
 
 Chevere.start();
 
-const [ one, two ] = [
+const [one, two] = [
     document.querySelector("#one") as HTMLButtonElement,
-    document.querySelector("#two") as HTMLButtonElement
+    document.querySelector("#two") as HTMLButtonElement,
 ];
 
 describe("EventNode", () => {
@@ -27,7 +27,7 @@ describe("EventNode", () => {
 
         expect(console.log).toBeCalled();
     });
-    test("$event and $el are successfully passed", () => {        
+    test("$event and $el are successfully passed", () => {
         two.click();
 
         expect(btns.every((btn) => btn === btns[0])).toBeTruthy();

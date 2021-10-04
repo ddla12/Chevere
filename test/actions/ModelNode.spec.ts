@@ -25,17 +25,25 @@ el.innerHTML += `
 const Inline = new ChevereInline(el);
 
 const inputs = {
-    text: Inline.element.querySelector("input[type='text']") as HTMLInputElement,
-    singleCheck: Inline.element.querySelector("input[type='checkbox']") as HTMLInputElement,
+    text: Inline.element.querySelector(
+        "input[type='text']",
+    ) as HTMLInputElement,
+    singleCheck: Inline.element.querySelector(
+        "input[type='checkbox']",
+    ) as HTMLInputElement,
     select: Inline.element.querySelector("select") as HTMLSelectElement,
-    radio: Inline.element.querySelector("input[type='radio']") as HTMLInputElement,
-    multipleCheck: [...Inline.element.querySelectorAll("input[name='multiple']")] as HTMLInputElement[]
+    radio: Inline.element.querySelector(
+        "input[type='radio']",
+    ) as HTMLInputElement,
+    multipleCheck: [
+        ...Inline.element.querySelectorAll("input[name='multiple']"),
+    ] as HTMLInputElement[],
 };
 
 const setAllCheckbox = (value: boolean) => {
-    inputs.multipleCheck.forEach((input) => { 
-        input.checked = value; 
-        input.dispatchEvent(new Event("input"))
+    inputs.multipleCheck.forEach((input) => {
+        input.checked = value;
+        input.dispatchEvent(new Event("input"));
     });
 };
 
@@ -47,10 +55,11 @@ describe("ModelNode", () => {
         inputs.text.value = "Chevere";
         inputs.select.value = "USA";
 
-        inputs.radio.checked = inputs.singleCheck.checked =  true;
+        inputs.radio.checked = inputs.singleCheck.checked = true;
 
-        [inputs.text, inputs.singleCheck, inputs.select, inputs.radio]
-            .forEach((input) => input.dispatchEvent(new Event("input")));
+        [inputs.text, inputs.singleCheck, inputs.select, inputs.radio].forEach(
+            (input) => input.dispatchEvent(new Event("input")),
+        );
 
         expect(Inline.data!.text).toStrictEqual("Chevere");
         expect(Inline.data!.singleCheck).toBeTruthy();
@@ -60,12 +69,16 @@ describe("ModelNode", () => {
     test("Multiple checkboxes are treated as an array...", () => {
         setAllCheckbox(true);
 
-        expect(Inline.data!.multipleCheck).toStrictEqual(["Araure", "Acarigua", "Guanare"]);
+        expect(Inline.data!.multipleCheck).toStrictEqual([
+            "Araure",
+            "Acarigua",
+            "Guanare",
+        ]);
         expect(Inline.data!.multipleCheck instanceof Array).toBeTruthy();
     });
     test("If none of them are checked, then its 'to model' property is false", () => {
         setAllCheckbox(false);
-        
+
         expect(Inline.data!.multipleCheck).toBeFalsy();
     });
 });

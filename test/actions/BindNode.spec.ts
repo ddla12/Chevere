@@ -20,10 +20,13 @@ jest.spyOn(console, "error").mockImplementation(jest.fn());
 
 describe("BindNode", () => {
     test("Attribute initialized succesfully", () => {
-        expect([...document.documentElement.querySelectorAll("span")].every((span) => 
-            (getComputedStyle(span).padding == "2rem")
-            && span.classList.contains("success")
-        )).toBeTruthy();
+        expect(
+            [...document.documentElement.querySelectorAll("span")].every(
+                (span) =>
+                    getComputedStyle(span).padding == "2rem" &&
+                    span.classList.contains("success"),
+            ),
+        ).toBeTruthy();
     });
     test("Throw an error if the 'data-bind' attribute doesn't have an object or a template literal", () => {
         const el = document.createElement("div");

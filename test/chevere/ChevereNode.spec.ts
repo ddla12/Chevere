@@ -9,7 +9,7 @@ describe("Create a basic ChevereNode", () => {
         const BasicData = new ChevereData({
             name: "data",
             data: {
-                msg: "Hello world"
+                msg: "Hello world",
             },
         });
 
@@ -32,12 +32,12 @@ describe("Create a basic ChevereNode", () => {
         const Data = new ChevereData({
             name: "data",
             data: {
-                msg: "Hello world"
+                msg: "Hello world",
             },
             methods: {
                 say() {
                     (this as unknown as ChevereNode).data.msg = "Bye world";
-                }
+                },
             },
             updated() {
                 return;
@@ -48,22 +48,22 @@ describe("Create a basic ChevereNode", () => {
             watch: {
                 msg() {
                     return;
-                }
-            }
+                },
+            },
         });
 
         test("'parseMethods' and 'parseDate' have been called", () => {
-            const [ methods, data ] = [ 
-                jest.spyOn(ChevereNode.prototype, 'parseMethods'), 
-                jest.spyOn(ChevereNode.prototype, 'parseData')
+            const [methods, data] = [
+                jest.spyOn(ChevereNode.prototype, "parseMethods"),
+                jest.spyOn(ChevereNode.prototype, "parseData"),
             ];
-    
+
             new ChevereNode(Data, element);
 
             expect(methods).toHaveBeenCalled();
             expect(data).toHaveBeenCalled();
         });
-            
+
         describe("'updated', 'updating' and 'watch'", () => {
             const Node = new ChevereNode(Data, element);
 
@@ -73,7 +73,7 @@ describe("Create a basic ChevereNode", () => {
                 expect((Node as any).watch!.msg).not.toBeUndefined();
             });
             test("'updated', 'updating' and 'watch' are called after a method call", () => {
-                jest.spyOn((Node as any).watch!, 'msg');
+                jest.spyOn((Node as any).watch!, "msg");
                 jest.spyOn(Node, "updated");
                 jest.spyOn(Node, "updating");
 
@@ -84,6 +84,5 @@ describe("Create a basic ChevereNode", () => {
                 expect((Node as any).watch.msg).toHaveBeenCalled();
             });
         });
-        
     });
 });

@@ -5,12 +5,28 @@ export class ChevereInline extends Chevere {
         super(el);
         this.data = {};
         this.methods = {};
-        const obj = Object.entries(Helper.parser({
-            expr: this.element.dataset.inline || "{}",
-        }));
-        this.data = this.parseData(obj.reduce((prev, [key, val]) => ({ ...prev, ...(typeof val != "function" && { [key]: val }) }), {}));
+        const obj = Object.entries(
+            Helper.parser({
+                expr: this.element.dataset.inline || "{}",
+            }),
+        );
+        this.data = this.parseData(
+            obj.reduce(
+                (prev, [key, val]) => ({
+                    ...prev,
+                    ...(typeof val != "function" && { [key]: val }),
+                }),
+                {},
+            ),
+        );
         this.methods = this.parseMethods({
-            object: obj.reduce((prev, [key, val]) => ({ ...prev, ...(typeof val == "function" && { [key]: val }) }), {})
+            object: obj.reduce(
+                (prev, [key, val]) => ({
+                    ...prev,
+                    ...(typeof val == "function" && { [key]: val }),
+                }),
+                {},
+            ),
         });
         this.checkForActionsAndChilds();
         this.findRefs();
@@ -21,7 +37,7 @@ export class ChevereInline extends Chevere {
             object: data,
             afterSet: (_, name) => {
                 this.updateRelated(name);
-            }
+            },
         });
     }
 }

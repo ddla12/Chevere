@@ -27,7 +27,7 @@ export class ChevereData implements ChevereNodeData {
         } = data);
 
         //Only existing properties can be watched
-        (this.watch) &&
+        this.watch &&
             Object.keys(this.watch!).some((func) => {
                 if (!this.data[func])
                     throw new ReferenceError(

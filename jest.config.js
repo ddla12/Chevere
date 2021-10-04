@@ -9,9 +9,9 @@ module.exports = {
         "@helpers": "<rootDir>/src/utils/index.ts",
         "@chevere": "<rootDir>/src/chevere/index.ts",
         "@interfaces": "<rootDir>/src/interfaces.ts",
-        "@actions": "<rootDir>/src/actions/index.ts"
+        "@actions": "<rootDir>/src/actions/index.ts",
     },
     verbose: true,
     preset: "ts-jest",
-    "resolver": "jest-ts-webcompat-resolver"
+    resolver: "jest-ts-webcompat-resolver",
 };

@@ -14,21 +14,31 @@ export class ChevereInline extends Chevere {
     constructor(el: HTMLElement) {
         super(el);
 
-        const obj = Object.entries(Helper.parser<object>({
-            expr: this.element.dataset.inline || "{}",
-        }));
+        const obj = Object.entries(
+            Helper.parser<object>({
+                expr: this.element.dataset.inline || "{}",
+            }),
+        );
 
         //Make the data reactive if it isn't undefined
         this.data = this.parseData(
             obj.reduce(
-                (prev, [key, val]) => ({ ...prev, ...(typeof val != "function" && { [key]: val }) }), {}
+                (prev, [key, val]) => ({
+                    ...prev,
+                    ...(typeof val != "function" && { [key]: val }),
+                }),
+                {},
             ),
         );
 
         this.methods = this.parseMethods({
             object: obj.reduce(
-                (prev, [key, val]) => ({ ...prev, ...(typeof val == "function" && { [key]: val }) }), {}
-            )
+                (prev, [key, val]) => ({
+                    ...prev,
+                    ...(typeof val == "function" && { [key]: val }),
+                }),
+                {},
+            ),
         });
 
         this.checkForActionsAndChilds();
@@ -41,8 +51,8 @@ export class ChevereInline extends Chevere {
         return Helper.reactive({
             object: data,
             afterSet: (_, name) => {
-                this.updateRelated(name!)
-            }
-        })
+                this.updateRelated(name!);
+            },
+        });
     }
 }
