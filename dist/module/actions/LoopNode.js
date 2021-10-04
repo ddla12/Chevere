@@ -3,6 +3,7 @@ import { Patterns, RegExpFactory } from "../utils/index.js";
 export class LoopNode extends ChevereAction {
     constructor(data) {
         super(data);
+        this.pos = [...this.parent.element.children].indexOf(this.element);
         this.variables = {
             loop: this.element.dataset.for.match(/^\w+/)[0],
             parent: this.element.dataset
@@ -41,7 +42,7 @@ export class LoopNode extends ChevereAction {
             });
             this.templates.fragment.append(document.importNode(this.templates.content, true));
         });
-        this.parent.element.append(this.templates.fragment);
+        this.parent.element.insertBefore(this.templates.fragment, this.parent.element.children[this.pos]);
     }
     parseAttribute() {
         try {

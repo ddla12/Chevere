@@ -11,9 +11,15 @@ export class LoopNode extends ChevereAction<Attribute> {
      * Template content and fragment
      */
     readonly templates: LoopFragment;
+    /**
+     * Position of the template element
+     */
+    readonly pos: number;
 
     constructor(data: ChevereChild<Attribute>) {
         super(data);
+
+        this.pos = [...this.parent.element.children].indexOf(this.element);
 
         this.variables = {
             loop: this.element.dataset.for!.match(/^\w+/)![0],
@@ -80,7 +86,10 @@ export class LoopNode extends ChevereAction<Attribute> {
             );
         });
 
-        this.parent.element.append(this.templates.fragment);
+        this.parent.element.insertBefore(
+            this.templates.fragment, 
+            this.parent.element.children[this.pos]
+        );
     }
 
     parseAttribute(): void {

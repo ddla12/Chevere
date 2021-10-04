@@ -10,6 +10,7 @@
         "ES2021",
         "DOM.Iterable",
     ],
+    "allowJs": true,
     "strict": true,
     "noImplicitThis": false,
     "baseUrl": "../src/",

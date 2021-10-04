@@ -43,10 +43,12 @@ export class ModelNode extends ChevereAction<Attribute> {
      * If input is not neither 'radio' nor 'checkbox', set its value
      */
     bindData(): void {
-        if (!["radio", "checkbox"].includes(this.inputType))
+        if (!["radio", "checkbox"].includes(this.inputType)) {
             (this.element as HTMLInputElement).value = String(
                 this.parent.data![this.variable],
             );
+        }
+
     }
 
     setAction(): void {
@@ -58,10 +60,11 @@ export class ModelNode extends ChevereAction<Attribute> {
                 ? //If there are not related checkbox, bind a boolean value
                   (this.element as HTMLInputElement).checked
                 : //else, push to array
-                  [...this.related!, this.element as HTMLInputElement]
+                  (([...this.related!, this.element as HTMLInputElement].filter((c) => c.checked).length != 0)
+                    ? [...this.related!, this.element as HTMLInputElement]
                       .filter((c) => c.checked)
                       .map((c) => c.value)
-                      .join(",");
+                    : (this.element as HTMLInputElement).checked);
     }
 
     refreshAttribute(): void {

@@ -1,2 +1,2 @@
-export * from "./Helper";
-export * from "./Patterns";
+export * from "./Helper.js";
+export * from "./Patterns.js";

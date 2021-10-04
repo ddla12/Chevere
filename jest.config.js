@@ -12,5 +12,6 @@ module.exports = {
         "@actions": "<rootDir>/src/actions/index.ts"
     },
     verbose: true,
-    preset: "ts-jest"
+    preset: "ts-jest",
+    "resolver": "jest-ts-webcompat-resolver"
 };

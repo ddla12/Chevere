@@ -13,8 +13,9 @@ export class ModelNode extends ChevereAction {
         this.parseAttribute();
     }
     bindData() {
-        if (!["radio", "checkbox"].includes(this.inputType))
+        if (!["radio", "checkbox"].includes(this.inputType)) {
             this.element.value = String(this.parent.data[this.variable]);
+        }
     }
     setAction() {
         this.parent.data[this.variable] =
@@ -25,10 +26,11 @@ export class ModelNode extends ChevereAction {
                         ?
                             this.element.checked
                         :
-                            [...this.related, this.element]
-                                .filter((c) => c.checked)
-                                .map((c) => c.value)
-                                .join(",");
+                            (([...this.related, this.element].filter((c) => c.checked).length != 0)
+                                ? [...this.related, this.element]
+                                    .filter((c) => c.checked)
+                                    .map((c) => c.value)
+                                : this.element.checked);
     }
     refreshAttribute() {
         this.element.addEventListener("input", this.setAction.bind(this));
