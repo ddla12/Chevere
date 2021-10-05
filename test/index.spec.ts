@@ -1,41 +1,43 @@
-import { ChevereData } from "@chevere";
 import Chevere from "../src/index";
 
 document.documentElement.innerHTML += `
     <div data-attached="test">
         <small data-text="this.data.msg"></small>
     </div>
-    <span data-inline="{ msg: 'Hello world' }">
-        <b data-text="this.data.msg"></b>
+    <span data-inline="{ data: { msg: 'Hello world' } }">
+        <small data-text="this.data.msg"></small>
     </span>
 `;
 
-const Data = new ChevereData({
-    name: "test",
-    data: {
-        msg: "Hello world",
-    },
-});
+const helloWorld = () => [...document.querySelectorAll("small")].every((s) => s.textContent == "Hello world");
 
 describe("Chevere window object", () => {
-    test("Create a node data", () => {
-        expect(
-            Chevere.data({
-                name: "test",
-                data: {
-                    msg: "Hello world",
-                },
-            }),
-        ).toStrictEqual(Data);
-    });
     test("Initialized successfully", () => {
-        Chevere.start(Data);
+        Chevere.start({
+            name: "test",
+            data: {
+                msg: "Hello world"
+            }
+        });
 
-        const helloWorld = [
-            document.querySelector("small")?.textContent,
-            document.querySelector("b")?.textContent,
-        ].every((s) => s == "Hello world");
-
-        expect(helloWorld).toBeTruthy();
+        expect(helloWorld()).toBeTruthy();
     });
+    test("makeNodes works", () => {
+        document.documentElement.innerHTML = `
+            <div name="chevere">
+                <small data-text="this.data.msg"></small>
+            </div>
+            <div name="chevere">
+                <small data-text="this.data.msg"></small>
+            </div>
+        `;
+
+        Chevere.makeNodes({
+            data: {
+                msg: "Hello world"
+            }
+        }, ...[...document.querySelectorAll("div[name='chevere']")] as HTMLElement[]);
+
+        expect(helloWorld()).toBeTruthy();
+    })
 });

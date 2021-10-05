@@ -2,7 +2,7 @@ import { ChevereInline } from "@chevere";
 import Chevere from "../../src/index";
 
 document.documentElement.innerHTML += `
-    <span data-inline="{ toggle: false }">
+    <span data-inline="{ data: { toggle: false } }">
         <em data-show="this.data.toggle"></em>
         <button @onClick="this.data.toggle = true"></button>
     </span>

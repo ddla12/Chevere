@@ -1,24 +1,37 @@
 import { ChevereInline } from "@chevere";
 
+jest.spyOn(console, "log");
+
 describe("Basic Inline component", () => {
     test("Without defined data", () => {
         const BasicInline = new ChevereInline(document.createElement("div"));
 
         expect(BasicInline instanceof ChevereInline).toBeTruthy();
     });
-    test("With defined data", () => {
-        const el = document.createElement("div");
+    describe("With defined data", () => {
+        test("Have that data", () => {
+            const el = document.createElement("div");
 
-        el.dataset.inline = "{ msg: 'Hola mundo' }";
+            el.dataset.inline = "{ data: { msg: 'Hello world' } }";
+    
+            const Inline = new ChevereInline(el);
+    
+            expect(Inline.data!.msg).toBe("Hello world");
+        });
+        test("init function is executed successfully", () => {
+            const el = document.createElement("div");
+
+        el.dataset.inline = "{ init() { console.log('Hello world'); } }";
 
         const Inline = new ChevereInline(el);
 
-        expect(Inline.data!.msg).toBe("Hola mundo");
-    });
-    test("Is sealed", () => {
-        expect(
-            Object.isSealed(new ChevereInline(document.createElement("span"))),
-        ).toBeTruthy();
+        expect(console.log).toBeCalledWith("Hello world");
+        });
+        test("Is sealed", () => {
+            expect(
+                Object.isSealed(new ChevereInline(document.createElement("span"))),
+            ).toBeTruthy();
+        });
     });
 });
 
@@ -35,10 +48,12 @@ describe("Childs", () => {
     const el = document.createElement("div");
 
     el.dataset.inline = `{
-        msg: 'Hello world',
-        array: [1, 2, 3, 4],
-        method() {
-            return 1 + 1;
+        data: {
+            msg: 'Hello world',
+            array: [1, 2, 3, 4],
+            method() {
+                return 1 + 1;
+            }
         }
     }`;
 

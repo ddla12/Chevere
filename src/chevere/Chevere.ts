@@ -7,15 +7,18 @@ import {
     ShowNode,
     TextNode,
 } from "@actions";
-import { Helper } from "@helpers";
+import { Helper, Patterns } from "@helpers";
 import {
     Attribute,
     Attributes,
     ChevereChild,
+    ChevereNodeData,
     Data,
     Dispatch,
+    initFunc,
     Reactive,
     Relation,
+    Watch,
 } from "@types";
 
 /**
@@ -24,38 +27,66 @@ import {
  * @abstract
  */
 export abstract class Chevere {
+    readonly name?: string;
     readonly id: string;
     readonly element: HTMLElement;
+    init?   : initFunc;
+    updated?: () => void;
+    updating?: () => void;
+    data?: Data<any> = {};
     refs?: Data<HTMLElement>;
-    //All the childs order by attribute
-    childs?: Data<ChevereChild<Attributes>[]> = {
-        "data-on": [],
-        "data-text": [],
-        "data-model": [],
-        "data-for": [],
-        "data-show": [],
-        "data-bind": [],
-    };
+    childs?: Data<ChevereChild<Attributes>[]>;
     methods?: Data<Function>;
-    //ChevereInline can have an undefined data
-    abstract readonly data?: Data<any>;
+    protected watch?: Data<Watch>;
+
 
     /**
      * Create a Chevere instance with an HTMLElement, then set it an id
      * @param element A element with 'data-attached/inline' attribute
      */
-    constructor(element: HTMLElement) {
+    constructor(data: ChevereNodeData, element: HTMLElement) {
+        ({
+            name: this.name,
+            watch: this.watch,
+            init: this.init,
+            updated: this.updated,
+            updating: this.updating,
+        } = data);
+        
         this.element = element;
-        this.id = this.element.dataset.id = this.setId();
-    }
 
-    /**
-     * Make the data reactive, setting a Proxy, ChevereInline doesn't have
-     * the same Proxy as ChevereNode
-     * @param data The reactive data
-     * @abstract
-     */
-    abstract parseData(data: Data<any>): Data<any>;
+        if(this.element.dataset.inline && this.element.dataset.attached) {
+            throw new Error("A component cannot have both 'data-' attributes ('inline', 'attached')");
+        }
+
+        this.id = this.element.dataset.id = this.setId();
+
+        (data.data) && (this.data = this.parseData(data.data));
+        (data.methods) && (this.methods = this.parseMethods(data.methods));
+
+        (this.watch) &&
+            Object.keys(this.watch!).some((func) => {
+                if (!this.data![func])
+                    throw new ReferenceError(
+                        `You're trying to watch an undefined property '${func}'`,
+                    );
+            });
+        
+        this.refs = this.findRefs();
+
+        //If there's not a init function and 'data-init' attribute has parameters
+        if (this.init == undefined && Patterns.arguments.test(this.element.dataset.init!))
+            throw new EvalError(
+                `The ${this.name || "Some"} components don't have an init() function, therefore they do not accept any parameters`,
+            );
+
+        if(this.init) this.executeInit();
+
+        //Get the refs and actions of the component
+        this.checkForActionsAndChilds();
+        
+        Object.seal(this);
+    }
 
     /**
      * Generate a valid id for the element
@@ -66,10 +97,21 @@ export abstract class Chevere {
     }
 
     /**
+     * Execute the init function
+     */
+    executeInit(): void|Promise<void> {
+        let args: [] = Helper.parser({ expr: "[" + this.element.dataset.init + "]" });
+
+        return (this.init! instanceof Promise)
+            ? (async() => await this.init!(...args))()
+            : this.init!(...args);
+    }
+
+    /**
      * Find and set the $refs of the component
      */
-    findRefs(): void {
-        this.refs = (
+    findRefs(): Data<HTMLElement> {
+        return (
             [...this.element.querySelectorAll("*[data-ref]")] as HTMLElement[]
         ).reduce((props, el) => {
             //If the attribute is empty
@@ -105,30 +147,8 @@ export abstract class Chevere {
     }
 
     /**
-     * Emit a event in the window scope
-     * @param data A valid event data
+     * Find all Child nodes at the current scope
      */
-    $emit(data: Dispatch): void {
-        window.dispatchEvent(
-            new CustomEvent(data.name, {
-                detail: data.detail,
-                bubbles: true,
-                composed: true,
-                cancelable: true,
-            }),
-        );
-    }
-
-    /**
-     * Push into 'this.childs' arrays by attribute
-     * @param data The list of related nodes
-     */
-    setChilds(data: Relation) {
-        data.nodes.forEach((node) => {
-            this.childs![data.type].push(node);
-        });
-    }
-
     checkForActionsAndChilds(): void {
         //For now, nested components is not supported
         if (
@@ -140,29 +160,29 @@ export abstract class Chevere {
             );
 
         //An array of all child nodes order by attribute
-        const childs = [
-            Helper.getElementsBy({
+        this.childs = {
+            ["data-for"]: Helper.getElementsBy({
                 attribute: "data-for",
                 element: this.element,
                 parent: this,
                 selector: "template[data-for]",
                 Child: LoopNode,
             }),
-            Helper.getElementsBy({
+            ["data-text"]: Helper.getElementsBy({
                 attribute: "data-text",
                 element: this.element,
                 parent: this,
                 selector: "*[data-text]",
                 Child: TextNode,
             }),
-            Helper.getElementsBy({
+            ["data-show"]: Helper.getElementsBy({
                 attribute: "data-show",
                 element: this.element,
                 parent: this,
                 selector: "*[data-show]",
                 Child: ShowNode,
             }),
-            Helper.getElementsBy({
+            ["data-model"]: Helper.getElementsBy({
                 attribute: "data-model",
                 element: this.element,
                 parent: this,
@@ -170,20 +190,17 @@ export abstract class Chevere {
                     "input[data-model], select[data-model], textarea[data-model]",
                 Child: ModelNode,
             }),
-            Helper.getElementsByDataOn({
+            ["data-on"]: Helper.getElementsByDataOn({
                 attribute: "on",
                 Child: EventNode,
                 parent: this,
             }),
-            Helper.getElementsByDataOn({
+            ["data-bind"]: Helper.getElementsByDataOn({
                 attribute: "bind",
                 Child: BindNode,
                 parent: this,
             }),
-        ];
-
-        //Set childs by attribute group
-        childs.forEach((child) => child.nodes.length && this.setChilds(child));
+        };
     }
 
     /**
@@ -208,6 +225,21 @@ export abstract class Chevere {
     }
 
     /**
+     * Emit a event in the window scope
+     * @param data A valid event data
+     */
+    $emit(data: Dispatch): void {
+        window.dispatchEvent(
+            new CustomEvent(data.name, {
+                detail: data.detail,
+                bubbles: true,
+                composed: true,
+                cancelable: true,
+            }),
+        );
+    }
+
+    /**
      * Update all child nodes data
      * @param name A data property name
      */
@@ -228,15 +260,15 @@ export abstract class Chevere {
     /**
      * Make the methods reactive
      */
-    parseMethods(data: Reactive<Data<Function>>): Data<Function> {
-        return Object.values(data.object).reduce(
+    parseMethods(data: Data<Function>): Data<Function> {
+        return Object.values(data).reduce(
             (rest, func) => ({
                 ...rest,
                 [func.name]: new Proxy(func, {
                     apply: (target, _, args) => {
-                        data.beforeSet && data.beforeSet();
+                        (this.updating) && this.updating();
                         const result = target.apply(this, [...args]);
-                        data.afterSet && data.afterSet();
+                        (this.updated) && this.updated();
 
                         return result;
                     },
@@ -244,5 +276,30 @@ export abstract class Chevere {
             }),
             {},
         );
+    }
+
+    /**
+     * Make the data reactive
+     * @param data 
+     * @returns A reactive data
+     */
+    parseData(data: Data<any>): Data<any> {
+        return Helper.reactive({
+            object: data,
+            beforeSet: (target, name, value) => {
+                this.updating && this.updating();
+
+                this.watch! &&
+                    this.watch![name as string]?.apply(this, [
+                        value,
+                        target![name as string],
+                    ]);
+            },
+            afterSet: (_, name) => {
+                this.updateRelated(name as string);
+
+                this.updated && this.updated();
+            },
+        });
     }
 }

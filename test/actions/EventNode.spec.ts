@@ -4,8 +4,8 @@ var btns: HTMLButtonElement[] = [];
 
 document.documentElement.innerHTML += `
     <div data-inline="{ 
-        msg: 'Hello world from an EventNode', 
-        func($event, $el) { btns = [$event.target, $el]; } 
+        data: { msg: 'Hello world from an EventNode' }, 
+        methods: { func($event, $el) { btns = [$event.target, $el]; } }
     }">
         <button id="one" @onClick="console.log(this.data.msg)">Click</button>
         <button id="two" @onClick="this.methods.func($event, $el)">Click</button>

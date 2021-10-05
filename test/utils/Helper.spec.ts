@@ -1,4 +1,4 @@
-import { ChevereData, ChevereNode } from "@chevere";
+import { ChevereNode } from "@chevere";
 import { Helper } from "@helpers";
 
 jest.spyOn(Helper, "eventCallback");
@@ -13,12 +13,11 @@ describe("Helper", () => {
     `;
 
     const Node = new ChevereNode(
-        new ChevereData({
-            name: "test",
+        {
             data: {
                 msg: "Hello world",
             },
-        }),
+        },
         element,
     );
 

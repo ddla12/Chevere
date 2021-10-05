@@ -1,23 +1,15 @@
-import { ChevereData, Chevere } from "./chevere/index.js";
+import { Chevere } from "./chevere/index.js";
 export declare type Helper = {
     [func: string]: Function;
 };
-export declare type Data<T> = {
-    [name: string]: T;
-};
-export declare type initFunc =
-    | ((...rest: any[]) => void | Promise<void>)
-    | undefined;
+export declare type Data<T> = Record<string, T>;
+export declare type initFunc = ((...rest: any[]) => void | Promise<void>) | undefined;
 export declare type Args = Map<string, any>;
 export declare type ChevereNodeList = ChevereDataNode[];
 export declare type Attributes = Attribute | Attribute[] | undefined;
 export declare type Watch = ((value?: any, oldValue?: any) => void) | undefined;
 export declare type Pattern = Data<RegExp>;
-export declare type ReactiveCallback = (
-    target?: Data<any>,
-    name?: string,
-    value?: any,
-) => void;
+export declare type ReactiveCallback = (target?: Data<any>, name?: string, value?: any) => void;
 export interface Parse {
     expr: string;
     args?: Args;
@@ -80,7 +72,7 @@ export interface Dispatch {
     readonly detail?: object;
 }
 export interface ChevereNodeData {
-    readonly name: string;
+    readonly name?: string;
     data: Data<any>;
     init?: initFunc;
     methods?: Data<Function>;
@@ -93,9 +85,8 @@ export interface ChevereDataNode {
     attr: string;
 }
 export interface ChevereWindow {
-    findItsData(attr: string, ...data: ChevereData[]): ChevereData;
-    start(...data: ChevereData[]): void;
-    data(data: ChevereNodeData): ChevereData;
+    start(...data: ChevereNodeData[]): void;
+    makeNodes(data: ChevereNodeData, ...element: HTMLElement[]): void;
 }
 export interface ChevereChild<T = Attributes> {
     element: HTMLElement;

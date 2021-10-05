@@ -1,27 +1,25 @@
-import {
-    Attributes,
-    ChevereChild,
-    Data,
-    Dispatch,
-    Reactive,
-    Relation,
-} from "../@types.js";
+import { Attributes, ChevereChild, ChevereNodeData, Data, Dispatch, initFunc, Watch } from "../@types.js";
 export declare abstract class Chevere {
+    readonly name?: string;
     readonly id: string;
     readonly element: HTMLElement;
+    init?: initFunc;
+    updated?: () => void;
+    updating?: () => void;
+    data?: Data<any>;
     refs?: Data<HTMLElement>;
     childs?: Data<ChevereChild<Attributes>[]>;
     methods?: Data<Function>;
-    abstract readonly data?: Data<any>;
-    constructor(element: HTMLElement);
-    abstract parseData(data: Data<any>): Data<any>;
+    protected watch?: Data<Watch>;
+    constructor(data: ChevereNodeData, element: HTMLElement);
     setId(): string;
-    findRefs(): void;
+    executeInit(): void | Promise<void>;
+    findRefs(): Data<HTMLElement>;
     refreshChilds(attr: string, name: string): void;
-    $emit(data: Dispatch): void;
-    setChilds(data: Relation): void;
     checkForActionsAndChilds(): void;
     $emitSelf(data: Dispatch): void;
+    $emit(data: Dispatch): void;
     updateRelated(name: string): void;
-    parseMethods(data: Reactive<Data<Function>>): Data<Function>;
+    parseMethods(data: Data<Function>): Data<Function>;
+    parseData(data: Data<any>): Data<any>;
 }

@@ -5,7 +5,7 @@ Is your project not enough complex to use a modern framework like *Vue, Angular 
 To help you to save time and lines of code, we bring you ***Chevere***...
 
 ```html
-<div data-inline="{ msg: 'Hello world' }">
+<div data-inline="{ data: { msg: 'Hello world' } }">
     <em data-text="this.data.msg"></em>
 </div>
 ```

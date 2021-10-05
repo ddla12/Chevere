@@ -1,4 +1,6 @@
-import { ChevereNode, ChevereData } from "@chevere";
+import { ChevereNode } from "@chevere";
+
+jest.spyOn(console, "log");
 
 const element = document.createElement("div");
 
@@ -6,17 +8,21 @@ element.dataset.attached = "data";
 
 describe("Create a basic ChevereNode", () => {
     describe("Basic functions", () => {
-        const BasicData = new ChevereData({
+        const BasicNode = new ChevereNode({
             name: "data",
             data: {
                 msg: "Hello world",
             },
-        });
-
-        const BasicNode = new ChevereNode(BasicData, element);
+            init() {
+                console.log(1);
+            }
+        }, element);
 
         test("data property 'msg' is equal to 'Hello world'", () => {
-            expect(BasicNode.data.msg).toBe("Hello world");
+            expect(BasicNode.data!.msg).toBe("Hello world");
+        });
+        test("init function is called", () => {
+            expect(console.log).toHaveBeenCalledWith(1);
         });
         test("The node is sealed", () => {
             expect(Object.isSealed(BasicNode)).toBeTruthy();
@@ -29,28 +35,28 @@ describe("Create a basic ChevereNode", () => {
         });
     });
     describe("Reactivity", () => {
-        const Data = new ChevereData({
+        const Data = {
             name: "data",
             data: {
                 msg: "Hello world",
             },
             methods: {
                 say() {
-                    (this as unknown as ChevereNode).data.msg = "Bye world";
+                    (this as unknown as ChevereNode).data!.msg = "Bye world";
                 },
             },
             updated() {
                 return;
             },
             updating() {
-                return "H";
+                return "Hello world";
             },
             watch: {
                 msg() {
                     return;
                 },
             },
-        });
+        };
 
         test("'parseMethods' and 'parseDate' have been called", () => {
             const [methods, data] = [

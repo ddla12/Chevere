@@ -1,12 +1,5 @@
-import { Data, Watch } from "../@types.js";
-import { ChevereData } from "./ChevereData";
 import { Chevere } from "./Chevere";
+import { ChevereNodeData } from "../@types.js";
 export declare class ChevereNode extends Chevere {
-    readonly name: string;
-    data: Data<any>;
-    protected watch?: Data<Watch>;
-    readonly updated?: () => void;
-    readonly updating?: () => void;
-    constructor(data: ChevereData, el: HTMLElement);
-    parseData(data: Data<any>): Data<any>;
+    constructor(data: ChevereNodeData, el: HTMLElement);
 }

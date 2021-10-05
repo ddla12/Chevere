@@ -1,8 +1,8 @@
-import { ChevereData, Chevere } from "@chevere";
+import { Chevere, ChevereNode } from "@chevere";
 //#region Types
 export type Helper = { [func: string]: Function };
 
-export type Data<T> = { [name: string]: T };
+export type Data<T> = Record<string, T>;
 
 export type initFunc = ((...rest: any[]) => void | Promise<void>) | undefined;
 
@@ -199,7 +199,7 @@ export interface ChevereNodeData {
     /**
      * Name of the component
      */
-    readonly name: string;
+    readonly name?: string;
     /**
      * Component data
      */
@@ -235,9 +235,8 @@ export interface ChevereDataNode {
 }
 
 export interface ChevereWindow {
-    findItsData(attr: string, ...data: ChevereData[]): ChevereData;
-    start(...data: ChevereData[]): void;
-    data(data: ChevereNodeData): ChevereData;
+    start(...data: ChevereNodeData[]): void;
+    makeNodes(data: ChevereNodeData, ...element: HTMLElement[]): void;
 }
 
 export interface ChevereChild<T = Attributes> {

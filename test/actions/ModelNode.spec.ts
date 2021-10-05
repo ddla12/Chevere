@@ -3,11 +3,13 @@ import { ChevereInline } from "@chevere";
 const el = document.createElement("div");
 
 el.dataset.inline = `{ 
-    text: 'Hello world', 
-    singleCheck: false, 
-    radio: '', 
-    select: '',
-    multipleCheck: ''
+    data: {
+        text: 'Hello world', 
+        singleCheck: false, 
+        radio: '', 
+        select: '',
+        multipleCheck: ''
+    }
 }`;
 
 el.innerHTML += `

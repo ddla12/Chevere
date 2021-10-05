@@ -42,6 +42,7 @@ const commonRegexp = {
 export const Patterns: Pattern = {
     $data: RegExpFactory.$this("data"),
     arguments: /(?<=\().*(?=\))/g,
+    removePar: /.*\(|\)$/g,
     isLogicalExpression: new RegExp(
         String.raw`${commonRegexp.bool}(\s+)?(\||&|=|!=|(>|<)(=)?)`,
     ),

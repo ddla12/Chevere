@@ -2,7 +2,7 @@ import { ChevereInline } from "@chevere";
 import Chevere from "../../src/index";
 
 document.documentElement.innerHTML += `
-    <span data-inline="{ msg: 'Hello world' }">
+    <span data-inline="{ data: { msg: 'Hello world' } }">
         <em data-text="this.data.msg"></em>
         <p data-text="\`\$\{this.data.msg\}, How are you?\`"></p>
     </span>

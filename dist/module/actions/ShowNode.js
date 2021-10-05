@@ -13,24 +13,20 @@ export class ShowNode extends ChevereAction {
             : this.display;
     }
     refreshAttribute() {
-        this.attr.values.current = () =>
-            Helper.parser({
-                expr: this.attr.values.original,
-                node: this.parent,
-            });
+        this.attr.values.current = () => Helper.parser({
+            expr: this.attr.values.original,
+            node: this.parent,
+        });
         this.setAction();
     }
     parseAttribute() {
         try {
-            if (
-                !Patterns.isBoolean.test(this.attr.values.original) &&
-                !Patterns.isLogicalExpression.test(this.attr.values.original)
-            )
-                throw new SyntaxError(
-                    "data-show attribute only accept booleans",
-                );
+            if (!Patterns.isBoolean.test(this.attr.values.original) &&
+                !Patterns.isLogicalExpression.test(this.attr.values.original))
+                throw new SyntaxError("data-show attribute only accept booleans");
             this.refreshAttribute();
-        } catch (error) {
+        }
+        catch (error) {
             console.error(error);
         }
     }

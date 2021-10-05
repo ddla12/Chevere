@@ -1,16 +1,8 @@
-import {
-    FindChilds,
-    Relation,
-    Parse,
-    Attribute,
-    DataOn,
-    EventCallback,
-    Reactive,
-} from "../@types.js";
+import { FindChilds, Parse, Attribute, DataOn, EventCallback, ChevereChild, Reactive } from "../@types.js";
 export declare const Helper: {
-    getElementsBy(data: FindChilds<Attribute>): Relation;
+    getElementsBy(data: FindChilds<Attribute>): ChevereChild<Attribute>[];
     parser<T>(data: Parse): T;
-    getElementsByDataOn(data: DataOn): Relation;
+    getElementsByDataOn(data: DataOn): ChevereChild<Attribute[]>[];
     eventCallback(data: EventCallback): () => void;
     reactive<T_1 extends object>(data: Reactive<T_1>): T_1;
 };

@@ -6,8 +6,7 @@ import {
     Attribute,
     DataOn,
     EventCallback,
-    Data,
-    ReactiveCallback,
+    ChevereChild,
     Reactive,
 } from "@types";
 
@@ -21,25 +20,22 @@ export const Helper = {
      * @param data
      * @returns A list of ActionNode<Attribute> related to the component
      */
-    getElementsBy(data: FindChilds<Attribute>): Relation {
+    getElementsBy(data: FindChilds<Attribute>): ChevereChild<Attribute>[] {
         const nodes = [...data.element.querySelectorAll(data.selector)];
 
-        return {
-            type: data.attribute,
-            nodes: nodes.map(
-                (node) =>
-                    new data.Child({
-                        element: node as HTMLElement,
-                        parent: data.parent,
-                        attr: {
-                            attribute: data.attribute,
-                            values: {
-                                original: node.getAttribute(data.attribute)!,
-                            },
+        return nodes.map(
+            (node) =>
+                new data.Child({
+                    element: node as HTMLElement,
+                    parent: data.parent,
+                    attr: {
+                        attribute: data.attribute,
+                        values: {
+                            original: node.getAttribute(data.attribute)!,
                         },
-                    }),
-            ),
-        };
+                    },
+                }),
+        );
     },
     /**
      * Parse a javascript expression passed in a string, with or without 'this' and arguments
@@ -57,7 +53,7 @@ export const Helper = {
      * @param data
      * @returns A list of ActionNodes<Attribute[]> related to the component
      */
-    getElementsByDataOn(data: DataOn): Relation {
+    getElementsByDataOn(data: DataOn): ChevereChild<Attribute[]>[] {
         const regexp = RegExpFactory.bindOrOn(data.attribute),
             nodes = [...data.parent.element.querySelectorAll("*")].filter(
                 (el) =>
@@ -66,25 +62,22 @@ export const Helper = {
                         .some((attr) => regexp.test(attr)),
             );
 
-        return {
-            type: `data-${data.attribute}`,
-            nodes: nodes.map(
-                (node) =>
-                    new data.Child({
-                        element: node as HTMLElement,
-                        parent: data.parent,
-                        attr: [...node.attributes]
-                            .map((attr) => attr.name)
-                            .filter((attr) => regexp.test(attr))
-                            .map((attr) => ({
-                                attribute: attr,
-                                values: {
-                                    original: node.getAttribute(attr)!,
-                                },
-                            })),
-                    }),
-            ),
-        };
+        return nodes.map(
+            (node) =>
+                new data.Child({
+                    element: node as HTMLElement,
+                    parent: data.parent,
+                    attr: [...node.attributes]
+                        .map((attr) => attr.name)
+                        .filter((attr) => regexp.test(attr))
+                        .map((attr) => ({
+                            attribute: attr,
+                            values: {
+                                original: node.getAttribute(attr)!,
+                            },
+                        })),
+                }),
+        );
     },
     /**
      * The callback that will be called in all EventNodes

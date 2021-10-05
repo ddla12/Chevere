@@ -2,7 +2,7 @@ import { ChevereInline } from "@chevere";
 import Chevere from "../../src/index";
 
 document.documentElement.innerHTML += `
-    <div data-inline="{ bool: true, pd: '2rem' }">
+    <div data-inline="{ data: { bool: true, pd: '2rem' } }">
         <span @bindStyle="\`padding: \$\{this.data.pd\};\`"
             @bindClass="\`\$\{this.data.bool ? 'success' : 'danger'  \}\`">
             Hello
@@ -30,7 +30,7 @@ describe("BindNode", () => {
     });
     test("Throw an error if the 'data-bind' attribute doesn't have an object or a template literal", () => {
         const el = document.createElement("div");
-        el.dataset.inline = "{ bg: 'red' }";
+        el.dataset.inline = "{ data: { bg: 'red' } }";
         el.innerHTML += `
             <span @bindStyle="padding: this.data.bg"></span>
         `;
