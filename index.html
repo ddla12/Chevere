@@ -7,22 +7,11 @@
         <script src="./dist/cdn/chevere.min.js"></script>
     </head>
     <body>
-        <div id="node" data-init="1 + 1">
-            <span data-text="this.data.msg"></span>
-            <input type="text" data-model="this.data.msg"/>
-        </div>
-        <div id="nod2" data-init="'What'">
+        <div data-inline="{ data: { msg: 'Hello world' } }">
             <span data-text="this.data.msg"></span>
         </div>
         <script>
-            Chevere.makeNodes({
-                data: {
-                    msg: "Hello world"
-                },
-                init(expr) {
-                    console.log(expr);
-                }
-            }, document.querySelector("#node"), document.querySelector("#nod2"));
+            Chevere.search();
         </script>
     </body>
 </html>

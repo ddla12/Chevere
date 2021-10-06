@@ -1,12 +1,13 @@
-import { ChevereChild, Attribute } from "../@types.js";
-import { Chevere } from "../chevere/index.js";
+import { ChevereChild, Attribute, Args } from "../@types.js";
+import { ChevereNode } from "../chevere/index.js";
 export declare abstract class ChevereAction<Attributes> {
     element: HTMLElement;
-    parent: Chevere;
+    parent: ChevereNode;
     attr?: Attributes;
+    forVars?: Args;
+    readonly readAttribute: (callback: () => void) => void;
     constructor(data: ChevereChild<Attributes>);
-    protected abstract parseAttribute(): void;
-    abstract refreshAttribute(): void;
-    setAction(): void;
+    abstract refresh(): void;
+    protected abstract setAction(): void;
     protected ifAttrIsEmpty(attr: Attribute): void;
 }

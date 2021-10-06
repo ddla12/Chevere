@@ -1,5 +1,5 @@
-import { Chevere, ChevereNode } from "@chevere";
-//#region Types
+import { ChevereNode } from "@chevere";
+//#region Types and enums
 export type Helper = { [func: string]: Function };
 
 export type Data<T> = Record<string, T>;
@@ -21,6 +21,7 @@ export type ReactiveCallback = (
     name?: string,
     value?: any,
 ) => void;
+
 //#endregion
 
 //#region Helpers interfaces
@@ -39,7 +40,7 @@ export interface Parse {
     /**
      * 'This' scope
      */
-    node?: Chevere;
+    node?: ChevereNode;
 }
 
 export interface Reactive<T extends object> {
@@ -81,7 +82,11 @@ export interface EventCallback {
     /**
      * This scope
      */
-    node: Chevere;
+    node: ChevereNode;
+    /**
+     * Args
+     */
+    args: Args
 }
 
 export interface BindableAttr extends Attribute {
@@ -123,29 +128,18 @@ export interface FindChilds<Attributes> {
     /**
      * The Chevere component
      */
-    parent: Chevere;
+    parent: ChevereNode;
     /**
      * The child node class
      */
     Child: ActionDynamic<Attributes>;
 }
 
-export interface Relation {
-    /**
-     * Related attribute
-     */
-    type: string;
-    /**
-     *  List of childs
-     */
-    nodes: ChevereChild<Attributes>[];
-}
-
 export interface DataOn {
     /**
      * Chevere component
      */
-    parent: Chevere;
+    parent: ChevereNode;
     /**
      * 'data-bind' or 'data-on',
      */
@@ -154,6 +148,10 @@ export interface DataOn {
      * List of childs
      */
     Child: ActionDynamic<Attribute[]>;
+    /**
+     * After a loop node changes
+     */
+    rescan: boolean
 }
 
 export interface LoopFragment {
@@ -235,13 +233,14 @@ export interface ChevereDataNode {
 }
 
 export interface ChevereWindow {
-    start(...data: ChevereNodeData[]): void;
-    makeNodes(data: ChevereNodeData, ...element: HTMLElement[]): void;
+    search(...data: ChevereNodeData[]): void;
+    make(data: ChevereNodeData, ...element: HTMLElement[]): void;
+    searchInlines(): void;
 }
 
 export interface ChevereChild<T = Attributes> {
     element: HTMLElement;
-    parent: Chevere;
+    parent: ChevereNode;
     attr?: T;
 }
 

@@ -1,6 +1,6 @@
-import { ChevereInline, ChevereNode } from "./chevere/index.js";
+import { ChevereInline, ChevereAttached } from "./chevere/index.js";
 const Chevere = {
-    start(...data) {
+    search(...data) {
         const elements = [...document.querySelectorAll("*[data-attached]")].map((element) => ({ el: element, attr: element.dataset.attached }));
         elements.forEach((el) => {
             const Data = (() => {
@@ -9,12 +9,15 @@ const Chevere = {
                     throw new ReferenceError(`'${search}' couldn't be found in any of your declared components`);
                 return search;
             })();
-            new ChevereNode(Data, el.el);
+            new ChevereAttached(Data, el.el);
         });
-        [...document.querySelectorAll("*[data-inline]")].map((e) => new ChevereInline(e));
+        this.searchInlines();
     },
-    makeNodes(data, ...element) {
-        element.forEach((e) => new ChevereNode(data, e));
+    make(data, ...element) {
+        element.forEach((e) => new ChevereAttached(data, e));
+    },
+    searchInlines() {
+        [...document.querySelectorAll("*[data-inline]")].forEach((e) => new ChevereInline(e));
     }
 };
 Object.defineProperty(window, "Chevere", { value: Chevere });

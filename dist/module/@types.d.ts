@@ -1,4 +1,4 @@
-import { Chevere } from "./chevere/index.js";
+import { ChevereNode } from "./chevere/index.js";
 export declare type Helper = {
     [func: string]: Function;
 };
@@ -13,7 +13,7 @@ export declare type ReactiveCallback = (target?: Data<any>, name?: string, value
 export interface Parse {
     expr: string;
     args?: Args;
-    node?: Chevere;
+    node?: ChevereNode;
 }
 export interface Reactive<T extends object> {
     object: T;
@@ -31,7 +31,8 @@ export interface EventCallback {
     $event: Event;
     $el: HTMLElement;
     expr: string;
-    node: Chevere;
+    node: ChevereNode;
+    args: Args;
 }
 export interface BindableAttr extends Attribute {
     readonly bindAttr: string;
@@ -46,17 +47,14 @@ export interface FindChilds<Attributes> {
     selector: string;
     attribute: string;
     element: Element;
-    parent: Chevere;
+    parent: ChevereNode;
     Child: ActionDynamic<Attributes>;
 }
-export interface Relation {
-    type: string;
-    nodes: ChevereChild<Attributes>[];
-}
 export interface DataOn {
-    parent: Chevere;
+    parent: ChevereNode;
     attribute: string;
     Child: ActionDynamic<Attribute[]>;
+    rescan: boolean;
 }
 export interface LoopFragment {
     readonly content: DocumentFragment;
@@ -85,11 +83,12 @@ export interface ChevereDataNode {
     attr: string;
 }
 export interface ChevereWindow {
-    start(...data: ChevereNodeData[]): void;
-    makeNodes(data: ChevereNodeData, ...element: HTMLElement[]): void;
+    search(...data: ChevereNodeData[]): void;
+    make(data: ChevereNodeData, ...element: HTMLElement[]): void;
+    searchInlines(): void;
 }
 export interface ChevereChild<T = Attributes> {
     element: HTMLElement;
-    parent: Chevere;
+    parent: ChevereNode;
     attr?: T;
 }

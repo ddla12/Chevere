@@ -4,8 +4,7 @@ import {
     ChevereDataNode,
     ChevereNodeList,
 } from "@types";
-import { ChevereInline, ChevereNode } from "@chevere";
-import { Patterns } from "@helpers";
+import { ChevereInline, ChevereAttached } from "@chevere";
 
 /**
  *  The main Chevere object, it allows to create and start components
@@ -15,12 +14,12 @@ const Chevere: ChevereWindow = {
      * Search for ChevereNodes at the DOM and execute their init functions
      * @param data All the ChevereData previously declared
      */
-    start(...data: ChevereNodeData[]): void {
+    search(...data: ChevereNodeData[]): void {
         const elements: ChevereNodeList = (
             [...document.querySelectorAll("*[data-attached]")] as HTMLElement[]
         ).map((element) => ({ el: element, attr: element.dataset.attached! }));
 
-        //Create a ChevereNode for each data-attached
+        //Create a ChevereAttached for each data-attached
         elements.forEach((el: ChevereDataNode) => {
             const Data: ChevereNodeData = (() => {
                 let search = data.find((d) => d.name == el.attr.trim());
@@ -33,22 +32,28 @@ const Chevere: ChevereWindow = {
                 return search;
             })();
 
-            //Finally, instance a new ChevereNode
-            new ChevereNode(Data, el.el);
+            //Finally, instance a new ChevereAttached
+            new ChevereAttached(Data, el.el);
         });
 
-        //Inline components don't have an attached ChevereData, so, they can set their own data
-        [...document.querySelectorAll("*[data-inline]")].map(
-            (e) => new ChevereInline(e as HTMLElement),
-        );
+        this.searchInlines();
     },
     /**
      * Manually make ChevereNodes
      * @param data 
      * @param element 
      */
-    makeNodes(data, ...element: HTMLElement[]): void {
-        element.forEach((e) => new ChevereNode(data, e));
+    make(data, ...element: HTMLElement[]): void {
+        element.forEach((e) => new ChevereAttached(data, e));
+    },
+    /**
+     * Search all 'data-inline' component
+     */
+    searchInlines(): void {
+        //Inline components don't have an attached ChevereData, so, they can set their own data
+        [...document.querySelectorAll("*[data-inline]")].forEach(
+            (e) => new ChevereInline(e as HTMLElement),
+        );
     }
 };
 

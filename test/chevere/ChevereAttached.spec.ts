@@ -1,4 +1,4 @@
-import { ChevereNode } from "@chevere";
+import { ChevereAttached } from "@chevere";
 
 jest.spyOn(console, "log");
 
@@ -6,9 +6,9 @@ const element = document.createElement("div");
 
 element.dataset.attached = "data";
 
-describe("Create a basic ChevereNode", () => {
+describe("Create a basic ChevereAttached", () => {
     describe("Basic functions", () => {
-        const BasicNode = new ChevereNode({
+        const BasicNode = new ChevereAttached({
             name: "data",
             data: {
                 msg: "Hello world",
@@ -42,7 +42,7 @@ describe("Create a basic ChevereNode", () => {
             },
             methods: {
                 say() {
-                    (this as unknown as ChevereNode).data!.msg = "Bye world";
+                    (this as unknown as ChevereAttached).data!.msg = "Bye world";
                 },
             },
             updated() {
@@ -60,18 +60,18 @@ describe("Create a basic ChevereNode", () => {
 
         test("'parseMethods' and 'parseDate' have been called", () => {
             const [methods, data] = [
-                jest.spyOn(ChevereNode.prototype, "parseMethods"),
-                jest.spyOn(ChevereNode.prototype, "parseData"),
+                jest.spyOn(ChevereAttached.prototype, "parseMethods"),
+                jest.spyOn(ChevereAttached.prototype, "parseData"),
             ];
 
-            new ChevereNode(Data, element);
+            new ChevereAttached(Data, element);
 
             expect(methods).toHaveBeenCalled();
             expect(data).toHaveBeenCalled();
         });
 
         describe("'updated', 'updating' and 'watch'", () => {
-            const Node = new ChevereNode(Data, element);
+            const Node = new ChevereAttached(Data, element);
 
             test("'updated', 'updating' and 'watch' aren't undefined", () => {
                 expect(Node.updating).not.toBeUndefined();

@@ -17,7 +17,7 @@ export const Helper = {
         return new Function([...(data.args?.keys() || "")].join(","), `return ${data.expr}`).bind(data.node)(...[...(data.args?.values() || "")]);
     },
     getElementsByDataOn(data) {
-        const regexp = RegExpFactory.bindOrOn(data.attribute), nodes = [...data.parent.element.querySelectorAll("*")].filter((el) => [...el.attributes]
+        const regexp = RegExpFactory.bindOrOn(data.attribute), nodes = [...data.parent.element.querySelectorAll((!data.rescan) ? "*" : "*[data-key]")].filter((el) => [...el.attributes]
             .map((attr) => attr.name)
             .some((attr) => regexp.test(attr)));
         return nodes.map((node) => new data.Child({
@@ -35,7 +35,11 @@ export const Helper = {
         }));
     },
     eventCallback(data) {
-        return new Function("$event, $el", data.expr).bind(data.node, data.$event, data.$el)();
+        return new Function(`$event, $el, ${[...data.args.keys()].join(",")}`, data.expr).apply(data.node, [
+            data.$event,
+            data.$el,
+            ...data.args.values()
+        ]);
     },
     reactive(data) {
         return new Proxy(data.object, {
@@ -47,5 +51,8 @@ export const Helper = {
                 return true;
             },
         });
+    },
+    setId() {
+        return Math.random().toString(32).substr(2);
     },
 };

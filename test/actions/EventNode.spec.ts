@@ -14,7 +14,7 @@ document.documentElement.innerHTML += `
 
 jest.spyOn(console, "log");
 
-Chevere.start();
+Chevere.search();
 
 const [one, two] = [
     document.querySelector("#one") as HTMLButtonElement,

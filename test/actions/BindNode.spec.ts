@@ -11,10 +11,12 @@ document.documentElement.innerHTML += `
             @bindClass="{ 'success': this.data.bool, 'danger': !this.data.bool }">
             Hello
         </span>
+        <video @bindControls="false"></video>
+        <strong @bindStyle="\`color: blue;\`" style="font-size: 2rem;"></strong>
     </div>
 `;
 
-Chevere.start();
+Chevere.search();
 
 jest.spyOn(console, "error").mockImplementation(jest.fn());
 
@@ -28,7 +30,8 @@ describe("BindNode", () => {
             ),
         ).toBeTruthy();
     });
-    test("Throw an error if the 'data-bind' attribute doesn't have an object or a template literal", () => {
+    test("Throw an error if the 'data-bind' attribute doesn't have neither an object nor template" + 
+        "literals nor boolean", () => {
         const el = document.createElement("div");
         el.dataset.inline = "{ data: { bg: 'red' } }";
         el.innerHTML += `
@@ -38,5 +41,13 @@ describe("BindNode", () => {
         new ChevereInline(el);
 
         expect(console.error).toHaveBeenCalled();
+    });
+    test("Boolean attributes are specials", () => {
+        expect((document.documentElement.querySelector("video") as HTMLVideoElement).controls).toBeFalsy();
+    });
+    test("Default values are passed", () => {
+        const style = getComputedStyle(document.documentElement.querySelector("strong")!);
+
+        expect([ style.color, style.fontSize ]).toStrictEqual([ "blue", "2rem" ]);
     });
 });

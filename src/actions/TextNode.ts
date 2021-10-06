@@ -11,25 +11,7 @@ export class TextNode extends ChevereAction<Attribute> {
         super(data);
 
         this.ifAttrIsEmpty(this.attr!);
-        this.parseAttribute();
-    }
-
-    setAction(): void {
-        this.element.textContent = this.attr!.values.current!();
-    }
-
-    refreshAttribute(): void {
-        this.attr!.values.current = () =>
-            Helper.parser<string>({
-                expr: this.attr?.values.original!,
-                node: this.parent,
-            });
-
-        this.setAction();
-    }
-
-    parseAttribute(): void {
-        try {
+        this.readAttribute(() => {
             if (
                 Patterns.isObject.test(this.attr?.values.original!) ||
                 Patterns.methodSyntax.test(this.attr?.values.original!)
@@ -38,10 +20,21 @@ export class TextNode extends ChevereAction<Attribute> {
                     "The 'data-text' attribute only accept strings concatenation, template literals, " +
                         "and a variable as reference",
                 );
+        });
+    }
 
-            this.refreshAttribute();
-        } catch (error) {
-            console.error(error);
-        }
+    refresh(): void {
+        this.element.textContent = this.attr!.values.current!();
+    }
+
+    setAction(): void {
+        this.attr!.values.current = () =>
+            Helper.parser<string>({
+                expr: this.attr?.values.original!,
+                node: this.parent,
+                args: this.forVars
+            });
+
+        this.refresh();
     }
 }

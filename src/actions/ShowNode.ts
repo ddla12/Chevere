@@ -14,38 +14,32 @@ export class ShowNode extends ChevereAction<Attribute> {
         this.display = getComputedStyle(this.element).display;
 
         this.ifAttrIsEmpty(this.attr!);
-        this.parseAttribute();
+        this.readAttribute(() => {
+            if (
+                (!Patterns.isBoolean.test(this.attr!.values.original) &&
+                !Patterns.isLogicalExpression.test(this.attr!.values.original)) || 
+                [...this.forVars!.keys()].some((v) => !this.attr!.values.original.includes(v))
+            )
+                throw new SyntaxError(
+                    "data-show attribute only accept booleans",
+                );
+        });
     }
 
-    setAction(): void {
+    refresh(): void {
         this.element.style.display = !this.attr!.values.current!()
             ? "none"
             : this.display!;
     }
 
-    refreshAttribute(): void {
+    setAction(): void {
         this.attr!.values.current = (): boolean =>
             Helper.parser<boolean>({
                 expr: this.attr!.values.original,
                 node: this.parent,
+                args: this.forVars
             });
 
-        this.setAction();
-    }
-
-    parseAttribute(): void {
-        try {
-            if (
-                !Patterns.isBoolean.test(this.attr!.values.original) &&
-                !Patterns.isLogicalExpression.test(this.attr!.values.original)
-            )
-                throw new SyntaxError(
-                    "data-show attribute only accept booleans",
-                );
-
-            this.refreshAttribute();
-        } catch (error) {
-            console.error(error);
-        }
+        this.refresh();
     }
 }

@@ -8,7 +8,7 @@ document.documentElement.innerHTML += `
     </span>
 `;
 
-Chevere.start();
+Chevere.search();
 
 jest.spyOn(console, "error").mockImplementation(jest.fn());
 

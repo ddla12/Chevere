@@ -12,10 +12,22 @@ export class EventNode extends ChevereAction<Attribute[]> {
 
         this.attr?.some((attr) => this.ifAttrIsEmpty(attr));
 
-        this.parseAttribute();
+        this.readAttribute(() => {
+            if (this.attr!.some(
+                    (attr) =>
+                        !Patterns.methodSyntax.test(attr.values.original) &&
+                        !Patterns.isVariableAssign.test(attr.values.original),
+            ))
+                throw new SyntaxError(
+                    "A 'data-on' attribute only accepts a method or a assignment as value",
+                );
+        });
     }
 
-    refreshAttribute(): void {
+    //This node doesn't need to implement these method
+    refresh(): void {};
+
+    setAction(): void {
         //Get all event names defined in the attributes
         let eventNames = this.attr!.map((attr) =>
             attr.attribute.replace(Patterns.bindAndOn, "").replace(/\..*/, ""),
@@ -36,28 +48,10 @@ export class EventNode extends ChevereAction<Attribute[]> {
                             : `$event.stopPropagation();${attr.values.original}`,
                         node: this.parent,
                         $el: this.element,
+                        args: this.forVars!
                     });
                 },
             );
         });
-    }
-
-    parseAttribute(): void {
-        try {
-            if (
-                this.attr!.some(
-                    (attr) =>
-                        !Patterns.methodSyntax.test(attr.values.original) &&
-                        !Patterns.isVariableAssign.test(attr.values.original),
-                )
-            )
-                throw new SyntaxError(
-                    "A 'data-on' attribute only accepts a method or a assignment as value",
-                );
-
-            this.refreshAttribute();
-        } catch (error) {
-            console.error(error);
-        }
     }
 }

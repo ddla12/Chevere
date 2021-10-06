@@ -8,6 +8,7 @@ To help you to save time and lines of code, we bring you ***Chevere***...
 <div data-inline="{ data: { msg: 'Hello world' } }">
     <em data-text="this.data.msg"></em>
 </div>
+<script>Chevere.search()</script>
 ```
 
 ### You can setup your frontend behavior with only *data-* attributes! That's it!

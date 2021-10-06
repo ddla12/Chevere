@@ -1,4 +1,4 @@
-import { ChevereNode } from "@chevere";
+import { ChevereAttached } from "@chevere";
 import { Helper } from "@helpers";
 
 jest.spyOn(Helper, "eventCallback");
@@ -12,7 +12,7 @@ describe("Helper", () => {
         <button @onClick="console.log(this.data.msg)"></button>
     `;
 
-    const Node = new ChevereNode(
+    const Node = new ChevereAttached(
         {
             data: {
                 msg: "Hello world",
@@ -42,7 +42,7 @@ describe("Helper", () => {
                 Object.values(values.after),
             );
         });
-        test("With a ChevereNode", () => {
+        test("With a ChevereAttached", () => {
             expect(
                 Helper.parser<string>({ expr: "this.data.msg", node: Node }),
             ).toStrictEqual("Hello world");

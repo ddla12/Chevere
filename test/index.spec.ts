@@ -13,7 +13,7 @@ const helloWorld = () => [...document.querySelectorAll("small")].every((s) => s.
 
 describe("Chevere window object", () => {
     test("Initialized successfully", () => {
-        Chevere.start({
+        Chevere.search({
             name: "test",
             data: {
                 msg: "Hello world"
@@ -32,7 +32,7 @@ describe("Chevere window object", () => {
             </div>
         `;
 
-        Chevere.makeNodes({
+        Chevere.make({
             data: {
                 msg: "Hello world"
             }

@@ -5,4 +5,5 @@ export declare const Helper: {
     getElementsByDataOn(data: DataOn): ChevereChild<Attribute[]>[];
     eventCallback(data: EventCallback): () => void;
     reactive<T_1 extends object>(data: Reactive<T_1>): T_1;
+    setId(): string;
 };

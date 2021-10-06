@@ -3,6 +3,49 @@ import { Attribute, BindableAttr, ChevereChild } from "@types";
 import { Helper, Patterns } from "@helpers";
 
 /**
+ * Boolean html attributes
+ */
+enum BooleanAttributes {
+    "async",
+    "autocomplete",
+    "autofocus",
+    "autoplay",
+    "border",
+    "challenge",
+    "checked",
+    "compact",
+    "contenteditable",
+    "controls",
+    "default",
+    "defer",
+    "disabled",
+    "formNoValidate",
+    "frameborder",
+    "hidden",
+    "indeterminate",
+    "ismap",
+    "loop",
+    "multiple",
+    "muted",
+    "nohref",
+    "noresize",
+    "noshade",
+    "novalidate",
+    "nowrap",
+    "open",
+    "readonly",
+    "required",
+    "reversed",
+    "scoped",
+    "scrolling",
+    "seamless",
+    "selected",
+    "sortable",
+    "spellcheck",
+    "translate",
+}
+
+/**
  * Child nodes with 'data-bind' attribute
  * @extends ChevereAction<Attribute>
  */
@@ -22,9 +65,9 @@ export class BindNode extends ChevereAction<Attribute[]> {
             },
             bindAttr: attr.attribute.replace(Patterns.bindAndOn, ""),
             bindValue:
-                this.element.dataset[
+                this.element.getAttribute(
                     attr.attribute.replace(Patterns.bindAndOn, "")
-                ] || "",
+                ) || "",
             type: Patterns.isString.test(attr.values.original)
                 ? "string"
                 : Patterns.isObject.test(attr.values.original)
@@ -32,14 +75,82 @@ export class BindNode extends ChevereAction<Attribute[]> {
                 : "variable",
         }));
 
-        this.parseAttribute();
+        this.readAttribute(() => {
+            if (this.attr!.some(
+                    (attr) =>
+                        !Patterns.isString.test(attr.values.original) &&
+                        !Patterns.isObject.test(attr.values.original) &&
+                        !Patterns.isLogicalExpression.test(attr.values.original) &&
+                        !Patterns.isBoolean.test(attr.values.original),
+            ))
+                throw new SyntaxError(
+                    "A 'data-bind' attribute only accepts an object or a template string as value",
+                );
+        });
     }
 
-    setAction(): void {
+    refresh(): void {
         this.attr.forEach((attr) => attr.predicate!());
     }
 
-    refreshAttribute(): void {
+    setBooleanAttributes(): void {
+        this.attr
+            .filter((attr) => Object.values(BooleanAttributes).includes(attr.bindAttr)
+            ).forEach((attr) => {
+                let i = this.attr.indexOf(attr);
+
+                //Get a boolean value
+                this.attr[i].values.current = () =>
+                    Helper.parser<boolean>({
+                        expr: this.attr[i].values.original,
+                        node: this.parent,
+                        args: this.forVars
+                    });
+
+                //And if it's true, the attribute is too
+                //@ts-ignore
+                attr.predicate = () => this.element[attr.bindAttr] = attr.values.current!();
+            });
+    }
+
+    /**
+     * Set normal attributes, those that aren't neither 'class' nor 'style' nor type boolean 
+     */
+    setAttributes(): void {
+        this.attr
+            .filter((attr) => (!["style", "class"].includes(attr.bindAttr)) &&
+                !(Object.values(BooleanAttributes).includes(attr.bindAttr))
+            ).forEach((attr) => {
+                let i = this.attr.indexOf(attr);
+
+                //...just get a valid js expression
+                this.attr[i].values.current = () =>
+                    Helper.parser<any>({
+                        expr: this.attr[i].values.original,
+                        node: this.parent,
+                        args: this.forVars
+                    });
+
+                //And pass it to the attribute
+                attr.predicate = () =>
+                    this.element.setAttribute(
+                        attr.bindAttr,
+                        attr.values.current!(),
+                    );
+            });
+    }
+
+    setAction(): void {
+        if(this.attr
+            .filter((attr) => !["style", "class"].includes(attr.bindAttr))
+            .some((attr) => Patterns.isObject.test(attr.values.original))
+        )
+            throw new SyntaxError(
+                `Only 'style' and 'class' attribute accepts an object as value any other /
+                atttribute can only receive either a variable or a template string`
+            );
+            
+
         //#region Style and Class attributes have a special treatment
         //First, get a valid js expression in the attribute
         this.attr
@@ -51,6 +162,7 @@ export class BindNode extends ChevereAction<Attribute[]> {
                     Helper.parser<string | object>({
                         expr: this.attr[i].values.original,
                         node: this.parent,
+                        args: this.forVars
                     });
             });
 
@@ -91,49 +203,9 @@ export class BindNode extends ChevereAction<Attribute[]> {
         //#endregion
 
         //Procedure with others attributes that are not 'style' and 'class' is simple...
-        this.attr
-            .filter((attr) => !["style", "class"].includes(attr.bindAttr))
-            .forEach((attr) => {
-                if (Patterns.isObject.test(attr.values.original))
-                    throw new SyntaxError(`Only 'style' and 'class' attribute accepts an object as value /
-                    any other atttribute can only receive either a variable or a template string`);
+        this.setAttributes();
+        this.setBooleanAttributes();
 
-                let i = this.attr.indexOf(attr);
-
-                //...just get a valid js expression
-                this.attr[i].values.current = () =>
-                    Helper.parser<any>({
-                        expr: this.attr[i].values.original,
-                        node: this.parent,
-                    });
-
-                //And pass it to the attribute
-                attr.predicate = () =>
-                    this.element.setAttribute(
-                        attr.bindAttr,
-                        attr.values.current!(),
-                    );
-            });
-
-        this.setAction();
-    }
-
-    parseAttribute(): void {
-        try {
-            if (
-                this.attr!.some(
-                    (attr) =>
-                        !Patterns.isString.test(attr.values.original) &&
-                        !Patterns.isObject.test(attr.values.original),
-                )
-            )
-                throw new SyntaxError(
-                    "A 'data-bind' attribute only accepts an object or a template string as value",
-                );
-
-            this.refreshAttribute();
-        } catch (error) {
-            console.error(error);
-        }
+        this.refresh();
     }
 }

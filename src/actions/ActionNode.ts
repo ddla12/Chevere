@@ -1,5 +1,6 @@
-import { ChevereChild, Attribute } from "@types";
-import { Chevere } from "@chevere";
+import { ChevereChild, Attribute, Args } from "@types";
+import { ChevereNode } from "@chevere";
+import { Helper } from "@helpers";
 
 /**
  * The main class of the child nodes
@@ -7,9 +8,21 @@ import { Chevere } from "@chevere";
  * @class
  */
 export abstract class ChevereAction<Attributes> {
-    element: HTMLElement;
-    parent: Chevere;
-    attr?: Attributes;
+    element : HTMLElement;
+    parent  : ChevereNode;
+    attr?   : Attributes;
+    forVars?: Args;
+    /**
+     * Check for syntax error in attribute(s)
+     */
+    readonly readAttribute = (callback: () => void) => {
+        try {
+            callback();
+            this.setAction();
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     constructor(data: ChevereChild<Attributes>) {
         ({
@@ -17,23 +30,25 @@ export abstract class ChevereAction<Attributes> {
             parent: this.parent,
             attr: this.attr,
         } = data);
+
+        this.forVars = new Map(
+            [...Object.entries(Helper.parser({ 
+                expr: this.element.dataset.forRef || "{}", 
+                node: this.parent 
+            })) || []]
+        );
     }
 
     /**
-     * Check for syntax error in attribute(s)
+     * Method called when the component is updated
      * @abstract
      */
-    protected abstract parseAttribute(): void;
-    /**
-     * Apply the proper action by the attribute
-     * @abstract
-     */
-    abstract refreshAttribute(): void;
+    abstract refresh(): void;
 
     /**
-     * Method called when the component is updated
+     * Apply the proper action by the attribute
      */
-    setAction(): void {}
+    protected abstract setAction(): void;
 
     /**
      * Attributes cannot be empty

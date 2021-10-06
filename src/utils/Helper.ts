@@ -1,7 +1,6 @@
 import { RegExpFactory } from "@helpers";
 import {
     FindChilds,
-    Relation,
     Parse,
     Attribute,
     DataOn,
@@ -55,7 +54,7 @@ export const Helper = {
      */
     getElementsByDataOn(data: DataOn): ChevereChild<Attribute[]>[] {
         const regexp = RegExpFactory.bindOrOn(data.attribute),
-            nodes = [...data.parent.element.querySelectorAll("*")].filter(
+            nodes = [...data.parent.element.querySelectorAll((!data.rescan) ? "*" : "*[data-key]")].filter(
                 (el) =>
                     [...el.attributes]
                         .map((attr) => attr.name)
@@ -85,11 +84,16 @@ export const Helper = {
      * @returns A callback with the proper 'this' and '$event'/'$el' parameters
      */
     eventCallback(data: EventCallback): () => void {
-        return new Function("$event, $el", data.expr).bind(
+        return new Function(
+            `$event, $el, ${[...data.args.keys()].join(",")}`, data.expr
+            ).apply(
             data.node,
-            data.$event,
-            data.$el,
-        )();
+            [
+                data.$event,
+                data.$el,
+                ...data.args.values()
+            ]
+        );
     },
     /**
      * Make data Reactive
@@ -108,5 +112,12 @@ export const Helper = {
                 return true;
             },
         });
+    },
+    /**
+     * Generate a valid id for the element
+     * @returns A valid id
+     */
+    setId(): string {
+        return Math.random().toString(32).substr(2);
     },
 };

@@ -6,7 +6,6 @@ export declare class ModelNode extends ChevereAction<Attribute> {
     readonly related?: HTMLInputElement[];
     constructor(data: ChevereChild<Attribute>);
     bindData(): void;
+    refresh(): void;
     setAction(): void;
-    refreshAttribute(): void;
-    parseAttribute(): void;
 }

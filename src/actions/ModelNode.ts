@@ -36,7 +36,12 @@ export class ModelNode extends ChevereAction<Attribute> {
             ).filter((e) => e != this.element);
 
         this.ifAttrIsEmpty(this.attr!);
-        this.parseAttribute();
+        this.readAttribute(() => {
+            if (!this.attr?.values.original!.match(Patterns.$data))
+                throw new SyntaxError(
+                    "The 'data-model' attribute only accept a property reference as value",
+                );
+        });
     }
 
     /**
@@ -50,7 +55,7 @@ export class ModelNode extends ChevereAction<Attribute> {
         }
     }
 
-    setAction(): void {
+    refresh(): void {
         this.parent.data![this.variable] =
             this.inputType != "checkbox"
                 ? (this.element as HTMLInputElement).value
@@ -68,22 +73,9 @@ export class ModelNode extends ChevereAction<Attribute> {
                 : (this.element as HTMLInputElement).checked;
     }
 
-    refreshAttribute(): void {
-        this.element.addEventListener("input", this.setAction.bind(this));
+    setAction(): void {
+        this.element.addEventListener("input", this.refresh.bind(this));
 
         this.bindData();
-    }
-
-    parseAttribute(): void {
-        try {
-            if (!this.attr?.values.original!.match(Patterns.$data))
-                throw new SyntaxError(
-                    "The 'data-model' attribute only accept a property reference as value",
-                );
-
-            this.refreshAttribute();
-        } catch (error) {
-            console.error(error);
-        }
     }
 }

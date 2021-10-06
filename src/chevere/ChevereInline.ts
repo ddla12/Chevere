@@ -1,4 +1,4 @@
-import { Chevere } from "@chevere";
+import { ChevereNode } from "@chevere";
 import { Helper } from "@helpers";
 import { ChevereNodeData } from "@types";
 
@@ -7,7 +7,7 @@ import { ChevereNodeData } from "@types";
  * @class
  * @extends {Chevere}
  */
-export class ChevereInline extends Chevere {
+export class ChevereInline extends ChevereNode {
     constructor(el: HTMLElement) {
         super(
             Helper.parser<object>({

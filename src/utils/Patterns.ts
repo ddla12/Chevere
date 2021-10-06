@@ -5,16 +5,6 @@ import { Pattern } from "@types";
  */
 export const RegExpFactory = {
     /**
-     * Search all references of the 'data-for' variable
-     * @param variable
-     * @returns A RegExp that differentiates between the real 'data-for' variable and others with the same name
-     */
-    loop: (v: string) =>
-        new RegExp(
-            String.raw`^${v}|(?<=\[)${v}(?=\])?|((?<=(\,|\())|(?<=\s+))${v}(?!\:)|(?<=\$\{)${v}`,
-            "g",
-        ),
-    /**
      * Create a RegExp to find 'this' references
      * @param prop
      * @returns A RegExp to find a specific property of 'this' (Chevere)
@@ -44,14 +34,14 @@ export const Patterns: Pattern = {
     arguments: /(?<=\().*(?=\))/g,
     removePar: /.*\(|\)$/g,
     isLogicalExpression: new RegExp(
-        String.raw`${commonRegexp.bool}(\s+)?(\||&|=|!=|(>|<)(=)?)`,
+        String.raw`${commonRegexp.bool}(\s+)?(\||&|=|!=|(>|<)(=)?)`, "s"
     ),
     isVariableAssign:
-        /^this\.data\.\w+(\s)?(\?\?||\+|\-|\*|\/|\%|\*\*|<<?|>>(>)?|\|(\|)?||\&(\&)?|\^)?=/,
+        /^this\.data\.\w+(\s)?(\?\?||\+|\-|\*|\/|\%|\*\*|<<?|>>(>)?|\|(\|)?||\&(\&)?|\^)?=/s,
     isString: /^(\`).*\1$/,
     isObject: /^\{.*\}$/,
     isBoolean: new RegExp(`${commonRegexp.bool}$`),
-    methodSyntax: /(^\w+$)|(^.*?\((.*)?\)$)/,
+    methodSyntax: /^.*\((.*)?\)$/s,
     bindAndOn: /^(data-(on|bind):|@(on|bind))/,
     bind: /^(data-)/,
     for: /^\w+(\s+)in(\s+)this\.data\.\w+/,
