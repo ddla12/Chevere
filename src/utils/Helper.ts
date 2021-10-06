@@ -20,12 +20,12 @@ export const Helper = {
      * @returns A list of ActionNode<Attribute> related to the component
      */
     getElementsBy(data: FindChilds<Attribute>): ChevereChild<Attribute>[] {
-        const nodes = [...data.element.querySelectorAll(data.selector)];
+        const nodes = [...data.$element.querySelectorAll(data.selector)];
 
         return nodes.map(
             (node) =>
                 new data.Child({
-                    element: node as HTMLElement,
+                    $element: node as HTMLElement,
                     parent: data.parent,
                     attr: {
                         attribute: data.attribute,
@@ -54,7 +54,7 @@ export const Helper = {
      */
     getElementsByDataOn(data: DataOn): ChevereChild<Attribute[]>[] {
         const regexp = RegExpFactory.bindOrOn(data.attribute),
-            nodes = [...data.parent.element.querySelectorAll((!data.rescan) ? "*" : "*[data-key]")].filter(
+            nodes = [...data.parent.$element.querySelectorAll((!data.rescan) ? "*" : "*[data-key]")].filter(
                 (el) =>
                     [...el.attributes]
                         .map((attr) => attr.name)
@@ -64,7 +64,7 @@ export const Helper = {
         return nodes.map(
             (node) =>
                 new data.Child({
-                    element: node as HTMLElement,
+                    $element: node as HTMLElement,
                     parent: data.parent,
                     attr: [...node.attributes]
                         .map((attr) => attr.name)

@@ -3,7 +3,7 @@ import { ChevereAction } from "./ActionNode";
 export class ShowNode extends ChevereAction {
     constructor(data) {
         super(data);
-        this.display = getComputedStyle(this.element).display;
+        this.display = getComputedStyle(this.$element).display;
         this.ifAttrIsEmpty(this.attr);
         this.readAttribute(() => {
             if ((!Patterns.isBoolean.test(this.attr.values.original) &&
@@ -13,7 +13,7 @@ export class ShowNode extends ChevereAction {
         });
     }
     refresh() {
-        this.element.style.display = !this.attr.values.current()
+        this.$element.style.display = !this.attr.values.current()
             ? "none"
             : this.display;
     }

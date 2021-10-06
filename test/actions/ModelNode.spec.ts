@@ -27,18 +27,18 @@ el.innerHTML += `
 const Inline = new ChevereInline(el);
 
 const inputs = {
-    text: Inline.element.querySelector(
+    text: Inline.$element.querySelector(
         "input[type='text']",
     ) as HTMLInputElement,
-    singleCheck: Inline.element.querySelector(
+    singleCheck: Inline.$element.querySelector(
         "input[type='checkbox']",
     ) as HTMLInputElement,
-    select: Inline.element.querySelector("select") as HTMLSelectElement,
-    radio: Inline.element.querySelector(
+    select: Inline.$element.querySelector("select") as HTMLSelectElement,
+    radio: Inline.$element.querySelector(
         "input[type='radio']",
     ) as HTMLInputElement,
     multipleCheck: [
-        ...Inline.element.querySelectorAll("input[name='multiple']"),
+        ...Inline.$element.querySelectorAll("input[name='multiple']"),
     ] as HTMLInputElement[],
 };
 

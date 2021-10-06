@@ -31,7 +31,7 @@ describe("Create a basic ChevereAttached", () => {
             expect(BasicNode.id).not.toBeUndefined();
         });
         test("Has a proper element", () => {
-            expect(BasicNode.element).toBe(element);
+            expect(BasicNode.$element).toBe(element);
         });
     });
     describe("Reactivity", () => {
@@ -48,7 +48,7 @@ describe("Create a basic ChevereAttached", () => {
             updated() {
                 return;
             },
-            updating() {
+            beforeUpdating() {
                 return "Hello world";
             },
             watch: {
@@ -70,23 +70,23 @@ describe("Create a basic ChevereAttached", () => {
             expect(data).toHaveBeenCalled();
         });
 
-        describe("'updated', 'updating' and 'watch'", () => {
+        describe("'updated', 'beforeUpdating' and 'watch'", () => {
             const Node = new ChevereAttached(Data, element);
 
-            test("'updated', 'updating' and 'watch' aren't undefined", () => {
-                expect(Node.updating).not.toBeUndefined();
+            test("'updated', 'beforeUpdating' and 'watch' aren't undefined", () => {
+                expect(Node.beforeUpdating).not.toBeUndefined();
                 expect(Node.updated).not.toBeUndefined();
                 expect((Node as any).watch!.msg).not.toBeUndefined();
             });
-            test("'updated', 'updating' and 'watch' are called after a method call", () => {
+            test("'updated', 'beforeUpdating' and 'watch' are called after a method call", () => {
                 jest.spyOn((Node as any).watch!, "msg");
                 jest.spyOn(Node, "updated");
-                jest.spyOn(Node, "updating");
+                jest.spyOn(Node, "beforeUpdating");
 
                 Node.methods?.say();
 
                 expect(Node.updated).toHaveBeenCalled();
-                expect(Node.updating).toHaveBeenCalled();
+                expect(Node.beforeUpdating).toHaveBeenCalled();
                 expect((Node as any).watch.msg).toHaveBeenCalled();
             });
         });

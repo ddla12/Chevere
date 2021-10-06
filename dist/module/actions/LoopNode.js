@@ -4,15 +4,15 @@ export class LoopNode extends ChevereAction {
     constructor(data) {
         super(data);
         this.id = Helper.setId();
-        this.pos = [...this.parent.element.children].indexOf(this.element);
+        this.pos = [...this.parent.$element.children].indexOf(this.$element);
         this.variables = {
-            loop: this.element.dataset.for.match(/^\w+/)[0],
-            parent: this.element.dataset
+            loop: this.$element.dataset.for.match(/^\w+/)[0],
+            parent: this.$element.dataset
                 .for.match(Patterns.forParent)[0]
                 .replace("this.data.", ""),
         };
         this.templates = {
-            content: this.element.content,
+            content: this.$element.content,
             fragment: document.createDocumentFragment(),
         };
         this.key = `${Object.values(this.variables).join("-")}-${this.id}`;
@@ -25,9 +25,9 @@ export class LoopNode extends ChevereAction {
     }
     refresh() {
         Object.entries(this.parent.childs).forEach(([attr, list]) => {
-            this.parent.childs[attr] = list.filter((child) => !child.element.dataset.key);
+            this.parent.childs[attr] = list.filter((child) => !child.$element.dataset.key);
         });
-        [...this.parent.element.querySelectorAll(`*[data-key=${this.key}]`)].forEach((n) => n.remove());
+        [...this.parent.$element.querySelectorAll(`*[data-key=${this.key}]`)].forEach((n) => n.remove());
         this.refresh();
         this.parent.reScan();
     }
@@ -47,6 +47,6 @@ export class LoopNode extends ChevereAction {
                 .forEach((child) => child.dataset.forRef = `{ ${this.variables.loop}: ${toReplace} }`);
             this.templates.fragment.append(document.importNode(this.templates.content, true));
         });
-        this.parent.element.insertBefore(this.templates.fragment, this.parent.element.children[this.pos]);
+        this.parent.$element.insertBefore(this.templates.fragment, this.parent.$element.children[this.pos]);
     }
 }

@@ -2,12 +2,12 @@ import { Attributes, ChevereChild, ChevereNodeData, Data, Dispatch, initFunc, Wa
 export declare abstract class ChevereNode {
     readonly name?: string;
     readonly id: string;
-    readonly element: HTMLElement;
+    readonly $element: HTMLElement;
     init?: initFunc;
     updated?: () => void;
-    updating?: () => void;
+    beforeUpdating?: () => void;
     data?: Data<any>;
-    refs?: Data<HTMLElement>;
+    $refs?: Data<HTMLElement>;
     childs?: Data<ChevereChild<Attributes>[]>;
     methods?: Data<Function>;
     protected watch?: Data<Watch>;

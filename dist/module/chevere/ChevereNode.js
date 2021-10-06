@@ -3,18 +3,26 @@ import { Helper, Patterns } from "../utils/index.js";
 export class ChevereNode {
     constructor(data, element) {
         this.data = {};
+        this.childs = {
+            ["data-for"]: [],
+            ["data-text"]: [],
+            ["data-show"]: [],
+            ["data-model"]: [],
+            ["data-on"]: [],
+            ["data-bind"]: []
+        };
         ({
             name: this.name,
             watch: this.watch,
             init: this.init,
             updated: this.updated,
-            updating: this.updating,
+            beforeUpdating: this.beforeUpdating,
         } = data);
-        this.element = element;
-        if (this.element.dataset.inline && this.element.dataset.attached) {
+        this.$element = element;
+        if (this.$element.dataset.inline && this.$element.dataset.attached) {
             throw new Error("A component cannot have both 'data-' attributes ('inline', 'attached')");
         }
-        this.id = this.element.dataset.id = Helper.setId();
+        this.id = this.$element.dataset.id = Helper.setId();
         (data.data) && (this.data = this.parseData(data.data));
         (data.methods) && (this.methods = this.parseMethods(data.methods));
         (this.watch) &&
@@ -22,8 +30,8 @@ export class ChevereNode {
                 if (!this.data[func])
                     throw new ReferenceError(`You're trying to watch an undefined property '${func}'`);
             });
-        this.refs = this.findRefs();
-        if (this.init == undefined && Patterns.arguments.test(this.element.dataset.init))
+        this.$refs = this.findRefs();
+        if (this.init == undefined && Patterns.arguments.test(this.$element.dataset.init))
             throw new EvalError(`The ${this.name || "Some"} components don't have an init() function, therefore they do not accept any parameters`);
         if (this.init)
             this.executeInit();
@@ -31,13 +39,13 @@ export class ChevereNode {
         Object.seal(this);
     }
     executeInit() {
-        let args = Helper.parser({ expr: "[" + this.element.dataset.init + "]" });
+        let args = Helper.parser({ expr: "[" + this.$element.dataset.init + "]" });
         return (this.init instanceof Promise)
             ? (async () => await this.init(...args))()
             : this.init(...args);
     }
     findRefs() {
-        return [...this.element.querySelectorAll("*[data-ref]")].reduce((props, el) => {
+        return [...this.$element.querySelectorAll("*[data-ref]")].reduce((props, el) => {
             if (!el.dataset.ref)
                 throw new SyntaxError("data-ref attribute cannot be empty");
             if (Object.keys({ ...props }).some((p) => p == el.dataset.ref))
@@ -54,34 +62,34 @@ export class ChevereNode {
         });
     }
     checkForActionsAndChilds() {
-        if (this.element.querySelectorAll("*[data-inline], *[data-attached]")
+        if (this.$element.querySelectorAll("*[data-inline], *[data-attached]")
             .length)
             throw Error(`Child components is an unsupported feature, sorry about that`);
         this.childs = {
             ["data-for"]: Helper.getElementsBy({
                 attribute: "data-for",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: "template[data-for]",
                 Child: LoopNode,
             }),
             ["data-text"]: Helper.getElementsBy({
                 attribute: "data-text",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: "*[data-text]",
                 Child: TextNode,
             }),
             ["data-show"]: Helper.getElementsBy({
                 attribute: "data-show",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: "*[data-show]",
                 Child: ShowNode,
             }),
             ["data-model"]: Helper.getElementsBy({
                 attribute: "data-model",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: "input[data-model], select[data-model], textarea[data-model]",
                 Child: ModelNode,
@@ -101,7 +109,8 @@ export class ChevereNode {
         };
     }
     $emitSelf(data) {
-        this.childs["data-on"].filter((node) => node.attr.some((attrs) => attrs.attribute.includes(data.name))).forEach((node) => node.element.dispatchEvent(new CustomEvent(data.name, {
+        this.childs["data-on"].filter((node) => node.attr.some((attrs) => attrs.attribute.includes(data.name) &&
+            !(attrs.attribute.includes("window")))).forEach((node) => node.$element.dispatchEvent(new CustomEvent(data.name, {
             detail: data.detail,
             bubbles: true,
             composed: true,
@@ -117,12 +126,12 @@ export class ChevereNode {
         }));
     }
     reScan() {
-        this.refs = this.findRefs();
+        this.$refs = this.findRefs();
         const newSimpleChilds = (attr, Child) => [
             ...this.childs[`data-${attr}`],
             ...Helper.getElementsBy({
                 attribute: `data-${attr}`,
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: `*[data-${attr}][data-key]`,
                 Child: Child,
@@ -163,7 +172,7 @@ export class ChevereNode {
             ...rest,
             [func.name]: new Proxy(func, {
                 apply: (target, _, args) => {
-                    (this.updating) && this.updating();
+                    (this.beforeUpdating) && this.beforeUpdating();
                     const result = (target instanceof Promise)
                         ? (async () => await target.apply(this, [...args]))()
                         : target.apply(this, [...args]);
@@ -177,7 +186,7 @@ export class ChevereNode {
         return Helper.reactive({
             object: data,
             beforeSet: (target, name, value) => {
-                this.updating && this.updating();
+                this.beforeUpdating && this.beforeUpdating();
                 this.watch &&
                     this.watch[name]?.apply(this, [
                         value,

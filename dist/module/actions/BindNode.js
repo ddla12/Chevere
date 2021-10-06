@@ -50,7 +50,7 @@ export class BindNode extends ChevereAction {
                 original: attr.values.original,
             },
             bindAttr: attr.attribute.replace(Patterns.bindAndOn, ""),
-            bindValue: this.element.getAttribute(attr.attribute.replace(Patterns.bindAndOn, "")) || "",
+            bindValue: this.$element.getAttribute(attr.attribute.replace(Patterns.bindAndOn, "")) || "",
             type: Patterns.isString.test(attr.values.original)
                 ? "string"
                 : Patterns.isObject.test(attr.values.original)
@@ -77,7 +77,7 @@ export class BindNode extends ChevereAction {
                 node: this.parent,
                 args: this.forVars
             });
-            attr.predicate = () => this.element[attr.bindAttr] = attr.values.current();
+            attr.predicate = () => this.$element[attr.bindAttr] = attr.values.current();
         });
     }
     setAttributes() {
@@ -90,7 +90,7 @@ export class BindNode extends ChevereAction {
                 node: this.parent,
                 args: this.forVars
             });
-            attr.predicate = () => this.element.setAttribute(attr.bindAttr, attr.values.current());
+            attr.predicate = () => this.$element.setAttribute(attr.bindAttr, attr.values.current());
         });
     }
     setAction() {
@@ -116,13 +116,13 @@ export class BindNode extends ChevereAction {
         if (this.attr[Style])
             this.attr[Style].predicate = () => ["string", "variable"].includes(this.attr[Style].type)
                 ?
-                    (this.element.style.cssText =
+                    (this.$element.style.cssText =
                         this.attr[Style].values.current() +
                             this.attr[Style].bindValue)
                 :
-                    Object.assign(this.element.style, this.attr[Style].values.current());
+                    Object.assign(this.$element.style, this.attr[Style].values.current());
         if (this.attr[Class])
-            this.attr[Class].predicate = () => (this.element.className = ["string", "variable"].includes(this.attr[Class].type)
+            this.attr[Class].predicate = () => (this.$element.className = ["string", "variable"].includes(this.attr[Class].type)
                 ?
                     this.attr[Class].values.current() + " "
                 :

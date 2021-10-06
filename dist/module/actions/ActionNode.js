@@ -11,12 +11,12 @@ export class ChevereAction {
             }
         };
         ({
-            element: this.element,
+            $element: this.$element,
             parent: this.parent,
             attr: this.attr,
         } = data);
         this.forVars = new Map([...Object.entries(Helper.parser({
-                expr: this.element.dataset.forRef || "{}",
+                expr: this.$element.dataset.forRef || "{}",
                 node: this.parent
             })) || []]);
     }

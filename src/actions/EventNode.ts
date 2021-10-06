@@ -38,7 +38,7 @@ export class EventNode extends ChevereAction<Attribute[]> {
             const modifier: string = attr.attribute.replace(/^.*\./, "");
 
             //Set the event in the proper scope
-            (modifier != "window" ? this.element : window).addEventListener(
+            (modifier != "window" ? this.$element : window).addEventListener(
                 eventNames[i],
                 (e) => {
                     Helper.eventCallback({
@@ -47,7 +47,7 @@ export class EventNode extends ChevereAction<Attribute[]> {
                             ? attr.values.original
                             : `$event.stopPropagation();${attr.values.original}`,
                         node: this.parent,
-                        $el: this.element,
+                        $el: this.$element,
                         args: this.forVars!
                     });
                 },

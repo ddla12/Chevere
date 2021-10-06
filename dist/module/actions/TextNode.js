@@ -12,7 +12,7 @@ export class TextNode extends ChevereAction {
         });
     }
     refresh() {
-        this.element.textContent = this.attr.values.current();
+        this.$element.textContent = this.attr.values.current();
     }
     setAction() {
         this.attr.values.current = () => Helper.parser({

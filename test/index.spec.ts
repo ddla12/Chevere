@@ -22,7 +22,7 @@ describe("Chevere window object", () => {
 
         expect(helloWorld()).toBeTruthy();
     });
-    test("makeNodes works", () => {
+    test("make() works", () => {
         document.documentElement.innerHTML = `
             <div name="chevere">
                 <small data-text="this.data.msg"></small>

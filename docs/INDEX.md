@@ -9,7 +9,7 @@ If you've worked with some [or both] of those frameworks, the thing will be easi
 
 Chevere works at the same way as the DOM, ``ChevereNodes`` have ``ActionNodes``, and together, they make a 'tree' with their own data
 
-![Chevere tree](./img/ChevereTree.svg "Chevere tree")
+![Chevere tree](./img/ChevereWorks.svg "Chevere tree")
 
 Of course, *data* is reusable, multiple ``ChevereNode`` instances can have the same 'blueprint data' so to speak, for instance...
 
@@ -50,7 +50,7 @@ Chevere has two kind of nodes, ``Inline`` nodes, and ``Attached`` nodes
 </div>
 ```
 
-``Attached`` nodes can also be defined with the *``Chevere.make``* function (Preferred way), for instance...
+``Attached`` nodes can also be defined with the *``Chevere.make``* method (Preferred way), for instance...
 
 ```html
 <div>
@@ -77,4 +77,5 @@ Perhaps, this gonna sounds a little weird to you, but we like to call ``Chevere`
 | Page | Description |
 | ------- | ----------- |
 | [`Defining the data`](./data.md)| How to create a reusable and functional data|
-| [`Lifecycle`](./lifecycle.md)| About *``init``*, *``updating``* and *``updated``* |
+| [`Lifecycle`](./lifecycle.md)| About *``init``*, *``beforeUpdating``* and *``updated``* |
+| [`Attributes`](./attribute.md)| About ``data-`` attributes|

@@ -41,4 +41,6 @@ Contribution
 | ``npm run build``| At first, transpile all ``.ts`` files of the ``.src`` folder, then, compile all the ``.js`` files to generate the CDN build|
 |``npm run format``| Prettier command |
 
+*Read the [ToDo](./docs/todo.md) file for contribution more*
+
 **We prefer a project with an OOP approach, keep it in mind**

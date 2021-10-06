@@ -16,14 +16,14 @@ export class EventNode extends ChevereAction {
         let eventNames = this.attr.map((attr) => attr.attribute.replace(Patterns.bindAndOn, "").replace(/\..*/, ""));
         this.attr.forEach((attr, i) => {
             const modifier = attr.attribute.replace(/^.*\./, "");
-            (modifier != "window" ? this.element : window).addEventListener(eventNames[i], (e) => {
+            (modifier != "window" ? this.$element : window).addEventListener(eventNames[i], (e) => {
                 Helper.eventCallback({
                     $event: e,
                     expr: attr.values.original.includes("$emitSelf")
                         ? attr.values.original
                         : `$event.stopPropagation();${attr.values.original}`,
                     node: this.parent,
-                    $el: this.element,
+                    $el: this.$element,
                     args: this.forVars
                 });
             });

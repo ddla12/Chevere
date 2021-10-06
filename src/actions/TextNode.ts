@@ -24,7 +24,7 @@ export class TextNode extends ChevereAction<Attribute> {
     }
 
     refresh(): void {
-        this.element.textContent = this.attr!.values.current!();
+        this.$element.textContent = this.attr!.values.current!();
     }
 
     setAction(): void {

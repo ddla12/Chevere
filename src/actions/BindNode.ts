@@ -65,7 +65,7 @@ export class BindNode extends ChevereAction<Attribute[]> {
             },
             bindAttr: attr.attribute.replace(Patterns.bindAndOn, ""),
             bindValue:
-                this.element.getAttribute(
+                this.$element.getAttribute(
                     attr.attribute.replace(Patterns.bindAndOn, "")
                 ) || "",
             type: Patterns.isString.test(attr.values.original)
@@ -109,7 +109,7 @@ export class BindNode extends ChevereAction<Attribute[]> {
 
                 //And if it's true, the attribute is too
                 //@ts-ignore
-                attr.predicate = () => this.element[attr.bindAttr] = attr.values.current!();
+                attr.predicate = () => this.$element[attr.bindAttr] = attr.values.current!();
             });
     }
 
@@ -133,7 +133,7 @@ export class BindNode extends ChevereAction<Attribute[]> {
 
                 //And pass it to the attribute
                 attr.predicate = () =>
-                    this.element.setAttribute(
+                    this.$element.setAttribute(
                         attr.bindAttr,
                         attr.values.current!(),
                     );
@@ -175,18 +175,18 @@ export class BindNode extends ChevereAction<Attribute[]> {
             this.attr[Style].predicate = () =>
                 ["string", "variable"].includes(this.attr[Style].type)
                     ? //If 'style' bind value is a string or variable, pass it directly to the cssText of the element
-                      (this.element.style.cssText =
+                      (this.$element.style.cssText =
                           this.attr[Style].values.current!() +
                           this.attr[Style].bindValue!)
                     : //Otherwise, assign the object to the element style
                       Object.assign(
-                          this.element.style,
+                          this.$element.style,
                           this.attr[Style].values.current!(),
                       );
 
         if (this.attr[Class])
             this.attr[Class].predicate = () =>
-                (this.element.className = ["string", "variable"].includes(
+                (this.$element.className = ["string", "variable"].includes(
                     this.attr[Class].type,
                 )
                     ? //Same treatment as the style bind value if it is string or variable

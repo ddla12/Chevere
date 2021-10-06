@@ -41,7 +41,7 @@ test("Refs", () => {
 
     const Inline = new ChevereInline(el);
 
-    expect(Inline.refs!.test).not.toBeUndefined();
+    expect(Inline.$refs!.test).not.toBeUndefined();
 });
 
 describe("Childs", () => {
@@ -78,14 +78,14 @@ describe("Childs", () => {
     test("span with 'data-show' is hidden", () => {
         expect(
             (
-                Inline.element.querySelector(
+                Inline.$element.querySelector(
                     "span[data-show]",
                 )! as HTMLSpanElement
             ).style.display,
         ).toBe("none");
     });
     test("style of span with 'data-bind' is 'padding: 1rem'", () => {
-        expect(Inline.childs!["data-bind"][0].element.style.padding).toBe(
+        expect(Inline.childs!["data-bind"][0].$element.style.padding).toBe(
             "1rem",
         );
     });
@@ -93,11 +93,11 @@ describe("Childs", () => {
         Inline.data!.msg = "Reactive";
 
         expect(
-            (Inline.element.querySelector("span[data-text]") as HTMLSpanElement)
+            (Inline.$element.querySelector("span[data-text]") as HTMLSpanElement)
                 .textContent,
         ).toBe("Reactive");
         expect(
-            (Inline.element.querySelector("input") as HTMLInputElement).value,
+            (Inline.$element.querySelector("input") as HTMLInputElement).value,
         ).toBe("Reactive");
     });
 });

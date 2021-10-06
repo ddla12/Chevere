@@ -11,7 +11,7 @@ export class ShowNode extends ChevereAction<Attribute> {
     constructor(data: ChevereChild<Attribute>) {
         super(data);
 
-        this.display = getComputedStyle(this.element).display;
+        this.display = getComputedStyle(this.$element).display;
 
         this.ifAttrIsEmpty(this.attr!);
         this.readAttribute(() => {
@@ -27,7 +27,7 @@ export class ShowNode extends ChevereAction<Attribute> {
     }
 
     refresh(): void {
-        this.element.style.display = !this.attr!.values.current!()
+        this.$element.style.display = !this.attr!.values.current!()
             ? "none"
             : this.display!;
     }

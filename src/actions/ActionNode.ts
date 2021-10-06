@@ -8,10 +8,10 @@ import { Helper } from "@helpers";
  * @class
  */
 export abstract class ChevereAction<Attributes> {
-    element : HTMLElement;
+    readonly $element : HTMLElement;
     parent  : ChevereNode;
     attr?   : Attributes;
-    forVars?: Args;
+    readonly forVars?: Args;
     /**
      * Check for syntax error in attribute(s)
      */
@@ -26,14 +26,14 @@ export abstract class ChevereAction<Attributes> {
 
     constructor(data: ChevereChild<Attributes>) {
         ({
-            element: this.element,
+            $element: this.$element,
             parent: this.parent,
             attr: this.attr,
         } = data);
 
         this.forVars = new Map(
             [...Object.entries(Helper.parser({ 
-                expr: this.element.dataset.forRef || "{}", 
+                expr: this.$element.dataset.forRef || "{}", 
                 node: this.parent 
             })) || []]
         );

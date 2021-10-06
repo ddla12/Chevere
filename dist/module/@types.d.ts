@@ -46,7 +46,7 @@ export interface ActionDynamic<Attributes> {
 export interface FindChilds<Attributes> {
     selector: string;
     attribute: string;
-    element: Element;
+    $element: Element;
     parent: ChevereNode;
     Child: ActionDynamic<Attributes>;
 }
@@ -75,7 +75,7 @@ export interface ChevereNodeData {
     init?: initFunc;
     methods?: Data<Function>;
     watch?: Data<Watch>;
-    readonly updating?: () => void;
+    readonly beforeUpdating?: () => void;
     readonly updated?: () => void;
 }
 export interface ChevereDataNode {
@@ -88,7 +88,7 @@ export interface ChevereWindow {
     searchInlines(): void;
 }
 export interface ChevereChild<T = Attributes> {
-    element: HTMLElement;
+    $element: HTMLElement;
     parent: ChevereNode;
     attr?: T;
 }

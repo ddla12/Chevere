@@ -4,5 +4,16 @@
     "description": "A mini-framework for javascript, to help you with your frontend setup",
     "main": "./module/index.js",
     "author": "Darud Lingilien",
-    "license": "MIT"
+    "license": "MIT",
+    "repository": {
+        "url": "https://github.com/ddla12/Chevere",
+        "directory": "dist/",
+        "type": "git"
+    },
+    "keywords": [
+        "DOM",
+        "chevere",
+        "reactive"
+    ],
+    "homepage": "https://github.com/ddla12/Chevere"
 }

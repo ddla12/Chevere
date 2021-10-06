@@ -24,16 +24,16 @@ export class ModelNode extends ChevereAction<Attribute> {
         super(data);
 
         this.variable = this.attr!.values.original.replace("this.data.", "");
-        this.inputType = (this.element as HTMLInputElement).type;
+        this.inputType = (this.$element as HTMLInputElement).type;
 
         if (this.inputType == "checkbox")
             this.related = (
                 [
-                    ...this.parent.element.querySelectorAll(
+                    ...this.parent.$element.querySelectorAll(
                         `input[type='checkbox'][data-model='this.data.${this.variable}']`,
                     ),
                 ] as HTMLInputElement[]
-            ).filter((e) => e != this.element);
+            ).filter((e) => e != this.$element);
 
         this.ifAttrIsEmpty(this.attr!);
         this.readAttribute(() => {
@@ -49,7 +49,7 @@ export class ModelNode extends ChevereAction<Attribute> {
      */
     bindData(): void {
         if (!["radio", "checkbox"].includes(this.inputType)) {
-            (this.element as HTMLInputElement).value = String(
+            (this.$element as HTMLInputElement).value = String(
                 this.parent.data![this.variable],
             );
         }
@@ -58,23 +58,23 @@ export class ModelNode extends ChevereAction<Attribute> {
     refresh(): void {
         this.parent.data![this.variable] =
             this.inputType != "checkbox"
-                ? (this.element as HTMLInputElement).value
+                ? (this.$element as HTMLInputElement).value
                 : //Input type checkbox has an special deal
                 !this.related?.length
                 ? //If there are not related checkbox, bind a boolean value
-                  (this.element as HTMLInputElement).checked
+                  (this.$element as HTMLInputElement).checked
                 : //else, push to array
-                [...this.related!, this.element as HTMLInputElement].filter(
+                [...this.related!, this.$element as HTMLInputElement].filter(
                       (c) => c.checked,
                   ).length != 0
-                ? [...this.related!, this.element as HTMLInputElement]
+                ? [...this.related!, this.$element as HTMLInputElement]
                       .filter((c) => c.checked)
                       .map((c) => c.value)
-                : (this.element as HTMLInputElement).checked;
+                : (this.$element as HTMLInputElement).checked;
     }
 
     setAction(): void {
-        this.element.addEventListener("input", this.refresh.bind(this));
+        this.$element.addEventListener("input", this.refresh.bind(this));
 
         this.bindData();
     }

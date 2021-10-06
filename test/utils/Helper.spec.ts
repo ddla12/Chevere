@@ -49,7 +49,7 @@ describe("Helper", () => {
         });
     });
     test("Event callback is called", () => {
-        Node.childs!["data-on"][0].element.click();
+        Node.childs!["data-on"][0].$element.click();
         expect(Helper.eventCallback).toBeCalled();
     });
     describe("Selector functions", () => {

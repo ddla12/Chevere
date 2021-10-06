@@ -28,13 +28,20 @@ import {
 export abstract class ChevereNode {
     readonly name?: string;
     readonly id: string;
-    readonly element: HTMLElement;
+    readonly $element: HTMLElement;
     init?   : initFunc;
     updated?: () => void;
-    updating?: () => void;
+    beforeUpdating?: () => void;
     data?: Data<any> = {};
-    refs?: Data<HTMLElement>;
-    childs?: Data<ChevereChild<Attributes>[]>;
+    $refs?: Data<HTMLElement>;
+    childs?: Data<ChevereChild<Attributes>[]> = {
+        ["data-for"]    : [],
+        ["data-text"]   : [],
+        ["data-show"]   : [],
+        ["data-model"]  : [],
+        ["data-on"]     : [],
+        ["data-bind"]   : []
+    };
     methods?: Data<Function>;
     protected watch?: Data<Watch>;
 
@@ -49,16 +56,16 @@ export abstract class ChevereNode {
             watch: this.watch,
             init: this.init,
             updated: this.updated,
-            updating: this.updating,
+            beforeUpdating: this.beforeUpdating,
         } = data);
         
-        this.element = element;
+        this.$element = element;
 
-        if(this.element.dataset.inline && this.element.dataset.attached) {
+        if(this.$element.dataset.inline && this.$element.dataset.attached) {
             throw new Error("A component cannot have both 'data-' attributes ('inline', 'attached')");
         }
 
-        this.id = this.element.dataset.id = Helper.setId();
+        this.id = this.$element.dataset.id = Helper.setId();
 
         (data.data) && (this.data = this.parseData(data.data));
         (data.methods) && (this.methods = this.parseMethods(data.methods));
@@ -71,10 +78,10 @@ export abstract class ChevereNode {
                     );
             });
         
-        this.refs = this.findRefs();
+        this.$refs = this.findRefs();
 
         //If there's not a init function and 'data-init' attribute has parameters
-        if (this.init == undefined && Patterns.arguments.test(this.element.dataset.init!))
+        if (this.init == undefined && Patterns.arguments.test(this.$element.dataset.init!))
             throw new EvalError(
                 `The ${this.name || "Some"} components don't have an init() function, therefore they do not accept any parameters`,
             );
@@ -91,7 +98,7 @@ export abstract class ChevereNode {
      * Execute the init function
      */
     executeInit(): void|Promise<void> {
-        let args: [] = Helper.parser({ expr: "[" + this.element.dataset.init + "]" });
+        let args: [] = Helper.parser({ expr: "[" + this.$element.dataset.init + "]" });
 
         return (this.init! instanceof Promise)
             ? (async() => await this.init!(...args))()
@@ -103,7 +110,7 @@ export abstract class ChevereNode {
      */
     findRefs(): Data<HTMLElement> {
         return (
-            [...this.element.querySelectorAll("*[data-ref]")] as HTMLElement[]
+            [...this.$element.querySelectorAll("*[data-ref]")] as HTMLElement[]
         ).reduce((props, el) => {
             //If the attribute is empty
             if (!el.dataset.ref)
@@ -143,7 +150,7 @@ export abstract class ChevereNode {
     checkForActionsAndChilds(): void {
         //For now, nested components is not supported
         if (
-            this.element.querySelectorAll("*[data-inline], *[data-attached]")
+            this.$element.querySelectorAll("*[data-inline], *[data-attached]")
                 .length
         )
             throw Error(
@@ -154,28 +161,28 @@ export abstract class ChevereNode {
         this.childs = {
             ["data-for"]: Helper.getElementsBy({
                 attribute: "data-for",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: "template[data-for]",
                 Child: LoopNode,
             }),
             ["data-text"]: Helper.getElementsBy({
                 attribute: "data-text",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: "*[data-text]",
                 Child: TextNode,
             }),
             ["data-show"]: Helper.getElementsBy({
                 attribute: "data-show",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: "*[data-show]",
                 Child: ShowNode,
             }),
             ["data-model"]: Helper.getElementsBy({
                 attribute: "data-model",
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector:
                     "input[data-model], select[data-model], textarea[data-model]",
@@ -203,10 +210,11 @@ export abstract class ChevereNode {
     $emitSelf(data: Dispatch): void {
         this.childs!["data-on"].filter((node) =>
             (node as EventNode).attr!.some((attrs) =>
-                attrs.attribute.includes(data.name),
+                attrs.attribute.includes(data.name) && 
+                !(attrs.attribute.includes("window")),
             ),
         ).forEach((node) =>
-            node.element.dispatchEvent(
+            node.$element.dispatchEvent(
                 new CustomEvent(data.name, {
                     detail: data.detail,
                     bubbles: true,
@@ -233,13 +241,13 @@ export abstract class ChevereNode {
     }
 
     reScan(): void {
-        this.refs = this.findRefs();
+        this.$refs = this.findRefs();
 
         const newSimpleChilds = (attr: string, Child: ActionDynamic<Attribute>) => [
             ...this.childs![`data-${attr}`],
             ...Helper.getElementsBy({
                 attribute: `data-${attr}`,
-                element: this.element,
+                $element: this.$element,
                 parent: this,
                 selector: `*[data-${attr}][data-key]`,
                 Child: Child,
@@ -300,7 +308,7 @@ export abstract class ChevereNode {
                 ...rest,
                 [func.name]: new Proxy(func, {
                     apply: (target, _, args) => {
-                        (this.updating) && this.updating();
+                        (this.beforeUpdating) && this.beforeUpdating();
 
                         //If target is async, one never knows..
                         const result = (target instanceof Promise)
@@ -326,7 +334,7 @@ export abstract class ChevereNode {
         return Helper.reactive({
             object: data,
             beforeSet: (target, name, value) => {
-                this.updating && this.updating();
+                this.beforeUpdating && this.beforeUpdating();
 
                 this.watch! &&
                     this.watch![name as string]?.apply(this, [

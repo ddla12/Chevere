@@ -10,7 +10,7 @@ interface ChevereNodeData {
     init?: initFunc;
     methods?: Data<Function>;
     watch?: Data<Watch>;
-    readonly updating?: () => void;
+    readonly beforeUpdating?: () => void;
     readonly updated?: () => void;
 }
 ```
@@ -21,7 +21,7 @@ As you can see, some properties are optional, but one of them is a special case:
 
 Depending of the way that you want to initialize ``Chevere``, **name** has a suitable behavior with it
 
-If you initialized ``Chevere`` with the *``Chevere.search``* function, in all **Attached nodes**, name must be defined, otherway it isn't necessary, for example...
+If you initialized ``Chevere`` with the *``Chevere.search``* method, in all **Attached nodes**, name must be defined, otherway it isn't necessary, for example...
 
 ```html
 <div data-attached="test">
@@ -40,7 +40,7 @@ If you initialized ``Chevere`` with the *``Chevere.search``* function, in all **
 </script>
 ```
 
-As you see, the *``data-attached``* attribute has as value the name of the data passed as argument to the *``Chevere.search``* function, then, the ``div[data-attached]`` data will **that argument**, the ``div[data-inline]`` doesn't need to have a name.
+As you see, the *``data-attached``* attribute has as value the name of the data passed as argument to the *``Chevere.search``* method, then, the ``div[data-attached]`` data will **that argument**, the ``div[data-inline]`` doesn't need to have a name.
 
 ## Reactive properties
 
@@ -88,7 +88,7 @@ Consider the following example:
 
 When ``button`` is clicked, the content of ``span[data-text]`` will have changed to *'Chevere'*
 
-Ok, that's a very simple example of the function of a javascript *``Proxy``*, but, what would happen with the ``button`` element is clicked on the following code...
+Ok, that's a very simple example of the function of a javascript *``Proxy``*, but, what would happen when the ``button`` element is clicked on the following code...
 
 ```html
 <div>
@@ -137,8 +137,8 @@ const data = {
 };
 ```
 
-So as you can see, you should declare a function with the name of a **data**, otherway you will receive a ***ReferenceError***
+So as you can see, you should declare a method with the name of a **data**, otherway you will receive a ***ReferenceError***
 
 ***Important: You must not call a watch anywhere of your code, they will called at the right time***
 
-### About *``init``*, *``updating``* and *``updated``*, you should read the [`Lifecycle`](./lifecycle.md) document
+### About *``init``*, *``beforeUpdating``* and *``updated``*, you should read the [`Lifecycle`](./lifecycle.md) document

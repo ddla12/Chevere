@@ -29,17 +29,17 @@ export class LoopNode extends ChevereAction<Attribute> {
 
         this.id = Helper.setId();
 
-        this.pos = [...this.parent.element.children].indexOf(this.element);
+        this.pos = [...this.parent.$element.children].indexOf(this.$element);
 
         this.variables = {
-            loop: this.element.dataset.for!.match(/^\w+/)![0],
-            parent: this.element.dataset
+            loop: this.$element.dataset.for!.match(/^\w+/)![0],
+            parent: this.$element.dataset
                 .for!.match(Patterns.forParent)![0]
                 .replace("this.data.", ""),
         };
 
         this.templates = {
-            content: (this.element as HTMLTemplateElement).content,
+            content: (this.$element as HTMLTemplateElement).content,
             fragment: document.createDocumentFragment(),
         };
 
@@ -61,10 +61,10 @@ export class LoopNode extends ChevereAction<Attribute> {
 
     refresh(): void { 
         Object.entries(this.parent.childs!).forEach(([attr, list]) => {
-            this.parent.childs![attr] = list.filter((child) => !child.element.dataset.key)
+            this.parent.childs![attr] = list.filter((child) => !child.$element.dataset.key)
         });
 
-        [...this.parent.element.querySelectorAll(`*[data-key=${this.key}]`)].forEach((n) => n.remove());
+        [...this.parent.$element.querySelectorAll(`*[data-key=${this.key}]`)].forEach((n) => n.remove());
 
         this.refresh();
 
@@ -101,9 +101,9 @@ export class LoopNode extends ChevereAction<Attribute> {
             );
         });
 
-        this.parent.element.insertBefore(
+        this.parent.$element.insertBefore(
             this.templates.fragment,
-            this.parent.element.children[this.pos],
+            this.parent.$element.children[this.pos],
         );
     }
 }

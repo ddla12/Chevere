@@ -1,9 +1,9 @@
 import { RegExpFactory } from "./index.js";
 export const Helper = {
     getElementsBy(data) {
-        const nodes = [...data.element.querySelectorAll(data.selector)];
+        const nodes = [...data.$element.querySelectorAll(data.selector)];
         return nodes.map((node) => new data.Child({
-            element: node,
+            $element: node,
             parent: data.parent,
             attr: {
                 attribute: data.attribute,
@@ -17,11 +17,11 @@ export const Helper = {
         return new Function([...(data.args?.keys() || "")].join(","), `return ${data.expr}`).bind(data.node)(...[...(data.args?.values() || "")]);
     },
     getElementsByDataOn(data) {
-        const regexp = RegExpFactory.bindOrOn(data.attribute), nodes = [...data.parent.element.querySelectorAll((!data.rescan) ? "*" : "*[data-key]")].filter((el) => [...el.attributes]
+        const regexp = RegExpFactory.bindOrOn(data.attribute), nodes = [...data.parent.$element.querySelectorAll((!data.rescan) ? "*" : "*[data-key]")].filter((el) => [...el.attributes]
             .map((attr) => attr.name)
             .some((attr) => regexp.test(attr)));
         return nodes.map((node) => new data.Child({
-            element: node,
+            $element: node,
             parent: data.parent,
             attr: [...node.attributes]
                 .map((attr) => attr.name)

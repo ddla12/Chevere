@@ -124,7 +124,7 @@ export interface FindChilds<Attributes> {
     /**
      * The component element
      */
-    element: Element;
+    $element: Element;
     /**
      * The Chevere component
      */
@@ -217,7 +217,7 @@ export interface ChevereNodeData {
     /**
      * Function to be call before an update
      */
-    readonly updating?: () => void;
+    readonly beforeUpdating?: () => void;
     /**
      * Function to be call after an update
      */
@@ -239,7 +239,7 @@ export interface ChevereWindow {
 }
 
 export interface ChevereChild<T = Attributes> {
-    element: HTMLElement;
+    $element: HTMLElement;
     parent: ChevereNode;
     attr?: T;
 }
