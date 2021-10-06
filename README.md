@@ -10,9 +10,27 @@ To help you to save time and lines of code, we bring you ***Chevere***...
 </div>
 <script>Chevere.search()</script>
 ```
-
 ### You can setup your frontend behavior with only *data-* attributes! That's it!
 
+# Get started
+
+## Via ``npm``
+
+```npm
+npm i chevere
+```
+
+Then...
+
+```javascript
+import Chevere from "chevere"
+```
+
+## Via CDN
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/chevere@1.0.0/cdn/chevere.min.js"></script>
+```
 <br>
 
 Do you wanna know more?, Then look for the [``docs/``](./docs/INDEX.md) folder of this repo
