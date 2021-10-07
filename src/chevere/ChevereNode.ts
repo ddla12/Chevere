@@ -268,10 +268,12 @@ export abstract class ChevereNode {
             this.childs!["data-text"],
             this.childs!["data-show"],
             this.childs!["data-on"],
+            this.childs!["data-model"],
             this.childs!["data-bind"],
         ] = [ 
             newSimpleChilds("text", TextNode),
             newSimpleChilds("show", ShowNode),
+            newSimpleChilds("model", ModelNode),
             newComplexChilds("on", EventNode),
             newComplexChilds("bind", BindNode)
         ];
@@ -294,9 +296,11 @@ export abstract class ChevereNode {
             (node) => (node as ModelNode).variable == name,
         ).forEach((node) => (node as ModelNode).bindData());
 
-        this.childs!["data-bind"].forEach((child) =>
-            (child as BindNode).refresh(),
-        );
+        this.childs!["data-bind"]
+            .filter((child) => (child as BindNode).attr.some((attr) => attr.values.original.includes(name)))
+            .forEach((child) =>
+                (child as BindNode).refresh(),
+            );
     }
 
     /**
@@ -310,10 +314,7 @@ export abstract class ChevereNode {
                     apply: (target, _, args) => {
                         (this.beforeUpdating) && this.beforeUpdating();
 
-                        //If target is async, one never knows..
-                        const result = (target instanceof Promise)
-                            ? (async() => await target.apply(this, [...args]))()
-                            : target.apply(this, [...args]);
+                        const result = target.apply(this, [...args]);
 
                         (this.updated) && this.updated();
 

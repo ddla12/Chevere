@@ -1,6 +1,6 @@
 {
     "name": "chevere",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A mini-framework for javascript, to help you with your frontend setup",
     "main": "./module/index.js",
     "author": "Darud Lingilien",

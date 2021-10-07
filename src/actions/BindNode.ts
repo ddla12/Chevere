@@ -1,5 +1,5 @@
 import { ChevereAction } from "./ActionNode";
-import { Attribute, BindableAttr, ChevereChild } from "@types";
+import { Attribute, BindableAttr, BindForEach, ChevereChild } from "@types";
 import { Helper, Patterns } from "@helpers";
 
 /**
@@ -93,51 +93,53 @@ export class BindNode extends ChevereAction<Attribute[]> {
         this.attr.forEach((attr) => attr.predicate!());
     }
 
-    setBooleanAttributes(): void {
+    //A quick way to implement 'setAttributes' and 'setBooleanAttributes'
+    attributeForEach(data: BindForEach): void {
         this.attr
-            .filter((attr) => Object.values(BooleanAttributes).includes(attr.bindAttr)
-            ).forEach((attr) => {
+            .filter(data.filter)
+            .forEach((attr) => {
                 let i = this.attr.indexOf(attr);
 
-                //Get a boolean value
-                this.attr[i].values.current = () =>
-                    Helper.parser<boolean>({
-                        expr: this.attr[i].values.original,
-                        node: this.parent,
-                        args: this.forVars
-                    });
-
-                //And if it's true, the attribute is too
-                //@ts-ignore
-                attr.predicate = () => this.$element[attr.bindAttr] = attr.values.current!();
-            });
-    }
-
-    /**
-     * Set normal attributes, those that aren't neither 'class' nor 'style' nor type boolean 
-     */
-    setAttributes(): void {
-        this.attr
-            .filter((attr) => (!["style", "class"].includes(attr.bindAttr)) &&
-                !(Object.values(BooleanAttributes).includes(attr.bindAttr))
-            ).forEach((attr) => {
-                let i = this.attr.indexOf(attr);
-
-                //...just get a valid js expression
+                //Get the value
                 this.attr[i].values.current = () =>
                     Helper.parser<any>({
                         expr: this.attr[i].values.original,
                         node: this.parent,
                         args: this.forVars
                     });
+                
+                data.callback(attr);
+            });
+    }
+    
+    /**
+     * Boolean attributes just need to toggle themselves
+     */
+    setBooleanAttributes(): void {
+        this.attributeForEach({
+            filter: (attr) => Object.values(BooleanAttributes).includes(attr.bindAttr),
+            callback: (attr) => {
+                //@ts-ignore
+                attr.predicate = () => this.$element[attr.bindAttr] = attr.values.current!();
+            }
+        });
+    }
 
-                //And pass it to the attribute
+    /**
+     * Set normal attributes, those that aren't neither 'class' nor 'style' nor type boolean 
+     */
+    setAttributes(): void {
+        this.attributeForEach({
+            filter: (attr) => (!["style", "class"].includes(attr.bindAttr)) &&
+                !(Object.values(BooleanAttributes).includes(attr.bindAttr)),
+            callback: (attr) => {
                 attr.predicate = () =>
                     this.$element.setAttribute(
                         attr.bindAttr,
                         attr.values.current!(),
                     );
-            });
+            }
+        });
     }
 
     setAction(): void {

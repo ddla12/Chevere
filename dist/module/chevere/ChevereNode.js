@@ -150,10 +150,12 @@ export class ChevereNode {
             this.childs["data-text"],
             this.childs["data-show"],
             this.childs["data-on"],
+            this.childs["data-model"],
             this.childs["data-bind"],
         ] = [
             newSimpleChilds("text", TextNode),
             newSimpleChilds("show", ShowNode),
+            newSimpleChilds("model", ModelNode),
             newComplexChilds("on", EventNode),
             newComplexChilds("bind", BindNode)
         ];
@@ -165,7 +167,9 @@ export class ChevereNode {
             .forEach((child) => child.refresh());
         ["data-show", "data-text"].forEach((attr) => this.refreshChilds(attr, name));
         this.childs["data-model"].filter((node) => node.variable == name).forEach((node) => node.bindData());
-        this.childs["data-bind"].forEach((child) => child.refresh());
+        this.childs["data-bind"]
+            .filter((child) => child.attr.some((attr) => attr.values.original.includes(name)))
+            .forEach((child) => child.refresh());
     }
     parseMethods(data) {
         return Object.values(data).reduce((rest, func) => ({
@@ -173,9 +177,7 @@ export class ChevereNode {
             [func.name]: new Proxy(func, {
                 apply: (target, _, args) => {
                     (this.beforeUpdating) && this.beforeUpdating();
-                    const result = (target instanceof Promise)
-                        ? (async () => await target.apply(this, [...args]))()
-                        : target.apply(this, [...args]);
+                    const result = target.apply(this, [...args]);
                     (this.updated) && this.updated();
                     return result;
                 },
