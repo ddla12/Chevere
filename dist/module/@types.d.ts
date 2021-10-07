@@ -1,8 +1,6 @@
 import { ChevereNode } from "./chevere/index.js";
-export declare type Helper = {
-    [func: string]: Function;
-};
 export declare type Data<T> = Record<string, T>;
+export declare type Helper = Data<Function>;
 export declare type initFunc = ((...rest: any[]) => void | Promise<void>) | undefined;
 export declare type Args = Map<string, any>;
 export declare type ChevereNodeList = ChevereDataNode[];
@@ -10,6 +8,10 @@ export declare type Attributes = Attribute | Attribute[] | undefined;
 export declare type Watch = ((value?: any, oldValue?: any) => void) | undefined;
 export declare type Pattern = Data<RegExp>;
 export declare type ReactiveCallback = (target?: Data<any>, name?: string, value?: any) => void;
+export interface BindForEach {
+    filter: (attr: BindableAttr) => boolean;
+    callback: (attr: BindableAttr) => void;
+}
 export interface Parse {
     expr: string;
     args?: Args;

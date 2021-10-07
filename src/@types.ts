@@ -1,8 +1,8 @@
 import { ChevereNode } from "@chevere";
 //#region Types and enums
-export type Helper = { [func: string]: Function };
-
 export type Data<T> = Record<string, T>;
+
+export type Helper = Data<Function>;
 
 export type initFunc = ((...rest: any[]) => void | Promise<void>) | undefined;
 
@@ -25,6 +25,11 @@ export type ReactiveCallback = (
 //#endregion
 
 //#region Helpers interfaces
+export interface BindForEach {
+    filter: (attr: BindableAttr) => boolean,
+    callback: (attr: BindableAttr) => void
+}
+
 /**
  * The parser function argument
  */
@@ -243,5 +248,4 @@ export interface ChevereChild<T = Attributes> {
     parent: ChevereNode;
     attr?: T;
 }
-
 //#endregion

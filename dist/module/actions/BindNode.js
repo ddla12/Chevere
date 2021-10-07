@@ -68,29 +68,34 @@ export class BindNode extends ChevereAction {
     refresh() {
         this.attr.forEach((attr) => attr.predicate());
     }
-    setBooleanAttributes() {
+    attributeForEach(data) {
         this.attr
-            .filter((attr) => Object.values(BooleanAttributes).includes(attr.bindAttr)).forEach((attr) => {
+            .filter(data.filter)
+            .forEach((attr) => {
             let i = this.attr.indexOf(attr);
             this.attr[i].values.current = () => Helper.parser({
                 expr: this.attr[i].values.original,
                 node: this.parent,
                 args: this.forVars
             });
-            attr.predicate = () => this.$element[attr.bindAttr] = attr.values.current();
+            data.callback(attr);
+        });
+    }
+    setBooleanAttributes() {
+        this.attributeForEach({
+            filter: (attr) => Object.values(BooleanAttributes).includes(attr.bindAttr),
+            callback: (attr) => {
+                attr.predicate = () => this.$element[attr.bindAttr] = attr.values.current();
+            }
         });
     }
     setAttributes() {
-        this.attr
-            .filter((attr) => (!["style", "class"].includes(attr.bindAttr)) &&
-            !(Object.values(BooleanAttributes).includes(attr.bindAttr))).forEach((attr) => {
-            let i = this.attr.indexOf(attr);
-            this.attr[i].values.current = () => Helper.parser({
-                expr: this.attr[i].values.original,
-                node: this.parent,
-                args: this.forVars
-            });
-            attr.predicate = () => this.$element.setAttribute(attr.bindAttr, attr.values.current());
+        this.attributeForEach({
+            filter: (attr) => (!["style", "class"].includes(attr.bindAttr)) &&
+                !(Object.values(BooleanAttributes).includes(attr.bindAttr)),
+            callback: (attr) => {
+                attr.predicate = () => this.$element.setAttribute(attr.bindAttr, attr.values.current());
+            }
         });
     }
     setAction() {
