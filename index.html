@@ -4,13 +4,16 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Chevere</title>
-        <script src="https://cdn.jsdelivr.net/npm/chevere@1.0.0/cdn/chevere.min.js"></script>    </head>
+        <script defer src="https://cdn.jsdelivr.net/npm/chevere@1.0.0/cdn/chevere.min.js"></script>    
+    </head>
     <body>
         <div data-inline="{ data: { msg: 'Hello world' } }">
             <span data-text="this.data.msg"></span>
         </div>
         <script>
-            Chevere.search();
+            window.addEventListener("DOMContentLoaded", () => {
+                Chevere.search();
+            });
         </script>
     </body>
 </html>

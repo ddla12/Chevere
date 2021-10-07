@@ -148,6 +148,11 @@ If you click on the ``div#one > button`` you will see two 'Test window' on the c
 
 But, if you click on ``div#two > button`` you will see only 'Test self' on the console
 
+Add the ``.self`` modifier if you want to an element to listen to an event dispatched with ``$emitSelf``,
+otherwise, ``.window`` if you want to it to listen to an event dispatched with ``$emit``
+
+***Important: ``.self`` is the default value***
+
 ### ***Important: only methods and assignments are allowed on ``data-on`` attributes, but we recommend you to only use methods***
 
 # *data-bind*

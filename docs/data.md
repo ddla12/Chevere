@@ -17,7 +17,7 @@ interface ChevereNodeData {
 
 ## Special case
 
-As you can see, some properties are optional, but one of them is a special case: **name**
+As you can see, all properties are optional, but one of them is a special case: **name**
 
 Depending of the way that you want to initialize ``Chevere``, **name** has a suitable behavior with it
 
